@@ -4,7 +4,7 @@ IMAGE_NAME = jointravel-front
 CONTAINER_NAME = jointravel-front-container
 PORT = 3003
 
-.PHONY: build run stop clean
+.PHONY: build run stop clean up down
 
 build:
 	docker build -t $(IMAGE_NAME) .
@@ -20,3 +20,9 @@ stop:
 
 clean:
 	docker rmi $(IMAGE_NAME)
+
+up:
+	docker-compose up --build
+
+down:
+	docker-compose down

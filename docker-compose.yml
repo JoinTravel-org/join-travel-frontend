@@ -1,0 +1,12 @@
+version: '3.8'
+
+services:
+  frontend:
+    container_name: jointravel-front-container
+    image: jointravel-front
+    build: .
+    ports:
+      - "3003:80"
+    restart: unless-stopped
+    environment:
+      - NODE_ENV=production

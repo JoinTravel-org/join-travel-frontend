@@ -53,11 +53,29 @@ make build
 # Run the container (accessible at http://localhost:3003)
 make run
 
+# Start with Docker Compose (builds and runs)
+make up
+
 # Stop the running container
 make stop
 
+# Stop Docker Compose
+make down
+
 # Clean up the Docker image
 make clean
+```
+
+### Using Docker Compose
+
+Alternatively, you can use Docker Compose for easier management:
+
+```bash
+# Start the application (builds and runs the container)
+make up
+
+# Stop the application
+make down
 ```
 
 ### Manual Docker Commands
@@ -77,5 +95,4 @@ docker rm jointravel-front-container
 
 # Remove the image
 docker rmi jointravel-front
-```
 ```
