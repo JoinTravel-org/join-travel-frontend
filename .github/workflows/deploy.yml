@@ -60,7 +60,7 @@ jobs:
       - name: Wait for deployment to finish
         id: wait
         env:
-          BASE_URL: ${{ steps.COOLIFY_BASE_URL }}
+          BASE_URL: ${{ secrets.COOLIFY_BASE_URL }}
           DEPLOYMENT_UUID: ${{ steps.trigger.outputs.deployment_uuid }}
           COOLIFY_TOKEN: ${{ secrets.COOLIFY_TOKEN }}
         run: |
@@ -91,7 +91,7 @@ jobs:
 
       - name: Check application health
         env:
-          BASE_URL: ${{ steps.COOLIFY_BASE_URL }}
+          BASE_URL: ${{ secrets.COOLIFY_BASE_URL }}
           APP_UUID: ${{ steps.trigger.outputs.app_uuid }}
           COOLIFY_TOKEN: ${{ secrets.COOLIFY_TOKEN }}
         run: |
