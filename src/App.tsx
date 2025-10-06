@@ -27,7 +27,7 @@ function App() {
       </div>
       <div className="card">
         <p>
-          Trying out webhook
+          Trying out auto deploy
         </p>
       </div>
       <p className="read-the-docs">
