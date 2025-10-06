@@ -21,6 +21,16 @@ jobs:
         'unknown'
       }}
 
+    # 🧠 This condition ensures:
+    # - Always run for "push" on "dev"
+    # - Run for "push" on "main"
+    # - Run for "merged PR" into main
+    # - ❌ Skip when event is "pull_request" coming from dev
+    if: |
+      (github.event_name == 'push' && github.ref_name == 'dev') ||
+      (github.event_name == 'push' && github.ref_name == 'main') ||
+      (github.event_name == 'pull_request' && github.event.pull_request.merged == true && github.base_ref == 'main')
+
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
