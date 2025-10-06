@@ -71,9 +71,8 @@ jobs:
           ELAPSED=0
 
           while [[ "$STATUS" != "finished" && $ELAPSED -lt $TIMEOUT ]]; do
-            STATUS=$(curl -s \
-              -H "Authorization: Bearer $COOLIFY_TOKEN" \
-              "$BASE_URL/deployments/$DEPLOYMENT_UUID" | jq -r '.status')
+            echo "curl -s -H "Authorization: Bearer $COOLIFY_TOKEN" "$BASE_URL/deployments/$DEPLOYMENT_UUID"
+            STATUS=$(curl -s -H "Authorization: Bearer $COOLIFY_TOKEN" "$BASE_URL/deployments/$DEPLOYMENT_UUID" | jq -r '.status')
 
             echo "➡️  Current status: $STATUS (elapsed: ${ELAPSED}s)"
             if [[ "$STATUS" == "finished" ]]; then
