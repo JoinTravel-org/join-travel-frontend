@@ -68,20 +68,26 @@ jobs:
           DEPLOYMENT_UUID: ${{ steps.trigger.outputs.deployment_uuid }}
           COOLIFY_TOKEN: ${{ secrets.COOLIFY_TOKEN }}
         run: |
-          echo "⏳ Waiting for deployment with ID $(echo "$DEPLOYMENT_UUID") to finish..."
+          echo "⏳ Waiting for deployment with ID $DEPLOYMENT_UUID to finish..."
           STATUS="in_progress"
           TIMEOUT=180   # 3 minutes
           INTERVAL=4
           ELAPSED=0
 
-          while [[ "$STATUS" != "finished" && $ELAPSED -lt $TIMEOUT ]]; do
+          while [[ "$STATUS" != "finished" && "$STATUS" != "failed" && $ELAPSED -lt $TIMEOUT ]]; do
             echo "curl -s -H Authorization: Bearer $COOLIFY_TOKEN $BASE_URL/deployments/$DEPLOYMENT_UUID"
-            STATUS=$(curl -s -H "Authorization: Bearer $COOLIFY_TOKEN" "$BASE_URL/deployments/$DEPLOYMENT_UUID" | jq -r '.status')
+            STATUS=$(curl -s \
+              -H "Authorization: Bearer $COOLIFY_TOKEN" \
+              "$BASE_URL/deployments/$DEPLOYMENT_UUID" | jq -r '.status')
 
             echo "➡️  Current status: $STATUS (elapsed: ${ELAPSED}s)"
+
             if [[ "$STATUS" == "finished" ]]; then
-              echo "✅ Deployment finished!"
+              echo "✅ Deployment finished successfully!"
               break
+            elif [[ "$STATUS" == "failed" ]]; then
+              echo "❌ Deployment failed!"
+              exit 1
             fi
 
             sleep $INTERVAL
@@ -89,7 +95,7 @@ jobs:
           done
 
           if [[ "$STATUS" != "finished" ]]; then
-            echo "❌ Deployment did not finish in the timeout window."
+            echo "❌ Deployment did not finish successfully within ${TIMEOUT}s (last status: $STATUS)"
             exit 1
           fi
 
