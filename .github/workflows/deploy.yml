@@ -64,10 +64,10 @@ jobs:
           DEPLOYMENT_UUID: ${{ steps.trigger.outputs.deployment_uuid }}
           COOLIFY_TOKEN: ${{ secrets.COOLIFY_TOKEN }}
         run: |
-          echo "⏳ Waiting for deployment to finish..."
+          echo "⏳ Waiting for deployment with ID $(echo "$DEPLOYMENT_UUID") to finish..."
           STATUS="in_progress"
-          TIMEOUT=900   # 15 minutes
-          INTERVAL=10
+          TIMEOUT=180   # 3 minutes
+          INTERVAL=4
           ELAPSED=0
 
           while [[ "$STATUS" != "finished" && $ELAPSED -lt $TIMEOUT ]]; do
@@ -96,7 +96,7 @@ jobs:
           APP_UUID: ${{ steps.trigger.outputs.app_uuid }}
           COOLIFY_TOKEN: ${{ secrets.COOLIFY_TOKEN }}
         run: |
-          echo "🔍 Checking application health..."
+          echo "🔍 Checking application health for ID $(echo "$APP_UUID")..."
           STATUS=$(curl -s \
             -H "Authorization: Bearer $COOLIFY_TOKEN" \
             "$BASE_URL/applications/$APP_UUID" | jq -r '.status')
