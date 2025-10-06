@@ -27,7 +27,7 @@ function App() {
       </div>
       <div className="card">
         <p>
-          Trying out deploy pipeline 2
+          Trying out deploy pipeline 3
         </p>
       </div>
       <p className="read-the-docs">
