@@ -16,7 +16,7 @@ function App() {
       try {
         logger.info('Fetching server status...');
         const response = await axios.get(BACKEND_URL);
-        setBackendStatus(`(${BACKEND_URL}) ${response.status} ${response.statusText} ${JSON.stringify(response.data)}`);
+        setBackendStatus(`${response.status} ${response.statusText} ${JSON.stringify(response.data)}`);
         logger.info(`Server status fetched successfully: ${response.data.status}`);
       } catch (error) {
         logger.error('Error fetching server status', error);
@@ -51,7 +51,7 @@ function App() {
           Trying out deploy pipeline 3
         </p>
         <p>
-          {backendStatus === null ? "Backend off" : `Backend status: ${backendStatus}`}
+          {backendStatus === null ? `Backend (${BACKEND_URL}) off` : `Backend (${BACKEND_URL}) status: ${backendStatus}`}
         </p>
       </div>
       <p className="read-the-docs">
