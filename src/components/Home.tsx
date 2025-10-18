@@ -49,9 +49,16 @@ const Home: React.FC = () => {
       {/* Navbar */}
       <AppBar position="static" color="primary">
         <Toolbar>
-          <Typography variant="h6" component="div" sx={{ flexGrow: 1, fontWeight: 'bold' }}>
-            JoinTravel
-          </Typography>
+          <Box sx={{ display: 'flex', alignItems: 'center', flexGrow: 1 }}>
+            <img
+              src="/logo.png"
+              alt="JoinTravel Logo"
+              style={{ height: '40px', marginRight: '12px' }}
+            />
+            <Typography variant="h6" component="div" sx={{ fontWeight: 'bold' }}>
+              JoinTravel
+            </Typography>
+          </Box>
 
           {isMobile ? (
             <IconButton
