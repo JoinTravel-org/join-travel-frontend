@@ -7,6 +7,12 @@ FROM node:22-alpine AS builder
 # Set the working directory inside the container to /app
 WORKDIR /app
 
+# Accept build argument for VITE_BACKEND_URL
+ARG VITE_BACKEND_URL
+
+# Set the environment variable for Vite
+ENV VITE_BACKEND_URL=$VITE_BACKEND_URL
+
 # Enable corepack and prepare the latest version of pnpm for package management
 RUN corepack enable && corepack prepare pnpm@latest --activate
 
