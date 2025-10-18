@@ -145,7 +145,7 @@ const Home: React.FC = () => {
             mt: 8,
             p: 4,
             textAlign: 'center',
-            backgroundColor: theme.palette.secondary.main,
+            backgroundColor: theme.palette.mode === 'light' ? theme.palette.secondary.main : theme.palette.primary.main,
             color: 'white'
           }}
         >
@@ -161,7 +161,7 @@ const Home: React.FC = () => {
             onClick={() => navigate('/register')}
             sx={{
               backgroundColor: 'white',
-              color: theme.palette.secondary.main,
+              color: theme.palette.mode === 'light' ? theme.palette.secondary.main : theme.palette.primary.main,
               '&:hover': {
                 backgroundColor: theme.palette.background.default,
               }
