@@ -24,7 +24,7 @@ export const createAppTheme = (mode: 'light' | 'dark'): Theme => {
       },
     },
     typography: {
-      fontFamily: '"Roboto", "Helvetica", "Arial", sans-serif',
+      fontFamily: '"Inter", "Roboto", "Helvetica", "Arial", sans-serif',
     },
     components: {
       MuiAppBar: {

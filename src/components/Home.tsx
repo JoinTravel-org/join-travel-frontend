@@ -12,7 +12,7 @@ import {
   IconButton,
   useMediaQuery,
 } from '@mui/material';
-import { useTheme as useCustomTheme } from '../contexts/ThemeContext';
+import { useTheme } from '../hooks/useTheme';
 import {
   Menu as MenuIcon,
   FlightTakeoff,
@@ -23,8 +23,8 @@ import { Link, useNavigate } from 'react-router-dom';
 import ThemeToggle from './ThemeToggle';
 
 const Home: React.FC = () => {
-  const { theme } = useCustomTheme();
-  const isMobile = useMediaQuery(theme.breakpoints.down('md'));
+  const { theme } = useTheme();
+  const isMobile = useMediaQuery('(max-width: 900px)');
   const navigate = useNavigate();
 
   const features = [
