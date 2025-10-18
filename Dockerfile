@@ -26,7 +26,7 @@ RUN pnpm install --frozen-lockfile
 COPY . .
 
 # Build the application for production using the build script from package.json
-RUN pnpm build
+RUN pnpm run build
 
 # Stage 2: Serve the application with Node.js
 # Use Node.js 22 Alpine as the base image for the runtime stage
