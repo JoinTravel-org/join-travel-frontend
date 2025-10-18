@@ -10,9 +10,9 @@ import {
   Card,
   CardContent,
   IconButton,
-  useTheme,
   useMediaQuery,
 } from '@mui/material';
+import { useTheme as useCustomTheme } from '../contexts/ThemeContext';
 import {
   Menu as MenuIcon,
   FlightTakeoff,
@@ -20,9 +20,10 @@ import {
   Group,
 } from '@mui/icons-material';
 import { Link, useNavigate } from 'react-router-dom';
+import ThemeToggle from './ThemeToggle';
 
 const Home: React.FC = () => {
-  const theme = useTheme();
+  const { theme } = useCustomTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
   const navigate = useNavigate();
 
@@ -71,7 +72,7 @@ const Home: React.FC = () => {
               <MenuIcon />
             </IconButton>
           ) : (
-            <Box sx={{ display: 'flex', gap: 2 }}>
+            <Box sx={{ display: 'flex', gap: 2, alignItems: 'center' }}>
               <Button color="inherit" component={Link} to="/">
                 Inicio
               </Button>
@@ -81,6 +82,7 @@ const Home: React.FC = () => {
               <Button color="inherit" component={Link} to="/register">
                 Registrarse
               </Button>
+              <ThemeToggle />
             </Box>
           )}
         </Toolbar>
