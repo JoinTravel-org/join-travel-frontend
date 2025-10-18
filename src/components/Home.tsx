@@ -7,7 +7,6 @@ import {
   Container,
   Box,
   Paper,
-  Grid,
   Card,
   CardContent,
   IconButton,
@@ -110,9 +109,9 @@ const Home: React.FC = () => {
         </Box>
 
         {/* Features Section */}
-        <Grid container spacing={4}>
+        <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 4, justifyContent: 'center' }}>
           {features.map((feature, index) => (
-            <Grid item xs={12} md={4} key={index}>
+            <Box key={index} sx={{ flex: '1 1 300px', maxWidth: '400px' }}>
               <Card sx={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
                 <CardContent sx={{ flexGrow: 1, textAlign: 'center', p: 3 }}>
                   <Box sx={{ mb: 2 }}>
@@ -126,9 +125,9 @@ const Home: React.FC = () => {
                   </Typography>
                 </CardContent>
               </Card>
-            </Grid>
+            </Box>
           ))}
-        </Grid>
+        </Box>
 
         {/* Call to Action */}
         <Paper
