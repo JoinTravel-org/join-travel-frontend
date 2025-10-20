@@ -1,18 +1,18 @@
-import axios, { AxiosInstance, AxiosError } from 'axios';
+import axios, { AxiosError } from "axios";
 
 /**
  * Configuración del cliente API con axios
  */
 class ApiService {
-  private api: AxiosInstance;
+  private api;
 
   constructor() {
-    const baseURL = import.meta.env.VITE_BACKEND_URL || 'http://localhost:8080';
+    const baseURL = import.meta.env.VITE_BACKEND_URL || "http://localhost:8080";
 
     this.api = axios.create({
       baseURL: `${baseURL}/api`,
       headers: {
-        'Content-Type': 'application/json',
+        "Content-Type": "application/json",
       },
       timeout: 30000, // 30 segundos para permitir el envío de email
     });
@@ -28,13 +28,14 @@ class ApiService {
           // La petición fue hecha pero no hubo respuesta
           throw {
             success: false,
-            message: 'No se pudo conectar con el servidor. Verifica tu conexión.',
+            message:
+              "No se pudo conectar con el servidor. Verifica tu conexión.",
           };
         } else {
           // Algo pasó al configurar la petición
           throw {
             success: false,
-            message: 'Error inesperado. Por favor intenta de nuevo.',
+            message: "Error inesperado. Por favor intenta de nuevo.",
           };
         }
       }
@@ -48,7 +49,7 @@ class ApiService {
    * @returns Promise con la respuesta del servidor
    */
   async register(email: string, password: string) {
-    const response = await this.api.post('/auth/register', {
+    const response = await this.api.post("/auth/register", {
       email,
       password,
     });
@@ -69,7 +70,7 @@ class ApiService {
    * Obtiene la instancia de axios para peticiones personalizadas
    * @returns Instancia de axios
    */
-  getAxiosInstance(): AxiosInstance {
+  getAxiosInstance() {
     return this.api;
   }
 }

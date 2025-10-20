@@ -29,19 +29,19 @@ export const validatePassword = (password: string): PasswordValidation => {
   const errors: string[] = [];
 
   if (!password || password.length < 8) {
-    errors.push('Al menos 8 caracteres');
+    errors.push("Al menos 8 caracteres");
   }
 
   if (!/[A-Z]/.test(password)) {
-    errors.push('Una mayúscula');
+    errors.push("Una mayúscula");
   }
 
   if (!/[0-9]/.test(password)) {
-    errors.push('Un número');
+    errors.push("Un número");
   }
 
-  if (!/[!@#$%^&*(),.?":{}|<>_\-+=[\]\\\/;'`~]/.test(password)) {
-    errors.push('Un símbolo');
+  if (!/[!@#$%^&*(),.?":{}|<>_\-+=[\]\\/;'`~]/.test(password)) {
+    errors.push("Un símbolo");
   }
 
   return {
@@ -56,17 +56,23 @@ export const validatePassword = (password: string): PasswordValidation => {
  * @returns Mensaje de error formateado
  */
 export const getErrorMessage = (error: unknown): string => {
-  if (typeof error === 'object' && error !== null) {
+  if (typeof error === "object" && error !== null) {
     const apiError = error as { message?: string; errors?: string[] };
-    
-    if (apiError.errors && Array.isArray(apiError.errors) && apiError.errors.length > 0) {
-      return `${apiError.message || 'Error de validación'}:\n${apiError.errors.join('\n')}`;
+
+    if (
+      apiError.errors &&
+      Array.isArray(apiError.errors) &&
+      apiError.errors.length > 0
+    ) {
+      return `${
+        apiError.message || "Error de validación"
+      }:\n${apiError.errors.join("\n")}`;
     }
-    
+
     if (apiError.message) {
       return apiError.message;
     }
   }
 
-  return 'Error inesperado. Por favor intenta de nuevo.';
+  return "Error inesperado. Por favor intenta de nuevo.";
 };

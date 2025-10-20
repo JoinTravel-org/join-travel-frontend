@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState } from "react";
 import {
   TextField,
   Button,
@@ -9,11 +9,15 @@ import {
   Link,
   FormControlLabel,
   Checkbox,
-} from '@mui/material';
-import { Email, Lock } from '@mui/icons-material';
-import { useNavigate } from 'react-router-dom';
-import authService from '../services/auth.service';
-import { isValidEmail, validatePassword, getErrorMessage } from '../utils/validators';
+} from "@mui/material";
+import { Email, Lock } from "@mui/icons-material";
+import { useNavigate } from "react-router-dom";
+import authService from "../services/auth.service";
+import {
+  isValidEmail,
+  validatePassword,
+  getErrorMessage,
+} from "../utils/validators";
 
 interface RegisterProps {
   onSwitchToLogin: () => void;
@@ -22,46 +26,47 @@ interface RegisterProps {
 const Register: React.FC<RegisterProps> = ({ onSwitchToLogin }) => {
   const navigate = useNavigate();
   const [formData, setFormData] = useState({
-    email: '',
-    password: '',
-    confirmPassword: '',
+    email: "",
+    password: "",
+    confirmPassword: "",
   });
-  const [error, setError] = useState('');
-  const [success, setSuccess] = useState('');
+  const [error, setError] = useState("");
+  const [success, setSuccess] = useState("");
   const [loading, setLoading] = useState(false);
   const [passwordErrors, setPasswordErrors] = useState<string[]>([]);
 
-  const handleInputChange = (field: string) => (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = e.target.value;
-    setFormData(prev => ({ ...prev, [field]: value }));
+  const handleInputChange =
+    (field: string) => (e: React.ChangeEvent<HTMLInputElement>) => {
+      const value = e.target.value;
+      setFormData((prev) => ({ ...prev, [field]: value }));
 
-    if (field === 'password') {
-      const validation = validatePassword(value);
-      setPasswordErrors(validation.errors);
-    }
-  };
+      if (field === "password") {
+        const validation = validatePassword(value);
+        setPasswordErrors(validation.errors);
+      }
+    };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setError('');
-    setSuccess('');
+    setError("");
+    setSuccess("");
 
     // Validar formato de email
     if (!isValidEmail(formData.email)) {
-      setError('Formato de correo inválido.');
+      setError("Formato de correo inválido.");
       return;
     }
 
     // Validar requisitos de contraseña
     const passwordValidation = validatePassword(formData.password);
     if (!passwordValidation.isValid) {
-      setError('La contraseña no cumple con los requisitos.');
+      setError("La contraseña no cumple con los requisitos.");
       return;
     }
 
     // Validar que las contraseñas coincidan
     if (formData.password !== formData.confirmPassword) {
-      setError('Las contraseñas no coinciden.');
+      setError("Las contraseñas no coinciden.");
       return;
     }
 
@@ -75,17 +80,19 @@ const Register: React.FC<RegisterProps> = ({ onSwitchToLogin }) => {
       });
 
       // Mostrar mensaje de éxito
-      setSuccess(response.message || 'Usuario registrado exitosamente. Por favor revisa tu correo para confirmar tu cuenta.');
+      setSuccess(
+        response.message ||
+          "Usuario registrado exitosamente. Por favor revisa tu correo para confirmar tu cuenta."
+      );
 
       // Limpiar formulario
-      setFormData({ email: '', password: '', confirmPassword: '' });
+      setFormData({ email: "", password: "", confirmPassword: "" });
       setPasswordErrors([]);
 
       // Redirigir al home después de 3 segundos para que el usuario vea el mensaje
       setTimeout(() => {
-        navigate('/');
+        navigate("/");
       }, 3000);
-
     } catch (err) {
       // Manejar errores de la API
       const errorMessage = getErrorMessage(err);
@@ -96,7 +103,7 @@ const Register: React.FC<RegisterProps> = ({ onSwitchToLogin }) => {
   };
 
   return (
-    <Paper elevation={3} sx={{ p: 4, maxWidth: 400, mx: 'auto', mt: 8 }}>
+    <Paper elevation={3} sx={{ p: 4, maxWidth: 400, mx: "auto", mt: 8 }}>
       <Typography variant="h4" component="h1" gutterBottom align="center">
         Registrarse
       </Typography>
@@ -124,9 +131,9 @@ const Register: React.FC<RegisterProps> = ({ onSwitchToLogin }) => {
           autoComplete="email"
           autoFocus
           value={formData.email}
-          onChange={handleInputChange('email')}
+          onChange={handleInputChange("email")}
           InputProps={{
-            startAdornment: <Email sx={{ mr: 1, color: 'action.active' }} />,
+            startAdornment: <Email sx={{ mr: 1, color: "action.active" }} />,
           }}
         />
 
@@ -140,11 +147,15 @@ const Register: React.FC<RegisterProps> = ({ onSwitchToLogin }) => {
           id="password"
           autoComplete="new-password"
           value={formData.password}
-          onChange={handleInputChange('password')}
+          onChange={handleInputChange("password")}
           InputProps={{
-            startAdornment: <Lock sx={{ mr: 1, color: 'action.active' }} />,
+            startAdornment: <Lock sx={{ mr: 1, color: "action.active" }} />,
           }}
-          helperText={passwordErrors.length > 0 ? `Faltan: ${passwordErrors.join(', ')}` : 'Mínimo 8 caracteres, 1 mayúscula, 1 número, 1 símbolo'}
+          helperText={
+            passwordErrors.length > 0
+              ? `Faltan: ${passwordErrors.join(", ")}`
+              : "Mínimo 8 caracteres, 1 mayúscula, 1 número, 1 símbolo"
+          }
           error={passwordErrors.length > 0}
         />
 
@@ -158,9 +169,9 @@ const Register: React.FC<RegisterProps> = ({ onSwitchToLogin }) => {
           id="confirmPassword"
           autoComplete="new-password"
           value={formData.confirmPassword}
-          onChange={handleInputChange('confirmPassword')}
+          onChange={handleInputChange("confirmPassword")}
           InputProps={{
-            startAdornment: <Lock sx={{ mr: 1, color: 'action.active' }} />,
+            startAdornment: <Lock sx={{ mr: 1, color: "action.active" }} />,
           }}
         />
 
@@ -177,18 +188,18 @@ const Register: React.FC<RegisterProps> = ({ onSwitchToLogin }) => {
           sx={{ mt: 3, mb: 2 }}
           disabled={loading || passwordErrors.length > 0}
         >
-          {loading ? 'Registrando...' : 'Registrar'}
+          {loading ? "Registrando..." : "Registrar"}
         </Button>
       </Box>
 
-      <Box sx={{ textAlign: 'center', mt: 2 }}>
+      <Box sx={{ textAlign: "center", mt: 2 }}>
         <Typography variant="body2">
-          ¿Ya tienes cuenta?{' '}
+          ¿Ya tienes cuenta?{" "}
           <Link
             component="button"
             variant="body2"
             onClick={onSwitchToLogin}
-            sx={{ cursor: 'pointer' }}
+            sx={{ cursor: "pointer" }}
           >
             Inicia sesión aquí
           </Link>
