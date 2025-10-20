@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   TextField,
   Button,
@@ -21,6 +21,18 @@ const Login: React.FC<LoginProps> = ({ onSwitchToRegister }) => {
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+  const [buttonDisabled, setButtonDisabled] = useState(false);
+
+
+  useEffect(() => {
+    if (email && password) {
+      setButtonDisabled(false);
+    } else {
+      setButtonDisabled(true);
+    }
+
+  } , [email, password]);
+
 
   const validateEmail = (email: string) => {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -71,6 +83,12 @@ const Login: React.FC<LoginProps> = ({ onSwitchToRegister }) => {
         </Alert>
       )}
 
+      <Box sx={{ mb: 2, textAlign: 'topLeft' }}>
+        <button onClick={() => navigate(-1)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#1976d2' }}>
+          &larr; Volver
+        </button>
+      </Box>
+
       <Box component="form" onSubmit={handleSubmit} sx={{ mt: 1 }}>
         <TextField
           margin="normal"
@@ -107,7 +125,7 @@ const Login: React.FC<LoginProps> = ({ onSwitchToRegister }) => {
           fullWidth
           variant="contained"
           sx={{ mt: 3, mb: 2 }}
-          disabled={loading}
+          disabled={buttonDisabled || loading}
         >
           {loading ? 'Iniciando sesión...' : 'Iniciar Sesión'}
         </Button>
