@@ -12,6 +12,8 @@ import {
 } from '@mui/material';
 import { Email, Lock } from '@mui/icons-material';
 import { useNavigate } from 'react-router-dom';
+import authService from '../services/auth.service';
+import { isValidEmail, validatePassword, getErrorMessage } from '../utils/validators';
 
 interface RegisterProps {
   onSwitchToLogin: () => void;
@@ -29,36 +31,13 @@ const Register: React.FC<RegisterProps> = ({ onSwitchToLogin }) => {
   const [loading, setLoading] = useState(false);
   const [passwordErrors, setPasswordErrors] = useState<string[]>([]);
 
-  const validateEmail = (email: string) => {
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    return emailRegex.test(email);
-  };
-
-  const validatePassword = (password: string) => {
-    const errors: string[] = [];
-
-    if (password.length < 8) {
-      errors.push('Al menos 8 caracteres');
-    }
-    if (!/[A-Z]/.test(password)) {
-      errors.push('Una mayúscula');
-    }
-    if (!/\d/.test(password)) {
-      errors.push('Un número');
-    }
-    if (!/[!@#$%^&*()_+\-=[\]{};':"\\|,.<>/?]/.test(password)) {
-      errors.push('Un símbolo');
-    }
-
-    return errors;
-  };
-
   const handleInputChange = (field: string) => (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
     setFormData(prev => ({ ...prev, [field]: value }));
 
     if (field === 'password') {
-      setPasswordErrors(validatePassword(value));
+      const validation = validatePassword(value);
+      setPasswordErrors(validation.errors);
     }
   };
 
@@ -67,17 +46,20 @@ const Register: React.FC<RegisterProps> = ({ onSwitchToLogin }) => {
     setError('');
     setSuccess('');
 
-    if (!validateEmail(formData.email)) {
+    // Validar formato de email
+    if (!isValidEmail(formData.email)) {
       setError('Formato de correo inválido.');
       return;
     }
 
-    const passwordValidationErrors = validatePassword(formData.password);
-    if (passwordValidationErrors.length > 0) {
+    // Validar requisitos de contraseña
+    const passwordValidation = validatePassword(formData.password);
+    if (!passwordValidation.isValid) {
       setError('La contraseña no cumple con los requisitos.');
       return;
     }
 
+    // Validar que las contraseñas coincidan
     if (formData.password !== formData.confirmPassword) {
       setError('Las contraseñas no coinciden.');
       return;
@@ -86,29 +68,28 @@ const Register: React.FC<RegisterProps> = ({ onSwitchToLogin }) => {
     setLoading(true);
 
     try {
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      // Llamar al servicio de autenticación real
+      const response = await authService.register({
+        email: formData.email,
+        password: formData.password,
+      });
 
-      // Simulate email already exists check
-      if (formData.email === 'existing@example.com') {
-        setError('El email ya está en uso. Intente iniciar sesión.');
-        return;
-      }
+      // Mostrar mensaje de éxito
+      setSuccess(response.message || 'Usuario registrado exitosamente. Por favor revisa tu correo para confirmar tu cuenta.');
 
-      // Simulate successful registration
-      setSuccess('Registro exitoso. Se ha enviado un correo de confirmación.');
-
-      // Reset form
+      // Limpiar formulario
       setFormData({ email: '', password: '', confirmPassword: '' });
       setPasswordErrors([]);
 
-      // Redirect to home after a short delay to show success message
+      // Redirigir al home después de 3 segundos para que el usuario vea el mensaje
       setTimeout(() => {
         navigate('/');
-      }, 2000);
+      }, 3000);
 
-    } catch {
-      setError('Error al registrar. Inténtelo de nuevo.');
+    } catch (err) {
+      // Manejar errores de la API
+      const errorMessage = getErrorMessage(err);
+      setError(errorMessage);
     } finally {
       setLoading(false);
     }
