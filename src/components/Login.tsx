@@ -42,20 +42,27 @@ const Login: React.FC<LoginProps> = ({ onSwitchToRegister }) => {
 
 
   const validateEmail = (email: string) => {
+    const trimmed = email.replace(/^[\s\uFEFF\xA0]+|[\s\uFEFF\xA0]+$/g, '');
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    return emailRegex.test(email);
+    console.log('validateEmail', { raw: email, trimmed, valid: emailRegex.test(trimmed) });
+    return emailRegex.test(trimmed);
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
 
-    if (!validateEmail(email)) {
+    const trimmedEmail = email.replace(/^[\s\uFEFF\xA0]+|[\s\uFEFF\xA0]+$/g, '');
+    const trimmedPassword = password.trim();
+    setEmail((prev) => prev.trim());
+    setPassword(trimmedPassword);
+
+    if (!validateEmail(trimmedEmail)) {
       setError('Formato de correo inválido.');
       return;
     }
 
-    if (!password) {
+    if (!trimmedPassword) {
       setError('La contraseña es requerida.');
       return;
     }
@@ -67,9 +74,10 @@ const Login: React.FC<LoginProps> = ({ onSwitchToRegister }) => {
       await new Promise(resolve => setTimeout(resolve, 1000));
 
       // For demo purposes, accept any email/password combination
+
       console.log('Login attempt:', { email, password });
       // Simulate successful login and redirect to home
-      navigate('/');
+     // navigate('/');
 
     } catch {
       setError('Error al iniciar sesión. Inténtelo de nuevo.');
