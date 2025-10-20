@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import {
   TextField,
   Button,
@@ -22,16 +22,23 @@ const Login: React.FC<LoginProps> = ({ onSwitchToRegister }) => {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const [buttonDisabled, setButtonDisabled] = useState(false);
+  const [messagePassword,setMessagePassword] = useState(false);
+  const [messageEmail,setMessageEmail] = useState(false);
 
+  const isFirstRun = useRef(true);
 
   useEffect(() => {
-    if (email && password) {
-      setButtonDisabled(false);
-    } else {
-      setButtonDisabled(true);
+    if (isFirstRun.current) {
+      setMessageEmail(false);
+      setMessagePassword(false);
+      isFirstRun.current = false;
+      return;
     }
 
-  } , [email, password]);
+    setMessageEmail(!email);
+    setMessagePassword(!password);
+    setButtonDisabled(!(email && password));
+  }, [email, password]);
 
 
   const validateEmail = (email: string) => {
@@ -105,6 +112,11 @@ const Login: React.FC<LoginProps> = ({ onSwitchToRegister }) => {
             startAdornment: <Email sx={{ mr: 1, color: 'action.active' }} />,
           }}
         />
+        {messageEmail && (
+        <Alert severity="error" sx={{ mb: 2 }}>
+          {messageEmail ? 'El correo electrónico es requerido.' : ''}
+        </Alert>
+      )}
         <TextField
           margin="normal"
           required
@@ -120,6 +132,11 @@ const Login: React.FC<LoginProps> = ({ onSwitchToRegister }) => {
             startAdornment: <Lock sx={{ mr: 1, color: 'action.active' }} />,
           }}
         />
+        {messagePassword && (
+        <Alert severity="error" sx={{ mb: 2 }}>
+          {messagePassword ? 'La contraseña es requerida.' : ''}
+        </Alert>
+      )}
         <Button
           type="submit"
           fullWidth
