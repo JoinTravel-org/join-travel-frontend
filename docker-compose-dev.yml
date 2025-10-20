@@ -1,0 +1,17 @@
+services:
+  frontend-dev:
+    container_name: jointravel-front-dev-container
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+    ports:
+      - "${APP_HOST_PORT}:80"
+    volumes:
+      - .:/app
+      - /app/node_modules
+    environment:
+      - NODE_ENV=development
+      - VITE_BACKEND_URL=${VITE_BACKEND_URL}
+      - TZ=UTC
+    command: pnpm dev
+    restart: unless-stopped
