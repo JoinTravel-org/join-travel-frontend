@@ -42,4 +42,4 @@ COPY --from=builder /app/dist ./dist
 EXPOSE 80
 
 # Start the serve command to host the static files on port 80
-CMD ["serve", "dist", "-l", "80"]
+CMD ["serve", "dist", "-l", "80", "-s"]
