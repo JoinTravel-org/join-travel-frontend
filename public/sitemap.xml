@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Sitemap index referencing production and test sitemaps.
+     Each environment should serve its own sitemap.xml at its own domain.
+     Production: https://jointravel.world/sitemap.xml
+     Test:       https://test.jointravel.world/sitemap.xml
+-->
+<sitemapindex xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+  <sitemap>
+    <loc>https://jointravel.world/sitemap.xml</loc>
+    <lastmod>2025-10-21</lastmod>
+  </sitemap>
+  <sitemap>
+    <loc>https://test.jointravel.world/sitemap.xml</loc>
+    <lastmod>2025-10-21</lastmod>
+  </sitemap>
+</sitemapindex>

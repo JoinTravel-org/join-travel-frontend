@@ -1,40 +1,55 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import './App.css'
+import CssBaseline from "@mui/material/CssBaseline";
+import { BrowserRouter as Router, Routes, Route, useLocation } from "react-router-dom";
+import { Suspense, useEffect } from "react";
+import "./App.css";
+import AppThemeProvider from "./contexts/ThemeProvider";
+import Home from "./components/Home";
+import Header from "./components/Header";
+import Footer from "./components/Footer";
+import { initAnalytics, trackPageview } from "./utils/analytics";
 
-function App() {
-  const [count, setCount] = useState(0)
+import Login from "./components/Login";
+import Register from "./components/Register";
+import ConfirmEmail from "./components/ConfirmEmail";
 
-  return (
-    <>
-      <div>
-        <a href="https://vite.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.tsx</code> and save to test HMR
-        </p>
-      </div>
-      <div className="card">
-        <p>
-          Trying out deploy pipeline 3
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
-    </>
-  )
+function AnalyticsListener() {
+  const location = useLocation();
+  useEffect(() => {
+    initAnalytics();
+    trackPageview();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [location.pathname]);
+  return null;
 }
 
-export default App
+function App() {
+  return (
+    <AppThemeProvider>
+      <CssBaseline />
+      <a className="skip-link" href="#main-content">Skip to content</a>
+      <Router>
+        <AnalyticsListener />
+        <Header />
+        <main id="main-content">
+          <Suspense fallback={<div aria-busy="true" style={{padding: '1rem'}}>Cargando…</div>}>
+            <Routes>
+              <Route path="/" element={<Home />} />
+              <Route
+                path="/login"
+                element={<Login onSwitchToRegister={() => {}} />}
+              />
+              <Route
+                path="/register"
+                element={<Register onSwitchToLogin={() => {}} />}
+              />
+              <Route path="/confirm-email" element={<ConfirmEmail />} />
+            </Routes>
+          </Suspense>
+        </main>
+        <Footer />
+      </Router>
+    </AppThemeProvider>
+  );
+}
+
+export default App;
