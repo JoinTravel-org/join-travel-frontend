@@ -39,7 +39,7 @@ RUN npm install -g serve
 COPY --from=builder /app/dist ./dist
 
 # Expose port 80 for the web server
-EXPOSE 80
+EXPOSE 3060
 
 # Start the serve command to host the static files on port 80
-CMD ["serve", "dist", "-l", "80", "-s"]
+CMD ["serve", "dist", "-l", "3060", "-s"]

@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   Typography,
   Button,
@@ -8,15 +8,21 @@ import {
   Card,
   CardContent,
   Stack,
+  Rating,
+  CircularProgress,
+  Pagination,
 } from '@mui/material';
 import { useTheme } from '../hooks/useTheme';
 import {
-  FlightTakeoff,
   Explore,
   Group,
+  AddLocation,
+  Star,
 } from '@mui/icons-material';
 import { useNavigate } from 'react-router-dom';
 import { trackEvent } from '../utils/analytics';
+import { useAuth } from '../hooks/useAuth';
+import api from '../services/api.service';
 
 /**
  * Home
@@ -25,19 +31,64 @@ import { trackEvent } from '../utils/analytics';
  * - Clear hierarchy, concise copy, strong primary CTA
  * - Accessible features list with list semantics
  */
+interface Place {
+  id: string;
+  name: string;
+  image?: string;
+  rating: number;
+}
+
 const Home: React.FC = () => {
   const { theme } = useTheme();
   const navigate = useNavigate();
+  const auth = useAuth();
+  const [places, setPlaces] = useState<Place[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [page, setPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
 
   React.useEffect(() => {
     document.title = 'JoinTravel — Explora el mundo, conecta y viaja mejor';
   }, []);
 
+  const fetchPlaces = async (pageNum: number) => {
+    try {
+      const response = await api.getPlaces(pageNum, 20);
+      const newPlaces = response.places || [];
+      const totalCount = response.totalCount || 0;
+      setPlaces(newPlaces);
+      setTotalPages(Math.ceil(totalCount / 20));
+    } catch (error) {
+      console.error('Error fetching places:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchPlaces(1);
+  }, []);
+
+  const handlePageChange = (_event: React.ChangeEvent<unknown>, value: number) => {
+    setPage(value);
+    // Scroll to top of places section with smooth animation
+    setTimeout(() => {
+      const placesSection = document.getElementById('places-section');
+      if (placesSection) {
+        placesSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
+    }, 100); // Small delay to allow new content to render
+  };
+
+  useEffect(() => {
+    fetchPlaces(page);
+  }, [page]);
+
   const features = [
     {
-      icon: <FlightTakeoff sx={{ fontSize: 40, color: 'var(--color-primary)' }} aria-hidden />,
-      title: 'Viajes Personalizados',
-      description: 'Descubre destinos y rutas adaptadas a tus intereses, tiempo y presupuesto.',
+      icon: <Star sx={{ fontSize: 40, color: 'var(--color-primary)' }} aria-hidden />,
+      title: 'Reseñas y Comentarios',
+      description: 'Lee opiniones de otros viajeros y comparte tus experiencias para guiar a la comunidad.',
     },
     {
       icon: <Explore sx={{ fontSize: 40, color: 'var(--color-primary)' }} aria-hidden />,
@@ -49,6 +100,21 @@ const Home: React.FC = () => {
       title: 'Conecta con Viajeros',
       description: 'Únete a una comunidad activa para compartir consejos y experiencias.',
     },
+    {
+      icon: <AddLocation sx={{ fontSize: 40, color: 'var(--color-primary)' }} aria-hidden />,
+      title: 'Agrega Lugares',
+      description: 'Enriquece nuestra base de datos agregando nuevos lugares desde Google Maps.',
+      action: {
+        text: 'Agregar Lugar',
+        onClick: () => {
+          if (auth.isAuthenticated) {
+            navigate('/add-place');
+          } else {
+            navigate('/login');
+          }
+        },
+      },
+    },
   ];
 
   return (
@@ -58,7 +124,7 @@ const Home: React.FC = () => {
         component="section"
         aria-labelledby="hero-title"
         sx={{
-          py: { xs: 6, md: 10 },
+          py: { xs: 4, md: 6 },
           background:
             theme.palette.mode === 'light'
               ? 'linear-gradient(180deg, rgba(24,154,180,0.08) 0%, rgba(0,0,0,0) 60%)'
@@ -66,77 +132,132 @@ const Home: React.FC = () => {
         }}
       >
         <Container maxWidth="lg">
+          <Box sx={{ textAlign: 'center' }}>
+            <Typography
+              id="hero-title"
+              variant="h1"
+              component="h1"
+              gutterBottom
+              sx={{ fontWeight: 700, fontSize: 'var(--fs-h1)', lineHeight: 'var(--lh-tight)' }}
+            >
+              Explora el mundo con JoinTravel
+            </Typography>
+            <Typography
+              variant="h5"
+              component="p"
+              sx={{ mb: 3, color: 'text.secondary' }}
+            >
+              Planifica aventuras únicas, conecta con viajeros como tú y crea recuerdos
+              inolvidables con itinerarios fáciles y confiables.
+            </Typography>
+            <Stack
+              direction={{ xs: 'column', sm: 'row' }}
+              spacing={2}
+              sx={{ alignItems: { xs: 'stretch', sm: 'center' }, justifyContent: 'center' }}
+            >
+              <Button
+                variant="contained"
+                size="large"
+                onClick={() => { trackEvent('cta_click', { cta: 'hero_primary', destination: '/register' }); navigate('/register'); }}
+                aria-label="Crear cuenta para comenzar a viajar"
+                sx={{ minWidth: 180 }}
+              >
+                Comenzar gratis
+              </Button>
+            </Stack>
+          </Box>
+        </Container>
+      </Box>
+
+      {/* Places Feed Section */}
+      <Box
+        id="places-section"
+        component="section"
+        aria-labelledby="places-title"
+        sx={{ py: { xs: 5, md: 8 } }}
+      >
+        <Container maxWidth="lg">
+          <Typography
+            id="places-title"
+            variant="h2"
+            component="h2"
+            gutterBottom
+            sx={{ fontWeight: 700, fontSize: 'var(--fs-h2)' }}
+          >
+            Lugares Disponibles
+          </Typography>
+
           <Box
             sx={{
+              mt: 2,
               display: 'grid',
-              gap: { xs: 3, md: 6 },
-              gridTemplateColumns: { xs: '1fr', md: '1.1fr 0.9fr' },
-              alignItems: 'center',
+              gap: { xs: 3, md: 4 },
+              gridTemplateColumns: { xs: '1fr', sm: 'repeat(2, 1fr)', md: 'repeat(3, 1fr)', lg: 'repeat(4, 1fr)' },
             }}
           >
-            <Box>
-              <Typography
-                id="hero-title"
-                variant="h1"
-                component="h1"
-                gutterBottom
-                sx={{ fontWeight: 700, fontSize: 'var(--fs-h1)', lineHeight: 'var(--lh-tight)' }}
+            {places.map((place) => (
+              <Card
+                key={place.id}
+                elevation={1}
+                sx={{
+                  height: '100%',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  borderRadius: 'var(--card-radius)',
+                  boxShadow: 'var(--card-shadow)',
+                  transition: 'transform var(--motion-duration-base) var(--motion-ease-standard), box-shadow var(--motion-duration-base) var(--motion-ease-standard)',
+                  '&:hover': {
+                    transform: 'translateY(-2px)',
+                    boxShadow: 'var(--card-shadow-hover)',
+                  },
+                }}
               >
-                Explora el mundo con JoinTravel
-              </Typography>
-              <Typography
-                variant="h5"
-                component="p"
-                sx={{ mb: 3, color: 'text.secondary' }}
-              >
-                Planifica aventuras únicas, conecta con viajeros como tú y crea recuerdos
-                inolvidables con itinerarios fáciles y confiables.
-              </Typography>
-              <Stack
-                direction={{ xs: 'column', sm: 'row' }}
-                spacing={2}
-                sx={{ alignItems: { xs: 'stretch', sm: 'center' } }}
-              >
-                <Button
-                  variant="contained"
-                  size="large"
-                  onClick={() => { trackEvent('cta_click', { cta: 'hero_primary', destination: '/register' }); navigate('/register'); }}
-                  aria-label="Crear cuenta para comenzar a viajar"
-                  sx={{ minWidth: 180 }}
-                >
-                  Crear cuenta
-                </Button>
-                <Button
-                  variant="outlined"
-                  size="large"
-                  onClick={() => { trackEvent('cta_click', { cta: 'hero_secondary', destination: '/login' }); navigate('/login'); }}
-                  aria-label="Iniciar sesión"
-                  sx={{ minWidth: 180 }}
-                >
-                  Iniciar sesión
-                </Button>
-              </Stack>
-            </Box>
-
-            {/* Optional visual panel (placeholder, can be replaced with an illustration) */}
-            <Paper
-              elevation={2}
-              aria-hidden
-              sx={{
-                height: { xs: 180, sm: 220, md: 260 },
-                borderRadius: 'var(--card-radius)',
-                backgroundColor: 'var(--color-surface)',
-                boxShadow: 'var(--card-shadow)',
-                display: 'grid',
-                placeItems: 'center',
-                color: 'var(--color-text-secondary)',
-              }}
-            >
-              <Typography variant="body2">
-                Espacio para imagen/ilustración optimizada
-              </Typography>
-            </Paper>
+                <Box
+                  sx={{
+                    height: 200,
+                    backgroundImage: `url(${place.image || '/placeholder-image.jpg'})`,
+                    backgroundSize: 'cover',
+                    backgroundPosition: 'center',
+                    backgroundColor: 'var(--color-bg-secondary)',
+                    borderRadius: 'var(--card-radius) var(--card-radius) 0 0',
+                  }}
+                  onError={(e) => {
+                    const target = e.target as HTMLDivElement;
+                    target.style.backgroundImage = 'url(/placeholder-image.jpg)';
+                  }}
+                />
+                <CardContent sx={{ flexGrow: 1, p: 2 }}>
+                  <Typography variant="h6" component="h3" sx={{ fontWeight: 600, mb: 1 }}>
+                    {place.name}
+                  </Typography>
+                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                    <Rating value={place.rating || 0} readOnly size="small" />
+                    <Typography variant="body2" color="text.secondary">
+                      ({typeof place.rating === 'number' ? place.rating.toFixed(1) : '0.0'})
+                    </Typography>
+                  </Box>
+                </CardContent>
+              </Card>
+            ))}
           </Box>
+
+          {loading && (
+            <Box sx={{ display: 'flex', justifyContent: 'center', mt: 4 }}>
+              <CircularProgress />
+            </Box>
+          )}
+
+          {!loading && (
+            <Box sx={{ display: 'flex', justifyContent: 'center', mt: 4, mb: 2 }}>
+              <Pagination
+                count={totalPages}
+                page={page}
+                onChange={handlePageChange}
+                color="primary"
+                size="large"
+              />
+            </Box>
+          )}
         </Container>
       </Box>
 
@@ -144,7 +265,7 @@ const Home: React.FC = () => {
       <Box
         component="section"
         aria-labelledby="features-title"
-        sx={{ py: { xs: 5, md: 8 } }}
+        sx={{ py: { xs: 3, md: 5 } }}
       >
         <Container maxWidth="lg">
           <Typography
@@ -163,7 +284,7 @@ const Home: React.FC = () => {
               mt: 2,
               display: 'grid',
               gap: { xs: 3, md: 4 },
-              gridTemplateColumns: { xs: '1fr', sm: 'repeat(2, 1fr)', md: 'repeat(3, 1fr)' },
+              gridTemplateColumns: { xs: '1fr', sm: 'repeat(2, 1fr)', md: 'repeat(4, 1fr)' },
             }}
           >
             {features.map((feature, index) => (
@@ -194,6 +315,18 @@ const Home: React.FC = () => {
                   <Typography variant="body1" color="text.secondary">
                     {feature.description}
                   </Typography>
+                  {feature.action && (
+                    <Box sx={{ mt: 2 }}>
+                      <Button
+                        variant="outlined"
+                        size="small"
+                        onClick={feature.action.onClick}
+                        sx={{ minWidth: 'auto' }}
+                      >
+                        {feature.action.text}
+                      </Button>
+                    </Box>
+                  )}
                 </CardContent>
               </Card>
             ))}
@@ -202,7 +335,7 @@ const Home: React.FC = () => {
       </Box>
 
       {/* Call to Action */}
-      <Box component="section" aria-labelledby="cta-title" sx={{ py: { xs: 5, md: 8 } }}>
+      <Box component="section" aria-labelledby="cta-title" sx={{ py: { xs: 3, md: 5 } }}>
         <Container maxWidth="lg">
           <Paper
             elevation={3}

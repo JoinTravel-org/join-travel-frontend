@@ -24,7 +24,7 @@ const Footer: React.FC = () => {
       <Container
         maxWidth="lg"
         sx={{
-          py: { xs: 3, sm: 4 },
+          py: { xs: 1, sm: 2 },
           display: "grid",
           gridTemplateColumns: { xs: "1fr", sm: "1fr auto" },
           alignItems: "center",
@@ -33,10 +33,10 @@ const Footer: React.FC = () => {
       >
         <Box>
           <Typography variant="body2" sx={{ opacity: 0.9 }}>
-            © {year} JoinTravel. Todos los derechos reservados.
+            © {year} JoinTravel
           </Typography>
           <Typography variant="caption" sx={{ display: "block", mt: 0.5, color: "var(--color-text-secondary)" }}>
-            Hecho con ❤️ pensando en accesibilidad y rendimiento.
+            Hecho con ❤️ por el equipo de JoinTravel
           </Typography>
         </Box>
 
@@ -46,7 +46,7 @@ const Footer: React.FC = () => {
           sx={{ justifyContent: { xs: "flex-start", sm: "flex-end" }, alignItems: "center" }}
         >
           <MUILink
-            href="mailto:contacto@jointravel.example"
+            href="mailto:contact@jointravel.world"
             underline="hover"
             sx={{
               color: "var(--color-link)",
@@ -61,25 +61,7 @@ const Footer: React.FC = () => {
             Contacto
           </MUILink>
           <MUILink
-            href="https://twitter.com/intent/tweet?text=Explora%20el%20mundo%20con%20JoinTravel"
-            target="_blank"
-            rel="noopener noreferrer"
-            underline="hover"
-            sx={{
-              color: "var(--color-link)",
-              "&:hover": { color: "var(--color-link-hover)" },
-              "&:focus-visible": {
-                outline: "none",
-                boxShadow: "0 0 0 3px var(--focus-ring-color)",
-                borderRadius: "var(--radius-sm)",
-              },
-            }}
-            aria-label="Compartir en Twitter (se abre en una nueva pestaña)"
-          >
-            Compartir
-          </MUILink>
-          <MUILink
-            href="https://github.com/"
+            href="https://github.com/JoinTravel-org/join-travel-frontend"
             target="_blank"
             rel="noopener noreferrer"
             underline="hover"
@@ -101,7 +83,7 @@ const Footer: React.FC = () => {
 
       <Divider sx={{ opacity: 0.08 }} />
 
-      <Container maxWidth="lg" sx={{ py: 2 }}>
+      <Container maxWidth="lg" sx={{ py: 0.5 }}>
         <Typography
           variant="caption"
           sx={{
