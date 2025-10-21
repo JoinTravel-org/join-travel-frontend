@@ -1,4 +1,5 @@
 import axios, { AxiosError } from "axios";
+import Logger from "../logger";
 
 /**
  * Configuración del cliente API con axios
@@ -17,15 +18,32 @@ class ApiService {
       timeout: 30000, // 30 segundos para permitir el envío de email
     });
 
+    // Request interceptor to log outgoing API calls
+    this.api.interceptors.request.use(
+      (config) => {
+        Logger.getInstance().info(`API Request: ${config.method?.toUpperCase()} ${config.baseURL} ${config.url}`);
+        return config;
+      },
+      (error) => {
+        Logger.getInstance().error("API Request Error", error);
+        return Promise.reject(error);
+      }
+    );
+
     // Interceptor para manejar errores globalmente
     this.api.interceptors.response.use(
-      (response) => response,
+      (response) => {
+        Logger.getInstance().info(`API Response: ${response.status} ${response.config.method?.toUpperCase()} ${response.config.baseURL} ${response.config.url}`);
+        return response;
+      },
       (error: AxiosError) => {
         if (error.response) {
           // El servidor respondió con un código de error
+          Logger.getInstance().error(`API Error Response: ${error.response.status} ${error.config?.method?.toUpperCase()} ${error.config?.baseURL} ${error.config?.url}`, error.response.data);
           throw error.response.data;
         } else if (error.request) {
           // La petición fue hecha pero no hubo respuesta
+          Logger.getInstance().error("API Request failed: No response from server", error.request);
           throw {
             success: false,
             message:
@@ -33,6 +51,7 @@ class ApiService {
           };
         } else {
           // Algo pasó al configurar la petición
+          Logger.getInstance().error("API Request setup error", error.message);
           throw {
             success: false,
             message: "Error inesperado. Por favor intenta de nuevo.",

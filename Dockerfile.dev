@@ -8,6 +8,12 @@ RUN npm install -g pnpm
 # Copiar archivos de dependencias
 COPY package.json pnpm-lock.yaml ./
 
+# Accept build argument for VITE_BACKEND_URL
+ARG VITE_BACKEND_URL
+
+# Set the environment variable for Vite
+ENV VITE_BACKEND_URL=$VITE_BACKEND_URL
+
 # Instalar dependencias
 RUN pnpm install
 

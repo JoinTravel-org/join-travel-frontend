@@ -1,4 +1,5 @@
 import apiService from "./api.service";
+import Logger from "../logger";
 
 /**
  * Interfaz para los datos de registro
@@ -51,9 +52,12 @@ class AuthService {
    */
   async register(data: RegisterData): Promise<RegisterResponse> {
     try {
+      Logger.getInstance().info(`Attempting to register user with email: ${data.email}`);
       const response = await apiService.register(data.email, data.password);
+      Logger.getInstance().info(`User registration successful for email: ${data.email}`);
       return response;
     } catch (error) {
+      Logger.getInstance().error(`User registration failed for email: ${data.email}`, error);
       throw error as ApiError;
     }
   }
@@ -65,9 +69,12 @@ class AuthService {
    */
   async confirmEmail(token: string): Promise<ConfirmEmailResponse> {
     try {
+      Logger.getInstance().info(`Attempting to confirm email with token: ${token.substring(0, 10)}...`);
       const response = await apiService.confirmEmail(token);
+      Logger.getInstance().info(`Email confirmation successful for token: ${token.substring(0, 10)}...`);
       return response;
     } catch (error) {
+      Logger.getInstance().error(`Email confirmation failed for token: ${token.substring(0, 10)}...`, error);
       throw error as ApiError;
     }
   }
