@@ -12,6 +12,8 @@ import {
 } from '@mui/material';
 import { Email, Lock, Visibility, VisibilityOff } from '@mui/icons-material';
 import { useNavigate } from 'react-router-dom';
+import authService from '../services/auth.service';
+import { getErrorMessage } from '../utils/validators';
 
 interface LoginProps {
   onSwitchToRegister: () => void;
@@ -90,12 +92,16 @@ const Login: React.FC<LoginProps> = ({ onSwitchToRegister }) => {
     setLoading(true);
 
     try {
-      // Simulate API call
-      await new Promise((resolve) => setTimeout(resolve, 1000));
-      // Redirect to home
-      navigate('/');
-    } catch {
-      setError('Error al iniciar sesión. Inténtalo nuevamente.');
+      const response = await authService.login({ email: trimmedEmail, password: trimmedPassword });
+
+      if (response.success) {
+        // Redirect to home on successful login
+        navigate('/');
+      } else {
+        setError(response.message || 'Error al iniciar sesión. Inténtalo nuevamente.');
+      }
+    } catch (err) {
+      setError(getErrorMessage(err));
     } finally {
       setLoading(false);
     }

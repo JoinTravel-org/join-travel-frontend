@@ -10,6 +10,14 @@ export interface RegisterData {
 }
 
 /**
+ * Interfaz para los datos de login
+ */
+export interface LoginData {
+  email: string;
+  password: string;
+}
+
+/**
  * Interfaz para la respuesta del registro
  */
 export interface RegisterResponse {
@@ -30,6 +38,21 @@ export interface RegisterResponse {
 export interface ConfirmEmailResponse {
   success: boolean;
   message: string;
+}
+
+/**
+ * Interfaz para la respuesta de login
+ */
+export interface LoginResponse {
+  success: boolean;
+  message: string;
+  data?: {
+    id: string;
+    email: string;
+    isEmailConfirmed: boolean;
+    createdAt: string;
+    updatedAt: string;
+  };
 }
 
 /**
@@ -75,6 +98,23 @@ class AuthService {
       return response;
     } catch (error) {
       Logger.getInstance().error(`Email confirmation failed for token: ${token.substring(0, 10)}...`, error);
+      throw error as ApiError;
+    }
+  }
+
+  /**
+   * Inicia sesión de un usuario
+   * @param data - Datos de login (email y password)
+   * @returns Promise con la respuesta del login
+   */
+  async login(data: LoginData): Promise<LoginResponse> {
+    try {
+      Logger.getInstance().info(`Attempting to login user with email: ${data.email}`);
+      const response = await apiService.login(data.email, data.password);
+      Logger.getInstance().info(`User login successful for email: ${data.email}`);
+      return response;
+    } catch (error) {
+      Logger.getInstance().error(`User login failed for email: ${data.email}`, error);
       throw error as ApiError;
     }
   }

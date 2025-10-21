@@ -86,6 +86,20 @@ class ApiService {
   }
 
   /**
+   * Inicia sesión de un usuario
+   * @param email - Email del usuario
+   * @param password - Contraseña del usuario
+   * @returns Promise con la respuesta del servidor
+   */
+  async login(email: string, password: string) {
+    const response = await this.api.post("/auth/login", {
+      email,
+      password,
+    });
+    return response.data;
+  }
+
+  /**
    * Obtiene la instancia de axios para peticiones personalizadas
    * @returns Instancia de axios
    */
