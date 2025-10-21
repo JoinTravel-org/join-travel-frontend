@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import {
   Typography,
   Button,
@@ -8,6 +8,8 @@ import {
   Card,
   CardContent,
   Stack,
+  Rating,
+  CircularProgress,
 } from '@mui/material';
 import { useTheme } from '../hooks/useTheme';
 import {
@@ -18,6 +20,7 @@ import {
 } from '@mui/icons-material';
 import { useNavigate } from 'react-router-dom';
 import { trackEvent } from '../utils/analytics';
+import api from '../services/api.service';
 
 /**
  * Home
@@ -26,13 +29,72 @@ import { trackEvent } from '../utils/analytics';
  * - Clear hierarchy, concise copy, strong primary CTA
  * - Accessible features list with list semantics
  */
+interface Place {
+  id: string;
+  name: string;
+  image?: string;
+  rating: number;
+}
+
 const Home: React.FC = () => {
   const { theme } = useTheme();
   const navigate = useNavigate();
+  const [places, setPlaces] = useState<Place[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [page, setPage] = useState(1);
+  const [hasMore, setHasMore] = useState(true);
+  const observerRef = useRef<IntersectionObserver | null>(null);
+  const lastPlaceRef = useRef<HTMLDivElement | null>(null);
 
   React.useEffect(() => {
     document.title = 'JoinTravel — Explora el mundo, conecta y viaja mejor';
   }, []);
+
+  const fetchPlaces = async (pageNum: number) => {
+    try {
+      const response = await api.getPlaces(pageNum, 10);
+      const newPlaces = response.places || [];
+      setPlaces(prev => pageNum === 1 ? newPlaces : [...prev, ...newPlaces]);
+      setHasMore(newPlaces.length === 10);
+    } catch (error) {
+      console.error('Error fetching places:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchPlaces(1);
+  }, []);
+
+  useEffect(() => {
+    if (loading || !hasMore) return;
+
+    if (observerRef.current) observerRef.current.disconnect();
+
+    observerRef.current = new IntersectionObserver(
+      (entries) => {
+        if (entries[0].isIntersecting && hasMore) {
+          setPage(prev => prev + 1);
+        }
+      },
+      { threshold: 1.0 }
+    );
+
+    if (lastPlaceRef.current) {
+      observerRef.current.observe(lastPlaceRef.current);
+    }
+
+    return () => {
+      if (observerRef.current) observerRef.current.disconnect();
+    };
+  }, [loading, hasMore]);
+
+  useEffect(() => {
+    if (page > 1) {
+      fetchPlaces(page);
+    }
+  }, [page]);
 
   const features = [
     {
@@ -147,6 +209,86 @@ const Home: React.FC = () => {
               </Typography>
             </Paper>
           </Box>
+        </Container>
+      </Box>
+
+      {/* Places Feed Section */}
+      <Box
+        component="section"
+        aria-labelledby="places-title"
+        sx={{ py: { xs: 5, md: 8 } }}
+      >
+        <Container maxWidth="lg">
+          <Typography
+            id="places-title"
+            variant="h2"
+            component="h2"
+            gutterBottom
+            sx={{ fontWeight: 700, fontSize: 'var(--fs-h2)' }}
+          >
+            Lugares Disponibles
+          </Typography>
+
+          <Box
+            sx={{
+              mt: 2,
+              display: 'grid',
+              gap: { xs: 3, md: 4 },
+              gridTemplateColumns: { xs: '1fr', sm: 'repeat(2, 1fr)', md: 'repeat(3, 1fr)', lg: 'repeat(4, 1fr)' },
+            }}
+          >
+            {places.map((place, index) => (
+              <Card
+                key={place.id}
+                ref={index === places.length - 1 ? lastPlaceRef : null}
+                elevation={1}
+                sx={{
+                  height: '100%',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  borderRadius: 'var(--card-radius)',
+                  boxShadow: 'var(--card-shadow)',
+                  transition: 'transform var(--motion-duration-base) var(--motion-ease-standard), box-shadow var(--motion-duration-base) var(--motion-ease-standard)',
+                  '&:hover': {
+                    transform: 'translateY(-2px)',
+                    boxShadow: 'var(--card-shadow-hover)',
+                  },
+                }}
+              >
+                <Box
+                  sx={{
+                    height: 200,
+                    backgroundImage: `url(${place.image || '/placeholder-image.jpg'})`,
+                    backgroundSize: 'cover',
+                    backgroundPosition: 'center',
+                    backgroundColor: 'var(--color-bg-secondary)',
+                    borderRadius: 'var(--card-radius) var(--card-radius) 0 0',
+                  }}
+                  onError={(e) => {
+                    const target = e.target as HTMLDivElement;
+                    target.style.backgroundImage = 'url(/placeholder-image.jpg)';
+                  }}
+                />
+                <CardContent sx={{ flexGrow: 1, p: 2 }}>
+                  <Typography variant="h6" component="h3" sx={{ fontWeight: 600, mb: 1 }}>
+                    {place.name}
+                  </Typography>
+                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                    <Rating value={place.rating || 0} readOnly size="small" />
+                    <Typography variant="body2" color="text.secondary">
+                      ({(place.rating || 0).toFixed(1)})
+                    </Typography>
+                  </Box>
+                </CardContent>
+              </Card>
+            ))}
+          </Box>
+
+          {loading && (
+            <Box sx={{ display: 'flex', justifyContent: 'center', mt: 4 }}>
+              <CircularProgress />
+            </Box>
+          )}
         </Container>
       </Box>
 

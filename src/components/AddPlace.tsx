@@ -20,6 +20,7 @@ interface Place {
   address: string;
   latitude: number;
   longitude: number;
+  image?: string;
 }
 
 const MapComponent: React.FC<{
@@ -61,6 +62,7 @@ const MapComponent: React.FC<{
             address: place.formatted_address || '',
             latitude: place.geometry.location.lat(),
             longitude: place.geometry.location.lng(),
+            image: place.photos && place.photos.length > 0 ? place.photos[0].getUrl() : undefined,
           };
 
           onPlaceSelect(selectedPlace);
