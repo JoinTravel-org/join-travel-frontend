@@ -12,6 +12,7 @@ import { initAnalytics, trackPageview } from "./utils/analytics";
 import Login from "./components/Login";
 import Register from "./components/Register";
 import ConfirmEmail from "./components/ConfirmEmail";
+import AddPlace from "./components/AddPlace";
 
 function AnalyticsListener() {
   const location = useLocation();
@@ -45,6 +46,7 @@ function App() {
                   element={<Register onSwitchToLogin={() => {}} />}
                 />
                 <Route path="/confirm-email" element={<ConfirmEmail />} />
+                <Route path="/add-place" element={<AddPlace />} />
               </Routes>
             </Suspense>
           </main>
