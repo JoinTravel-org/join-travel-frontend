@@ -24,17 +24,17 @@ clean:
 	docker rmi $(IMAGE_NAME)
 
 up:
-	docker-compose up --build
+	docker compose up --build
 
 down:
-	docker-compose down
+	docker compose down
 
 # Development commands
 dev:
-	docker-compose -f docker-compose-dev.yml up --build
+	docker compose -f docker-compose-dev.yml up --build
 
 dev-down:
-	docker-compose -f docker-compose-dev.yml down --remove-orphans
+	docker compose -f docker-compose-dev.yml down --remove-orphans
 
 dev-logs:
-	docker-compose -f docker-compose-dev.yml logs -f
+	docker compose -f docker-compose-dev.yml logs -f

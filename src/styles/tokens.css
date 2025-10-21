@@ -1,0 +1,162 @@
+/* Design Tokens: color, typography, spacing, radius, elevation, motion */
+
+/* Base defaults (will be overridden by [data-theme] variants) */
+:root {
+  color-scheme: light dark;
+
+  /* Typography */
+  --font-sans: "Inter", "Roboto", "Helvetica", "Arial", sans-serif;
+
+  /* Fluid type scale (clamp for responsive sizing) */
+  --fs-h1: clamp(2.25rem, 1.4rem + 2.2vw, 3rem);
+  --fs-h2: clamp(1.75rem, 1.2rem + 1.6vw, 2.25rem);
+  --fs-h3: clamp(1.5rem, 1.05rem + 1.2vw, 2rem);
+  --fs-h4: clamp(1.25rem, 1.0rem + 0.8vw, 1.5rem);
+  --fs-body: 1rem;
+  --fs-small: 0.875rem;
+
+  --lh-tight: 1.2;
+  --lh-normal: 1.5;
+  --lh-relaxed: 1.7;
+
+  --fw-regular: 400;
+  --fw-medium: 500;
+  --fw-semibold: 600;
+  --fw-bold: 700;
+
+  /* Spacing (8px scale) */
+  --space-0: 0px;
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 24px;
+  --space-6: 32px;
+  --space-7: 48px;
+  --space-8: 64px;
+
+  /* Radius */
+  --radius-sm: 6px;
+  --radius-md: 8px;
+  --radius-lg: 12px;
+  --radius-pill: 9999px;
+
+  /* Elevation (use rgba with a shared shadow color) */
+  --shadow-color: 0, 0, 0; /* default, overridden in themes if needed */
+  --shadow-0: none;
+  --shadow-1: 0 1px 2px rgba(var(--shadow-color), 0.06);
+  --shadow-2: 0 2px 8px rgba(var(--shadow-color), 0.08);
+  --shadow-3: 0 6px 16px rgba(var(--shadow-color), 0.12);
+
+  /* Motion */
+  --motion-duration-fast: 150ms;
+  --motion-duration-base: 200ms;
+  --motion-duration-slow: 250ms;
+
+  --motion-ease-enter: cubic-bezier(0.2, 0, 0, 1);
+  --motion-ease-standard: cubic-bezier(0.4, 0, 0.2, 1);
+
+  /* Color placeholders (overridden per theme) */
+  --color-bg: #ffffff;
+  --color-surface: #ffffff;
+  --color-text: #14202A;
+  --color-text-secondary: #445B6C;
+
+  --color-primary: #05445e;
+  --color-primary-contrast: #ffffff;
+
+  --color-accent: #189ab4; /* accent for chips/badges/links, not body text */
+  --color-info: #0288d1;
+  --color-success: #2e7d32;
+  --color-warning: #ed6c02;
+  --color-error: #d32f2f;
+
+  --color-link: #0b6e99;
+  --color-link-hover: #095a7c;
+
+  --focus-ring-color: rgba(10, 119, 196, 0.35); /* derived from primary */
+}
+
+/* Light mode (meets WCAG AA for text on surfaces) */
+:root[data-theme="light"] {
+  color-scheme: light;
+
+  --color-bg: #f3f7fb;          /* softer than #d4f1f4 to reduce glare */
+  --color-surface: #ffffff;      /* cards, sheets */
+  --color-text: #14202A;         /* ~13.6:1 vs #fff */
+  --color-text-secondary: #445B6C; /* ~6.9:1 vs #fff */
+
+  --color-primary: #05445e;      /* brand primary */
+  --color-primary-contrast: #ffffff;
+
+  --color-accent: #189ab4;       /* use as accent, avoid as body text on white */
+  --color-info: #0288d1;
+  --color-success: #2e7d32;
+  --color-warning: #ed6c02;
+  --color-error: #d32f2f;
+
+  --color-link: #0b6e99;         /* ≥ 4.5:1 on light bg */
+  --color-link-hover: #095a7c;
+
+  --shadow-color: 0, 0, 0;
+
+  --focus-ring-color: rgba(9, 90, 124, 0.4);
+}
+
+/* Dark mode (balanced contrast, avoids pure black) */
+:root[data-theme="dark"] {
+  color-scheme: dark;
+
+  --color-bg: #0b1220;           /* deep navy to reduce bloom */
+  --color-surface: #1a2027;      /* dark paper */
+  --color-text: #E6EDF3;         /* ~12.6:1 vs #1a2027 */
+  --color-text-secondary: #9FB3C8; /* ~4.9:1 vs #1a2027 */
+
+  /* Keep brand identity while ensuring contained button contrast */
+  --color-primary: #189ab4;          /* brighter on dark */
+  --color-primary-contrast: #0b1220; /* readable on bright primary */
+
+  --color-accent: #75e6da;       /* subtle accents */
+  --color-info: #29b6f6;
+  --color-success: #66bb6a;
+  --color-warning: #ffa000;
+  --color-error: #ef5350;
+
+  --color-link: #7cc9ff;         /* vibrant but accessible on dark */
+  --color-link-hover: #a3daff;
+
+  --shadow-color: 0, 0, 0;
+
+  --focus-ring-color: rgba(124, 201, 255, 0.5);
+}
+
+/* Recommended element usage examples (non-invasive; main styles will live in index.css)
+   These can be used by components with var() to ensure consistency.
+*/
+
+:root {
+  /* Button tokens (for custom elements) */
+  --btn-border-radius: var(--radius-md);
+  --btn-padding-y: 0.6em;
+  --btn-padding-x: 1.2em;
+  --btn-font-weight: var(--fw-medium);
+  --btn-transition: box-shadow var(--motion-duration-base) var(--motion-ease-standard),
+                    background-color var(--motion-duration-base) var(--motion-ease-standard),
+                    color var(--motion-duration-fast) var(--motion-ease-standard);
+
+  /* Input tokens */
+  --input-border-radius: var(--radius-md);
+  --input-focus-ring: 0 0 0 3px var(--focus-ring-color);
+
+  /* Card tokens */
+  --card-radius: var(--radius-lg);
+  --card-shadow: var(--shadow-2);
+  --card-shadow-hover: var(--shadow-3);
+}
+
+/* Utility: focus outlines for keyboard users */
+:root :focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 3px var(--focus-ring-color);
+  transition: box-shadow var(--motion-duration-fast) var(--motion-ease-standard);
+}

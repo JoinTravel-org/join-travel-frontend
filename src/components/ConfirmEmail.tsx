@@ -23,6 +23,15 @@ const ConfirmEmail: React.FC = () => {
   const [status, setStatus] = useState<ConfirmationStatus>("loading");
   const [message, setMessage] = useState("");
 
+  useEffect(() => {
+    document.title =
+      status === 'loading'
+        ? 'Confirmando email — JoinTravel'
+        : status === 'success'
+          ? 'Email confirmado — JoinTravel'
+          : 'Error de confirmación — JoinTravel';
+  }, [status]);
+
   const hasRunRef = useRef(false);
 
   useEffect(() => {
@@ -70,7 +79,7 @@ const ConfirmEmail: React.FC = () => {
       sx={{ p: 4, maxWidth: 500, mx: "auto", mt: 8, textAlign: "center" }}
     >
       {status === "loading" && (
-        <Box>
+        <Box role="status" aria-live="polite">
           <CircularProgress size={60} sx={{ mb: 3 }} />
           <Typography variant="h5" gutterBottom>
             Confirmando tu email...
@@ -82,7 +91,7 @@ const ConfirmEmail: React.FC = () => {
       )}
 
       {status === "success" && (
-        <Box>
+        <Box aria-live="polite" aria-atomic="true">
           <CheckCircle color="success" sx={{ fontSize: 80, mb: 2 }} />
           <Typography variant="h4" gutterBottom color="success.main">
             ¡Email confirmado!
@@ -100,7 +109,7 @@ const ConfirmEmail: React.FC = () => {
       )}
 
       {status === "error" && (
-        <Box>
+        <Box aria-live="polite" aria-atomic="true">
           <ErrorIcon color="error" sx={{ fontSize: 80, mb: 2 }} />
           <Typography variant="h4" gutterBottom color="error.main">
             Error en la confirmación

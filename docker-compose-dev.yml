@@ -13,5 +13,4 @@ services:
       - NODE_ENV=development
       - VITE_BACKEND_URL=${VITE_BACKEND_URL}
       - TZ=UTC
-    command: pnpm dev
     restart: unless-stopped
