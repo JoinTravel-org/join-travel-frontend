@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import {
   TextField,
   Button,
@@ -37,10 +37,32 @@ const Login: React.FC<LoginProps> = ({ onSwitchToRegister }) => {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
 
-  const validateEmail = (value: string) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value);
+  // Extra UX from feature branch: disable button until inputs present and inline alerts
+  const [buttonDisabled, setButtonDisabled] = useState(false);
+  const [messagePassword, setMessagePassword] = useState(false);
+  const [messageEmail, setMessageEmail] = useState(false);
+  const isFirstRun = useRef(true);
+
+  useEffect(() => {
+    if (isFirstRun.current) {
+      setMessageEmail(false);
+      setMessagePassword(false);
+      isFirstRun.current = false;
+      return;
+    }
+    setMessageEmail(!email);
+    setMessagePassword(!password);
+    setButtonDisabled(!(email && password));
+  }, [email, password]);
+
+  const validateEmail = (value: string) => {
+    const trimmed = value.replace(/^[\s\uFEFF\xA0]+|[\s\uFEFF\xA0]+$/g, '');
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return emailRegex.test(trimmed);
+  };
 
   const emailInvalid = touched.email && !validateEmail(email);
-  const passwordInvalid = touched.password && !password;
+  const passwordInvalid = touched.password && !password.trim();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -49,12 +71,18 @@ const Login: React.FC<LoginProps> = ({ onSwitchToRegister }) => {
     // Mark all as touched for validation on submit
     setTouched({ email: true, password: true });
 
-    if (!validateEmail(email)) {
+    // Trim inputs before validation/submit
+    const trimmedEmail = email.replace(/^[\s\uFEFF\xA0]+|[\s\uFEFF\xA0]+$/g, '');
+    const trimmedPassword = password.trim();
+    setEmail(trimmedEmail);
+    setPassword(trimmedPassword);
+
+    if (!validateEmail(trimmedEmail)) {
       setError('Formato de correo inválido.');
       return;
     }
 
-    if (!password) {
+    if (!trimmedPassword) {
       setError('La contraseña es requerida.');
       return;
     }
@@ -64,7 +92,6 @@ const Login: React.FC<LoginProps> = ({ onSwitchToRegister }) => {
     try {
       // Simulate API call
       await new Promise((resolve) => setTimeout(resolve, 1000));
-      // For demo purposes, accept any email/password combination
       // Redirect to home
       navigate('/');
     } catch {
@@ -99,6 +126,13 @@ const Login: React.FC<LoginProps> = ({ onSwitchToRegister }) => {
         )}
       </Box>
 
+      {/* Back link kept from feature branch, styled with MUI */}
+      <Box sx={{ mb: 2, textAlign: 'left' }}>
+        <Button variant="text" size="small" onClick={() => navigate(-1)} sx={{ px: 0 }}>
+          ← Volver
+        </Button>
+      </Box>
+
       <Box component="form" onSubmit={handleSubmit} noValidate sx={{ mt: 1 }}>
         <TextField
           margin="normal"
@@ -123,6 +157,11 @@ const Login: React.FC<LoginProps> = ({ onSwitchToRegister }) => {
             ),
           }}
         />
+        {messageEmail && (
+          <Alert severity="error" sx={{ mb: 2 }}>
+            El correo electrónico es requerido.
+          </Alert>
+        )}
 
         <TextField
           margin="normal"
@@ -159,13 +198,18 @@ const Login: React.FC<LoginProps> = ({ onSwitchToRegister }) => {
             ),
           }}
         />
+        {messagePassword && (
+          <Alert severity="error" sx={{ mb: 2 }}>
+            La contraseña es requerida.
+          </Alert>
+        )}
 
         <Button
           type="submit"
           fullWidth
           variant="contained"
           sx={{ mt: 1.5, mb: 2 }}
-          disabled={loading}
+          disabled={buttonDisabled || loading}
           aria-busy={loading ? 'true' : 'false'}
         >
           {loading ? 'Iniciando sesión…' : 'Iniciar sesión'}
