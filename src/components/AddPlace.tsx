@@ -239,7 +239,33 @@ const AddPlace: React.FC = () => {
               label="Coordenadas"
               value={`${selectedPlace.latitude}, ${selectedPlace.longitude}`}
               InputProps={{ readOnly: true }}
+              sx={{ mb: 2 }}
             />
+            {selectedPlace.image && (
+              <Box sx={{ mb: 2 }}>
+                <Typography variant="body2" sx={{ mb: 1, color: 'text.secondary' }}>
+                  Imagen del lugar:
+                </Typography>
+                <Box
+                  component="img"
+                  src={selectedPlace.image}
+                  alt={`Vista previa de ${selectedPlace.name}`}
+                  sx={{
+                    width: '100%',
+                    maxWidth: 300,
+                    height: 200,
+                    objectFit: 'cover',
+                    borderRadius: 1,
+                    border: '1px solid',
+                    borderColor: 'divider',
+                  }}
+                  onError={(e) => {
+                    const target = e.target as HTMLImageElement;
+                    target.style.display = 'none';
+                  }}
+                />
+              </Box>
+            )}
           </Box>
         )}
 
