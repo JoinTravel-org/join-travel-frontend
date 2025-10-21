@@ -12,11 +12,19 @@ import {
   ListItemText,
   Divider,
   useMediaQuery,
+  Snackbar,
+  Alert,
+  Slide,
+  Backdrop,
+  CircularProgress,
+  Menu,
+  MenuItem,
 } from "@mui/material";
-import { Menu as MenuIcon, Close as CloseIcon } from "@mui/icons-material";
-import { Link as RouterLink, useLocation } from "react-router-dom";
+import { Menu as MenuIcon, Close as CloseIcon, Person as PersonIcon } from "@mui/icons-material";
+import { Link as RouterLink, useLocation, useNavigate } from "react-router-dom";
 import { useTheme as useMuiTheme } from "@mui/material/styles";
 import ThemeToggle from "./ThemeToggle";
+import { useAuth } from "../hooks/useAuth";
 
 /**
  * Accessible, responsive site header:
@@ -29,11 +37,48 @@ const Header: React.FC = () => {
   const isMobile = useMediaQuery(muiTheme.breakpoints.down("md"));
   const [open, setOpen] = React.useState(false);
   const location = useLocation();
+  const navigate = useNavigate();
+  const auth = useAuth();
+
+  const [logoutSnackbarOpen, setLogoutSnackbarOpen] = React.useState(false);
+  const [isLoggingOut, setIsLoggingOut] = React.useState(false);
+  const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
 
   const navId = "primary-navigation";
 
   const toggleDrawer = (nextOpen: boolean) => () => {
     setOpen(nextOpen);
+  };
+
+  const handleLogout = async () => {
+    setIsLoggingOut(true);
+    try {
+      await auth.logout();
+      setLogoutSnackbarOpen(true);
+    } catch (error) {
+      console.error('Logout failed:', error);
+    } finally {
+      setIsLoggingOut(false);
+    }
+  };
+
+  const handleProfileMenuOpen = (event: React.MouseEvent<HTMLElement>) => {
+    setAnchorEl(event.currentTarget);
+  };
+
+  const handleProfileMenuClose = () => {
+    setAnchorEl(null);
+  };
+
+  const handleProfileClick = () => {
+    // Por ahora no hace nada
+    handleProfileMenuClose();
+  };
+
+  const handleLogoutClick = async () => {
+    handleProfileMenuClose();
+    await handleLogout();
+    navigate('/');
   };
 
   const NavItems = (
@@ -49,27 +94,42 @@ const Header: React.FC = () => {
       <Button
         color="inherit"
         component={RouterLink}
-        to="/login"
-        aria-current={location.pathname === "/login" ? "page" : undefined}
-      >
-        Iniciar Sesión
-      </Button>
-      <Button
-        color="inherit"
-        component={RouterLink}
-        to="/register"
-        aria-current={location.pathname === "/register" ? "page" : undefined}
-      >
-        Registrarse
-      </Button>
-      <Button
-        color="inherit"
-        component={RouterLink}
         to="/add-place"
         aria-current={location.pathname === "/add-place" ? "page" : undefined}
       >
         Agregar Lugar
       </Button>
+      {auth.isAuthenticated ? (
+        <>
+          <IconButton
+            color="inherit"
+            onClick={handleProfileMenuOpen}
+            aria-label="Perfil"
+            sx={{ ml: 1 }}
+          >
+            <PersonIcon />
+          </IconButton>
+        </>
+      ) : (
+        <>
+          <Button
+            color="inherit"
+            component={RouterLink}
+            to="/login"
+            aria-current={location.pathname === "/login" ? "page" : undefined}
+          >
+            Iniciar Sesión
+          </Button>
+          <Button
+            color="inherit"
+            component={RouterLink}
+            to="/register"
+            aria-current={location.pathname === "/register" ? "page" : undefined}
+          >
+            Registrarse
+          </Button>
+        </>
+      )}
       <ThemeToggle />
     </>
   );
@@ -121,6 +181,7 @@ const Header: React.FC = () => {
             JoinTravel
           </Typography>
         </Box>
+        
 
         {/* Desktop nav */}
         {!isMobile && (
@@ -206,23 +267,44 @@ const Header: React.FC = () => {
             >
               <ListItemText primary="Inicio" />
             </ListItemButton>
-            <ListItemButton
-              component={RouterLink}
-              to="/login"
-              selected={location.pathname === "/login"}
-              onClick={toggleDrawer(false)}
-            >
-              <ListItemText primary="Iniciar Sesión" />
-            </ListItemButton>
-            <ListItemButton
-              component={RouterLink}
-              to="/register"
-              selected={location.pathname === "/register"}
-              onClick={toggleDrawer(false)}
-            >
-              <ListItemText primary="Registrarse" />
-            </ListItemButton>
-            <ListItemButton
+            {auth.isAuthenticated ? (
+              <>
+                <ListItemButton
+                  component={RouterLink}
+                  to="/profile"
+                  onClick={toggleDrawer(false)}
+                >
+                  <ListItemText primary="Mi perfil" />
+                </ListItemButton>
+                <ListItemButton
+                  onClick={() => {
+                    handleLogout();
+                    toggleDrawer(false)();
+                    navigate('/');
+                  }}
+                >
+                  <ListItemText primary="Cerrar sesión" />
+                </ListItemButton>
+              </>
+            ) : (
+              <>
+                <ListItemButton
+                  component={RouterLink}
+                  to="/login"
+                  selected={location.pathname === "/login"}
+                  onClick={toggleDrawer(false)}
+                >
+                  <ListItemText primary="Iniciar Sesión" />
+                </ListItemButton>
+                <ListItemButton
+                  component={RouterLink}
+                  to="/register"
+                  selected={location.pathname === "/register"}
+                  onClick={toggleDrawer(false)}
+                >
+                  <ListItemText primary="Registrarse" />
+                </ListItemButton>
+                <ListItemButton
               component={RouterLink}
               to="/add-place"
               selected={location.pathname === "/add-place"}
@@ -230,6 +312,8 @@ const Header: React.FC = () => {
             >
               <ListItemText primary="Agregar Lugar" />
             </ListItemButton>
+              </>
+            )}
           </List>
           <Divider sx={{ my: 1 }} />
           <Box sx={{ px: 2, py: 1 }}>
@@ -237,6 +321,43 @@ const Header: React.FC = () => {
           </Box>
         </Box>
       </Drawer>
+
+      <Menu
+        anchorEl={anchorEl}
+        open={Boolean(anchorEl)}
+        onClose={handleProfileMenuClose}
+        anchorOrigin={{
+          vertical: 'bottom',
+          horizontal: 'center',
+        }}
+        transformOrigin={{
+          vertical: 'top',
+          horizontal: 'center',
+        }}
+      >
+        <MenuItem onClick={handleProfileClick}>Mi perfil</MenuItem>
+        <MenuItem onClick={handleLogoutClick}>Cerrar sesión</MenuItem>
+      </Menu>
+
+      <Snackbar
+        open={logoutSnackbarOpen}
+        autoHideDuration={4000}
+        onClose={() => setLogoutSnackbarOpen(false)}
+        anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
+        TransitionComponent={(props) => <Slide {...props} direction="up" />}
+        transitionDuration={500}
+      >
+        <Alert onClose={() => setLogoutSnackbarOpen(false)} severity="success" sx={{ width: '100%' }}>
+          Sesión cerrada exitosamente.
+        </Alert>
+      </Snackbar>
+
+      <Backdrop
+        sx={{ color: '#fff', zIndex: (theme) => theme.zIndex.drawer + 1 }}
+        open={isLoggingOut}
+      >
+        <CircularProgress color="inherit" />
+      </Backdrop>
     </AppBar>
   );
 };

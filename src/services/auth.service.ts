@@ -41,17 +41,29 @@ export interface ConfirmEmailResponse {
 }
 
 /**
+ * Interfaz para la respuesta de logout
+ */
+export interface LogoutResponse {
+  success: boolean;
+  message: string;
+}
+
+/**
  * Interfaz para la respuesta de login
  */
 export interface LoginResponse {
   success: boolean;
   message: string;
   data?: {
-    id: string;
-    email: string;
-    isEmailConfirmed: boolean;
-    createdAt: string;
-    updatedAt: string;
+    accessToken: string;
+    refreshToken: string;
+    user?: {
+      id: string;
+      email: string;
+      isEmailConfirmed: boolean;
+      createdAt: string;
+      updatedAt: string;
+    };
   };
 }
 
@@ -115,6 +127,22 @@ class AuthService {
       return response;
     } catch (error) {
       Logger.getInstance().error(`User login failed for email: ${data.email}`, error);
+      throw error as ApiError;
+    }
+  }
+
+  /**
+   * Cierra sesión de un usuario
+   * @returns Promise con la respuesta del logout
+   */
+  async logout(): Promise<LogoutResponse> {
+    try {
+      Logger.getInstance().info(`Attempting to logout user`);
+      const response = await apiService.logout();
+      Logger.getInstance().info(`User logout successful`);
+      return response;
+    } catch (error) {
+      Logger.getInstance().error(`User logout failed`, error);
       throw error as ApiError;
     }
   }
