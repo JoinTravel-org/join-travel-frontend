@@ -55,17 +55,20 @@ const PlacesSection: React.FC<Props> = ({ places, loading, page, totalPages, onP
           {places.map((place) => (
             <Card
               key={place.id}
-              elevation={1}
+              elevation={0}
               sx={{
                 height: '100%',
                 display: 'flex',
                 flexDirection: 'column',
-                borderRadius: 'var(--card-radius)',
-                boxShadow: 'var(--card-shadow)',
-                transition: 'transform var(--motion-duration-base) var(--motion-ease-standard), box-shadow var(--motion-duration-base) var(--motion-ease-standard)',
+                border: '4px solid #000',
+                borderRadius: 0,
+                backgroundColor: '#fff',
+                boxShadow: '8px 8px 0px 0px rgba(0,0,0,1)',
+                transition: 'all 0.2s ease',
                 '&:hover': {
-                  transform: 'translateY(-2px)',
-                  boxShadow: 'var(--card-shadow-hover)',
+                  transform: 'translate(-4px, -4px)',
+                  boxShadow: '12px 12px 0px 0px rgba(0,0,0,1)',
+                  borderColor: '#333',
                 },
               }}
             >
@@ -75,21 +78,51 @@ const PlacesSection: React.FC<Props> = ({ places, loading, page, totalPages, onP
                   backgroundImage: `url(${place.image || '/placeholder-image.jpg'})`,
                   backgroundSize: 'cover',
                   backgroundPosition: 'center',
-                  backgroundColor: 'var(--color-bg-secondary)',
-                  borderRadius: 'var(--card-radius) var(--card-radius) 0 0',
+                  backgroundColor: '#f0f0f0',
+                  borderBottom: '4px solid #000',
                 }}
                 onError={(e) => {
                   const target = e.target as HTMLDivElement;
                   target.style.backgroundImage = 'url(/placeholder-image.jpg)';
                 }}
               />
-              <CardContent sx={{ flexGrow: 1, p: 2 }}>
-                <Typography variant="h6" component="h3" sx={{ fontWeight: 600, mb: 1 }}>
+              <CardContent sx={{ flexGrow: 1, p: 3, backgroundColor: '#fff' }}>
+                <Typography
+                  variant="h6"
+                  component="h3"
+                  sx={{
+                    fontWeight: 900,
+                    mb: 2,
+                    fontSize: '1.25rem',
+                    textTransform: 'uppercase',
+                    letterSpacing: '0.05em',
+                    color: '#000'
+                  }}
+                >
                   {place.name}
                 </Typography>
                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                  <Rating value={place.rating || 0} readOnly size="small" />
-                  <Typography variant="body2" color="text.secondary">
+                  <Rating
+                    value={place.rating || 0}
+                    readOnly
+                    size="small"
+                    sx={{
+                      '& .MuiRating-iconFilled': {
+                        color: '#000',
+                      },
+                      '& .MuiRating-iconEmpty': {
+                        color: '#ccc',
+                      }
+                    }}
+                  />
+                  <Typography
+                    variant="body2"
+                    sx={{
+                      fontWeight: 700,
+                      fontSize: '0.9rem',
+                      color: '#000'
+                    }}
+                  >
                     ({typeof place.rating === 'number' ? place.rating.toFixed(1) : '0.0'})
                   </Typography>
                 </Box>
