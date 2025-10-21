@@ -1,6 +1,6 @@
 import CssBaseline from "@mui/material/CssBaseline";
 import { BrowserRouter as Router, Routes, Route, useLocation } from "react-router-dom";
-import { Suspense, lazy, useEffect } from "react";
+import { Suspense, useEffect } from "react";
 import "./App.css";
 import AppThemeProvider from "./contexts/ThemeProvider";
 import Home from "./components/Home";
@@ -8,9 +8,9 @@ import Header from "./components/Header";
 import Footer from "./components/Footer";
 import { initAnalytics, trackPageview } from "./utils/analytics";
 
-const Login = lazy(() => import("./components/Login"));
-const Register = lazy(() => import("./components/Register"));
-const ConfirmEmail = lazy(() => import("./components/ConfirmEmail"));
+import Login from "./components/Login";
+import Register from "./components/Register";
+import ConfirmEmail from "./components/ConfirmEmail";
 
 function AnalyticsListener() {
   const location = useLocation();
