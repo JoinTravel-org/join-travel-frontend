@@ -136,7 +136,7 @@ class ApiService {
    * @param limit - Número de lugares por página
    * @returns Promise con la respuesta del servidor
    */
-  async getPlaces(page: number = 1, limit: number = 10) {
+  async getPlaces(page: number = 1, limit: number = 20) {
     const response = await this.api.get("/places", {
       params: { page, limit }
     });

@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   Typography,
   Button,
@@ -10,6 +10,7 @@ import {
   Stack,
   Rating,
   CircularProgress,
+  Pagination,
 } from '@mui/material';
 import { useTheme } from '../hooks/useTheme';
 import {
@@ -42,9 +43,7 @@ const Home: React.FC = () => {
   const [places, setPlaces] = useState<Place[]>([]);
   const [loading, setLoading] = useState(true);
   const [page, setPage] = useState(1);
-  const [hasMore, setHasMore] = useState(true);
-  const observerRef = useRef<IntersectionObserver | null>(null);
-  const lastPlaceRef = useRef<HTMLDivElement | null>(null);
+  const [totalPages, setTotalPages] = useState(1);
 
   React.useEffect(() => {
     document.title = 'JoinTravel — Explora el mundo, conecta y viaja mejor';
@@ -52,10 +51,11 @@ const Home: React.FC = () => {
 
   const fetchPlaces = async (pageNum: number) => {
     try {
-      const response = await api.getPlaces(pageNum, 10);
+      const response = await api.getPlaces(pageNum, 20);
       const newPlaces = response.places || [];
-      setPlaces(prev => pageNum === 1 ? newPlaces : [...prev, ...newPlaces]);
-      setHasMore(newPlaces.length === 10);
+      const totalCount = response.totalCount || 0;
+      setPlaces(newPlaces);
+      setTotalPages(Math.ceil(totalCount / 20));
     } catch (error) {
       console.error('Error fetching places:', error);
     } finally {
@@ -67,33 +67,19 @@ const Home: React.FC = () => {
     fetchPlaces(1);
   }, []);
 
-  useEffect(() => {
-    if (loading || !hasMore) return;
-
-    if (observerRef.current) observerRef.current.disconnect();
-
-    observerRef.current = new IntersectionObserver(
-      (entries) => {
-        if (entries[0].isIntersecting && hasMore) {
-          setPage(prev => prev + 1);
-        }
-      },
-      { threshold: 1.0 }
-    );
-
-    if (lastPlaceRef.current) {
-      observerRef.current.observe(lastPlaceRef.current);
-    }
-
-    return () => {
-      if (observerRef.current) observerRef.current.disconnect();
-    };
-  }, [loading, hasMore]);
+  const handlePageChange = (event: React.ChangeEvent<unknown>, value: number) => {
+    setPage(value);
+    // Scroll to top of places section with smooth animation
+    setTimeout(() => {
+      const placesSection = document.getElementById('places-section');
+      if (placesSection) {
+        placesSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
+    }, 100); // Small delay to allow new content to render
+  };
 
   useEffect(() => {
-    if (page > 1) {
-      fetchPlaces(page);
-    }
+    fetchPlaces(page);
   }, [page]);
 
   const features = [
@@ -214,6 +200,7 @@ const Home: React.FC = () => {
 
       {/* Places Feed Section */}
       <Box
+        id="places-section"
         component="section"
         aria-labelledby="places-title"
         sx={{ py: { xs: 5, md: 8 } }}
@@ -237,10 +224,9 @@ const Home: React.FC = () => {
               gridTemplateColumns: { xs: '1fr', sm: 'repeat(2, 1fr)', md: 'repeat(3, 1fr)', lg: 'repeat(4, 1fr)' },
             }}
           >
-            {places.map((place, index) => (
+            {places.map((place) => (
               <Card
                 key={place.id}
-                ref={index === places.length - 1 ? lastPlaceRef : null}
                 elevation={1}
                 sx={{
                   height: '100%',
@@ -287,6 +273,18 @@ const Home: React.FC = () => {
           {loading && (
             <Box sx={{ display: 'flex', justifyContent: 'center', mt: 4 }}>
               <CircularProgress />
+            </Box>
+          )}
+
+          {!loading && (
+            <Box sx={{ display: 'flex', justifyContent: 'center', mt: 4, mb: 2 }}>
+              <Pagination
+                count={totalPages}
+                page={page}
+                onChange={handlePageChange}
+                color="primary"
+                size="large"
+              />
             </Box>
           )}
         </Container>
