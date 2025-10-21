@@ -1,4 +1,6 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://jointravel.example/sitemap.xml
+# Sitemaps
+Sitemap: https://jointravel.world/sitemap.xml
+Sitemap: https://test.jointravel.world/sitemap.xml
