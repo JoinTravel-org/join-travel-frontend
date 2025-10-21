@@ -12,3 +12,4 @@ services:
     environment:
       - NODE_ENV=production
       - VITE_BACKEND_URL=${VITE_BACKEND_URL}
+      - TZ=UTC

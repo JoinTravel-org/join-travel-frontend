@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from "react";
 import {
   TextField,
   Button,
@@ -9,130 +9,195 @@ import {
   Link,
   FormControlLabel,
   Checkbox,
-} from '@mui/material';
-import { Email, Lock } from '@mui/icons-material';
-import { useNavigate } from 'react-router-dom';
+  InputAdornment,
+  IconButton,
+  List,
+  ListItem,
+} from "@mui/material";
+import { Email, Lock, Visibility, VisibilityOff } from "@mui/icons-material";
+import { useNavigate } from "react-router-dom";
+import authService from "../services/auth.service";
+import {
+  isValidEmail,
+  validatePassword,
+  getErrorMessage,
+} from "../utils/validators";
 
 interface RegisterProps {
   onSwitchToLogin: () => void;
 }
 
+type PasswordValidation = {
+  isValid: boolean;
+  errors: string[];
+};
+
 const Register: React.FC<RegisterProps> = ({ onSwitchToLogin }) => {
   const navigate = useNavigate();
+
+  // Document title for SEO/UX
+  useEffect(() => {
+    document.title = "Crear cuenta — JoinTravel";
+  }, []);
+
   const [formData, setFormData] = useState({
-    email: '',
-    password: '',
-    confirmPassword: '',
+    email: "",
+    password: "",
+    confirmPassword: "",
+    termsAccepted: false,
   });
-  const [error, setError] = useState('');
-  const [success, setSuccess] = useState('');
+
+  const [touched, setTouched] = useState({
+    email: false,
+    password: false,
+    confirmPassword: false,
+    termsAccepted: false,
+  });
+
+  const [error, setError] = useState("");
+  const [success, setSuccess] = useState("");
   const [loading, setLoading] = useState(false);
-  const [passwordErrors, setPasswordErrors] = useState<string[]>([]);
+  const [passwordValidation, setPasswordValidation] = useState<PasswordValidation>({
+    isValid: false,
+    errors: [],
+  });
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirm, setShowConfirm] = useState(false);
 
-  const validateEmail = (email: string) => {
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    return emailRegex.test(email);
-  };
+  const setField =
+    (field: keyof typeof formData) =>
+    (e: React.ChangeEvent<HTMLInputElement>) => {
+      const value =
+        field === "termsAccepted" ? (e.target as HTMLInputElement).checked : e.target.value;
+      setFormData((prev) => ({ ...prev, [field]: value as never }));
 
-  const validatePassword = (password: string) => {
-    const errors: string[] = [];
+      if (field === "password") {
+        const validation = validatePassword(value as string);
+        setPasswordValidation(validation);
+      }
+    };
 
-    if (password.length < 8) {
-      errors.push('Al menos 8 caracteres');
-    }
-    if (!/[A-Z]/.test(password)) {
-      errors.push('Una mayúscula');
-    }
-    if (!/\d/.test(password)) {
-      errors.push('Un número');
-    }
-    if (!/[!@#$%^&*()_+\-=[\]{};':"\\|,.<>/?]/.test(password)) {
-      errors.push('Un símbolo');
-    }
+  const onBlur = (field: keyof typeof touched) => () =>
+    setTouched((t) => ({ ...t, [field]: true }));
 
-    return errors;
-  };
+  const emailInvalid = touched.email && !isValidEmail(formData.email);
+  const passwordInvalid = touched.password && !validatePassword(formData.password).isValid;
+  const confirmInvalid =
+    touched.confirmPassword && formData.confirmPassword !== formData.password;
+  const termsInvalid = touched.termsAccepted && !formData.termsAccepted;
 
-  const handleInputChange = (field: string) => (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = e.target.value;
-    setFormData(prev => ({ ...prev, [field]: value }));
-
-    if (field === 'password') {
-      setPasswordErrors(validatePassword(value));
-    }
-  };
+  const canSubmit =
+    isValidEmail(formData.email) &&
+    validatePassword(formData.password).isValid &&
+    formData.confirmPassword === formData.password &&
+    formData.termsAccepted &&
+    !loading;
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setError('');
-    setSuccess('');
+    setError("");
+    setSuccess("");
 
-    if (!validateEmail(formData.email)) {
-      setError('Formato de correo inválido.');
+    // Mark all fields as touched on submit
+    setTouched({
+      email: true,
+      password: true,
+      confirmPassword: true,
+      termsAccepted: true,
+    });
+
+    if (!isValidEmail(formData.email)) {
+      setError("Formato de correo inválido.");
       return;
     }
 
-    const passwordValidationErrors = validatePassword(formData.password);
-    if (passwordValidationErrors.length > 0) {
-      setError('La contraseña no cumple con los requisitos.');
+    const pwdValidation = validatePassword(formData.password);
+    if (!pwdValidation.isValid) {
+      setError("La contraseña no cumple con los requisitos.");
       return;
     }
 
     if (formData.password !== formData.confirmPassword) {
-      setError('Las contraseñas no coinciden.');
+      setError("Las contraseñas no coinciden.");
+      return;
+    }
+
+    if (!formData.termsAccepted) {
+      setError("Debes aceptar los términos y condiciones.");
       return;
     }
 
     setLoading(true);
 
     try {
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      const response = await authService.register({
+        email: formData.email,
+        password: formData.password,
+      });
 
-      // Simulate email already exists check
-      if (formData.email === 'existing@example.com') {
-        setError('El email ya está en uso. Intente iniciar sesión.');
-        return;
-      }
-
-      // Simulate successful registration
-      setSuccess('Registro exitoso. Se ha enviado un correo de confirmación.');
+      setSuccess(
+        response.message ||
+          "Usuario registrado exitosamente. Revisa tu correo para confirmar tu cuenta."
+      );
 
       // Reset form
-      setFormData({ email: '', password: '', confirmPassword: '' });
-      setPasswordErrors([]);
+      setFormData({
+        email: "",
+        password: "",
+        confirmPassword: "",
+        termsAccepted: false,
+      });
+      setPasswordValidation({ isValid: false, errors: [] });
+      setTouched({
+        email: false,
+        password: false,
+        confirmPassword: false,
+        termsAccepted: false,
+      });
 
-      // Redirect to home after a short delay to show success message
+      // Navigate after a short delay
       setTimeout(() => {
-        navigate('/');
-      }, 2000);
-
-    } catch {
-      setError('Error al registrar. Inténtelo de nuevo.');
+        navigate("/");
+      }, 3000);
+    } catch (err) {
+      const errorMessage = getErrorMessage(err);
+      setError(errorMessage);
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <Paper elevation={3} sx={{ p: 4, maxWidth: 400, mx: 'auto', mt: 8 }}>
-      <Typography variant="h4" component="h1" gutterBottom align="center">
-        Registrarse
+    <Paper
+      elevation={3}
+      sx={{
+        p: 4,
+        maxWidth: 480,
+        mx: "auto",
+        mt: 8,
+        backgroundColor: "var(--color-surface)",
+        color: "var(--color-text)",
+      }}
+    >
+      <Typography variant="h4" component="h1" gutterBottom align="center" sx={{ fontWeight: 700 }}>
+        Crear cuenta
       </Typography>
 
-      {error && (
-        <Alert severity="error" sx={{ mb: 2 }}>
-          {error}
-        </Alert>
-      )}
+      {/* Live region for form status messages */}
+      <Box aria-live="polite" aria-atomic="true">
+        {error && (
+          <Alert severity="error" sx={{ mb: 2 }} role="alert">
+            {error}
+          </Alert>
+        )}
+        {success && (
+          <Alert severity="success" sx={{ mb: 2 }} role="status">
+            {success}
+          </Alert>
+        )}
+      </Box>
 
-      {success && (
-        <Alert severity="success" sx={{ mb: 2 }}>
-          {success}
-        </Alert>
-      )}
-
-      <Box component="form" onSubmit={handleSubmit} sx={{ mt: 1 }}>
+      <Box component="form" onSubmit={handleSubmit} noValidate sx={{ mt: 1 }}>
         <TextField
           margin="normal"
           required
@@ -143,9 +208,17 @@ const Register: React.FC<RegisterProps> = ({ onSwitchToLogin }) => {
           autoComplete="email"
           autoFocus
           value={formData.email}
-          onChange={handleInputChange('email')}
+          onChange={setField("email")}
+          onBlur={onBlur("email")}
+          error={emailInvalid}
+          helperText={emailInvalid ? "Ingresa un correo válido." : " "}
+          aria-invalid={emailInvalid ? "true" : "false"}
           InputProps={{
-            startAdornment: <Email sx={{ mr: 1, color: 'action.active' }} />,
+            startAdornment: (
+              <InputAdornment position="start">
+                <Email sx={{ color: "action.active" }} aria-hidden />
+              </InputAdornment>
+            ),
           }}
         />
 
@@ -155,16 +228,56 @@ const Register: React.FC<RegisterProps> = ({ onSwitchToLogin }) => {
           fullWidth
           name="password"
           label="Contraseña"
-          type="password"
+          type={showPassword ? "text" : "password"}
           id="password"
           autoComplete="new-password"
           value={formData.password}
-          onChange={handleInputChange('password')}
+          onChange={setField("password")}
+          onBlur={onBlur("password")}
+          error={passwordInvalid}
+          aria-invalid={passwordInvalid ? "true" : "false"}
+          helperText={
+            touched.password && passwordValidation.errors.length > 0 ? (
+              <Box component="span">
+                Faltan:
+                <List dense sx={{ pl: 2, listStyleType: "disc" }}>
+                  {passwordValidation.errors.map((it, idx) => (
+                    <ListItem
+                      key={idx}
+                      sx={{
+                        display: "list-item",
+                        py: 0,
+                        color: "text.secondary",
+                      }}
+                    >
+                      {it}
+                    </ListItem>
+                  ))}
+                </List>
+              </Box>
+            ) : (
+              "Mínimo 8 caracteres, una mayúscula, un número y un símbolo."
+            )
+          }
           InputProps={{
-            startAdornment: <Lock sx={{ mr: 1, color: 'action.active' }} />,
+            startAdornment: (
+              <InputAdornment position="start">
+                <Lock sx={{ color: "action.active" }} aria-hidden />
+              </InputAdornment>
+            ),
+            endAdornment: (
+              <InputAdornment position="end">
+                <IconButton
+                  aria-label={showPassword ? "Ocultar contraseña" : "Mostrar contraseña"}
+                  onClick={() => setShowPassword((s) => !s)}
+                  onMouseDown={(e) => e.preventDefault()}
+                  edge="end"
+                >
+                  {showPassword ? <VisibilityOff /> : <Visibility />}
+                </IconButton>
+              </InputAdornment>
+            ),
           }}
-          helperText={passwordErrors.length > 0 ? `Faltan: ${passwordErrors.join(', ')}` : 'Mínimo 8 caracteres, 1 mayúscula, 1 número, 1 símbolo'}
-          error={passwordErrors.length > 0}
         />
 
         <TextField
@@ -173,41 +286,100 @@ const Register: React.FC<RegisterProps> = ({ onSwitchToLogin }) => {
           fullWidth
           name="confirmPassword"
           label="Confirmar contraseña"
-          type="password"
+          type={showConfirm ? "text" : "password"}
           id="confirmPassword"
           autoComplete="new-password"
           value={formData.confirmPassword}
-          onChange={handleInputChange('confirmPassword')}
+          onChange={setField("confirmPassword")}
+          onBlur={onBlur("confirmPassword")}
+          error={confirmInvalid}
+          helperText={confirmInvalid ? "Las contraseñas deben coincidir." : " "}
+          aria-invalid={confirmInvalid ? "true" : "false"}
           InputProps={{
-            startAdornment: <Lock sx={{ mr: 1, color: 'action.active' }} />,
+            startAdornment: (
+              <InputAdornment position="start">
+                <Lock sx={{ color: "action.active" }} aria-hidden />
+              </InputAdornment>
+            ),
+            endAdornment: (
+              <InputAdornment position="end">
+                <IconButton
+                  aria-label={showConfirm ? "Ocultar contraseña" : "Mostrar contraseña"}
+                  onClick={() => setShowConfirm((s) => !s)}
+                  onMouseDown={(e) => e.preventDefault()}
+                  edge="end"
+                >
+                  {showConfirm ? <VisibilityOff /> : <Visibility />}
+                </IconButton>
+              </InputAdornment>
+            ),
           }}
         />
 
         <FormControlLabel
-          control={<Checkbox value="terms" color="primary" required />}
-          label="Acepto los términos y condiciones"
+          control={
+            <Checkbox
+              color="primary"
+              checked={formData.termsAccepted}
+              onChange={setField("termsAccepted")}
+              onBlur={onBlur("termsAccepted")}
+              inputProps={{ "aria-invalid": termsInvalid ? "true" : "false" }}
+              required
+            />
+          }
           sx={{ mt: 1 }}
+          label={
+            <Typography variant="body2">
+              Acepto los{" "}
+              <Link
+                href="#"
+                onClick={(e) => e.preventDefault()}
+                underline="hover"
+                sx={{
+                  color: "var(--color-link)",
+                  "&:hover": { color: "var(--color-link-hover)" },
+                }}
+              >
+                términos y condiciones
+              </Link>
+            </Typography>
+          }
         />
+        {termsInvalid && (
+          <Typography
+            variant="caption"
+            color="error"
+            sx={{ display: "block", mt: 0.5 }}
+            role="alert"
+          >
+            Debes aceptar los términos y condiciones.
+          </Typography>
+        )}
 
         <Button
           type="submit"
           fullWidth
           variant="contained"
           sx={{ mt: 3, mb: 2 }}
-          disabled={loading || passwordErrors.length > 0}
+          disabled={!canSubmit}
+          aria-busy={loading ? "true" : "false"}
         >
-          {loading ? 'Registrando...' : 'Registrar'}
+          {loading ? "Registrando…" : "Crear cuenta"}
         </Button>
       </Box>
 
-      <Box sx={{ textAlign: 'center', mt: 2 }}>
+      <Box sx={{ textAlign: "center", mt: 2 }}>
         <Typography variant="body2">
-          ¿Ya tienes cuenta?{' '}
+          ¿Ya tienes cuenta?{" "}
           <Link
             component="button"
             variant="body2"
             onClick={onSwitchToLogin}
-            sx={{ cursor: 'pointer' }}
+            sx={{
+              cursor: "pointer",
+              color: "var(--color-link)",
+              "&:hover": { color: "var(--color-link-hover)" },
+            }}
           >
             Inicia sesión aquí
           </Link>

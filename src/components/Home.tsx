@@ -1,7 +1,5 @@
 import React from 'react';
 import {
-  AppBar,
-  Toolbar,
   Typography,
   Button,
   Container,
@@ -9,168 +7,238 @@ import {
   Paper,
   Card,
   CardContent,
-  IconButton,
-  useMediaQuery,
+  Stack,
 } from '@mui/material';
 import { useTheme } from '../hooks/useTheme';
 import {
-  Menu as MenuIcon,
   FlightTakeoff,
   Explore,
   Group,
 } from '@mui/icons-material';
-import { Link, useNavigate } from 'react-router-dom';
-import ThemeToggle from './ThemeToggle';
+import { useNavigate } from 'react-router-dom';
+import { trackEvent } from '../utils/analytics';
 
+/**
+ * Home
+ * - Semantic sections with a single H1
+ * - Mobile-first responsive layout using CSS grid via sx
+ * - Clear hierarchy, concise copy, strong primary CTA
+ * - Accessible features list with list semantics
+ */
 const Home: React.FC = () => {
   const { theme } = useTheme();
-  const isMobile = useMediaQuery('(max-width: 900px)');
   const navigate = useNavigate();
+
+  React.useEffect(() => {
+    document.title = 'JoinTravel — Explora el mundo, conecta y viaja mejor';
+  }, []);
 
   const features = [
     {
-      icon: <FlightTakeoff sx={{ fontSize: 40, color: theme.palette.primary.main }} />,
+      icon: <FlightTakeoff sx={{ fontSize: 40, color: 'var(--color-primary)' }} aria-hidden />,
       title: 'Viajes Personalizados',
-      description: 'Descubre destinos únicos adaptados a tus preferencias y presupuesto.',
+      description: 'Descubre destinos y rutas adaptadas a tus intereses, tiempo y presupuesto.',
     },
     {
-      icon: <Explore sx={{ fontSize: 40, color: theme.palette.primary.main }} />,
+      icon: <Explore sx={{ fontSize: 40, color: 'var(--color-primary)' }} aria-hidden />,
       title: 'Explora el Mundo',
-      description: 'Accede a guías detalladas y recomendaciones de expertos locales.',
+      description: 'Accede a guías prácticas, mapas y recomendaciones de viajeros locales.',
     },
     {
-      icon: <Group sx={{ fontSize: 40, color: theme.palette.primary.main }} />,
+      icon: <Group sx={{ fontSize: 40, color: 'var(--color-primary)' }} aria-hidden />,
       title: 'Conecta con Viajeros',
-      description: 'Únete a una comunidad de aventureros y comparte experiencias.',
+      description: 'Únete a una comunidad activa para compartir consejos y experiencias.',
     },
   ];
 
   return (
-    <Box sx={{ flexGrow: 1, minHeight: '100vh', backgroundColor: theme.palette.background.default }}>
-      {/* Navbar */}
-      <AppBar position="static" color="primary">
-        <Toolbar>
-          <Box sx={{ display: 'flex', alignItems: 'center', flexGrow: 1 }}>
-            <img
-              src="/logo.png"
-              alt="JoinTravel Logo"
-              style={{ height: '40px', marginRight: '12px' }}
-            />
-            <Typography variant="h6" component="div" sx={{ fontWeight: 'bold' }}>
-              JoinTravel
-            </Typography>
-          </Box>
-
-          {isMobile ? (
-            <IconButton
-              size="large"
-              edge="start"
-              color="inherit"
-              aria-label="menu"
-              sx={{ mr: 2 }}
-            >
-              <MenuIcon />
-            </IconButton>
-          ) : (
-            <Box sx={{ display: 'flex', gap: 2, alignItems: 'center' }}>
-              <Button color="inherit" component={Link} to="/">
-                Inicio
-              </Button>
-              <Button color="inherit" component={Link} to="/login">
-                Iniciar Sesión
-              </Button>
-              <Button color="inherit" component={Link} to="/register">
-                Registrarse
-              </Button>
-              <ThemeToggle />
-            </Box>
-          )}
-        </Toolbar>
-      </AppBar>
-
+    <Box component="div" sx={{ flexGrow: 1, backgroundColor: 'var(--color-bg)', containerType: 'inline-size' }}>
       {/* Hero Section */}
-      <Container maxWidth="lg" sx={{ py: 8 }}>
-        <Box sx={{ textAlign: 'center', mb: 8 }}>
-          <Typography variant="h2" component="h1" gutterBottom sx={{ fontWeight: 'bold' }}>
-            Descubre el Mundo con JoinTravel
-          </Typography>
-          <Typography variant="h5" component="p" sx={{ mb: 4, color: 'text.secondary' }}>
-            Conecta con viajeros, planifica aventuras únicas y crea recuerdos inolvidables.
-          </Typography>
-          <Box sx={{ display: 'flex', gap: 2, justifyContent: 'center', flexWrap: 'wrap' }}>
-            <Button
-              variant="contained"
-              size="large"
-              onClick={() => navigate('/register')}
-              sx={{ minWidth: 150 }}
-            >
-              Únete Ahora
-            </Button>
-            <Button
-              variant="outlined"
-              size="large"
-              onClick={() => navigate('/login')}
-              sx={{ minWidth: 150 }}
-            >
-              Iniciar Sesión
-            </Button>
-          </Box>
-        </Box>
+      <Box
+        component="section"
+        aria-labelledby="hero-title"
+        sx={{
+          py: { xs: 6, md: 10 },
+          background:
+            theme.palette.mode === 'light'
+              ? 'linear-gradient(180deg, rgba(24,154,180,0.08) 0%, rgba(0,0,0,0) 60%)'
+              : 'linear-gradient(180deg, rgba(24,154,180,0.15) 0%, rgba(0,0,0,0) 60%)',
+        }}
+      >
+        <Container maxWidth="lg">
+          <Box
+            sx={{
+              display: 'grid',
+              gap: { xs: 3, md: 6 },
+              gridTemplateColumns: { xs: '1fr', md: '1.1fr 0.9fr' },
+              alignItems: 'center',
+            }}
+          >
+            <Box>
+              <Typography
+                id="hero-title"
+                variant="h1"
+                component="h1"
+                gutterBottom
+                sx={{ fontWeight: 700, fontSize: 'var(--fs-h1)', lineHeight: 'var(--lh-tight)' }}
+              >
+                Explora el mundo con JoinTravel
+              </Typography>
+              <Typography
+                variant="h5"
+                component="p"
+                sx={{ mb: 3, color: 'text.secondary' }}
+              >
+                Planifica aventuras únicas, conecta con viajeros como tú y crea recuerdos
+                inolvidables con itinerarios fáciles y confiables.
+              </Typography>
+              <Stack
+                direction={{ xs: 'column', sm: 'row' }}
+                spacing={2}
+                sx={{ alignItems: { xs: 'stretch', sm: 'center' } }}
+              >
+                <Button
+                  variant="contained"
+                  size="large"
+                  onClick={() => { trackEvent('cta_click', { cta: 'hero_primary', destination: '/register' }); navigate('/register'); }}
+                  aria-label="Crear cuenta para comenzar a viajar"
+                  sx={{ minWidth: 180 }}
+                >
+                  Crear cuenta
+                </Button>
+                <Button
+                  variant="outlined"
+                  size="large"
+                  onClick={() => { trackEvent('cta_click', { cta: 'hero_secondary', destination: '/login' }); navigate('/login'); }}
+                  aria-label="Iniciar sesión"
+                  sx={{ minWidth: 180 }}
+                >
+                  Iniciar sesión
+                </Button>
+              </Stack>
+            </Box>
 
-        {/* Features Section */}
-        <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 4, justifyContent: 'center' }}>
-          {features.map((feature, index) => (
-            <Box key={index} sx={{ flex: '1 1 300px', maxWidth: '400px' }}>
-              <Card sx={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
-                <CardContent sx={{ flexGrow: 1, textAlign: 'center', p: 3 }}>
-                  <Box sx={{ mb: 2 }}>
+            {/* Optional visual panel (placeholder, can be replaced with an illustration) */}
+            <Paper
+              elevation={2}
+              aria-hidden
+              sx={{
+                height: { xs: 180, sm: 220, md: 260 },
+                borderRadius: 'var(--card-radius)',
+                backgroundColor: 'var(--color-surface)',
+                boxShadow: 'var(--card-shadow)',
+                display: 'grid',
+                placeItems: 'center',
+                color: 'var(--color-text-secondary)',
+              }}
+            >
+              <Typography variant="body2">
+                Espacio para imagen/ilustración optimizada
+              </Typography>
+            </Paper>
+          </Box>
+        </Container>
+      </Box>
+
+      {/* Features Section */}
+      <Box
+        component="section"
+        aria-labelledby="features-title"
+        sx={{ py: { xs: 5, md: 8 } }}
+      >
+        <Container maxWidth="lg">
+          <Typography
+            id="features-title"
+            variant="h2"
+            component="h2"
+            gutterBottom
+            sx={{ fontWeight: 700, fontSize: 'var(--fs-h2)' }}
+          >
+            Todo lo que necesitas para tu próximo viaje
+          </Typography>
+
+          <Box
+            role="list"
+            sx={{
+              mt: 2,
+              display: 'grid',
+              gap: { xs: 3, md: 4 },
+              gridTemplateColumns: { xs: '1fr', sm: 'repeat(2, 1fr)', md: 'repeat(3, 1fr)' },
+            }}
+          >
+            {features.map((feature, index) => (
+              <Card
+                key={index}
+                role="listitem"
+                elevation={1}
+                sx={{
+                  height: '100%',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  borderRadius: 'var(--card-radius)',
+                  boxShadow: 'var(--card-shadow)',
+                  transition: 'transform var(--motion-duration-base) var(--motion-ease-standard), box-shadow var(--motion-duration-base) var(--motion-ease-standard)',
+                  '&:hover': {
+                    transform: 'translateY(-2px)',
+                    boxShadow: 'var(--card-shadow-hover)',
+                  },
+                }}
+              >
+                <CardContent sx={{ flexGrow: 1, textAlign: 'left', p: 3 }}>
+                  <Box sx={{ mb: 2, display: 'flex', alignItems: 'center', gap: 1 }}>
                     {feature.icon}
+                    <Typography variant="h5" component="h3" sx={{ fontWeight: 700 }}>
+                      {feature.title}
+                    </Typography>
                   </Box>
-                  <Typography variant="h5" component="h2" gutterBottom sx={{ fontWeight: 'bold' }}>
-                    {feature.title}
-                  </Typography>
                   <Typography variant="body1" color="text.secondary">
                     {feature.description}
                   </Typography>
                 </CardContent>
               </Card>
-            </Box>
-          ))}
-        </Box>
+            ))}
+          </Box>
+        </Container>
+      </Box>
 
-        {/* Call to Action */}
-        <Paper
-          elevation={3}
-          sx={{
-            mt: 8,
-            p: 4,
-            textAlign: 'center',
-            backgroundColor: theme.palette.mode === 'light' ? theme.palette.secondary.main : theme.palette.primary.main,
-            color: 'white'
-          }}
-        >
-          <Typography variant="h4" component="h2" gutterBottom sx={{ fontWeight: 'bold' }}>
-            ¿Listo para tu próxima aventura?
-          </Typography>
-          <Typography variant="h6" component="p" sx={{ mb: 3 }}>
-            Únete a miles de viajeros que ya están explorando el mundo con JoinTravel.
-          </Typography>
-          <Button
-            variant="contained"
-            size="large"
-            onClick={() => navigate('/register')}
+      {/* Call to Action */}
+      <Box component="section" aria-labelledby="cta-title" sx={{ py: { xs: 5, md: 8 } }}>
+        <Container maxWidth="lg">
+          <Paper
+            elevation={3}
             sx={{
-              backgroundColor: 'white',
-              color: theme.palette.mode === 'light' ? theme.palette.secondary.main : theme.palette.primary.main,
-              '&:hover': {
-                backgroundColor: theme.palette.background.default,
-              }
+              p: { xs: 3, sm: 4 },
+              textAlign: 'center',
+              backgroundColor: 'var(--color-primary)',
+              color: 'var(--color-primary-contrast)',
+              borderRadius: 'var(--card-radius)',
             }}
           >
-            Comenzar mi viaje
-          </Button>
-        </Paper>
-      </Container>
+            <Typography id="cta-title" variant="h2" component="h2" gutterBottom sx={{ fontWeight: 700, fontSize: 'var(--fs-h3)' }}>
+              ¿Listo para tu próxima aventura?
+            </Typography>
+            <Typography variant="h6" component="p" sx={{ mb: 3, color: 'inherit', opacity: 0.95 }}>
+              Únete hoy y empieza a planificar con confianza junto a miles de viajeros.
+            </Typography>
+            <Button
+              variant="contained"
+              size="large"
+              onClick={() => { trackEvent('cta_click', { cta: 'cta_bottom', destination: '/register' }); navigate('/register'); }}
+              aria-label="Comenzar registro"
+              sx={{
+                minWidth: 200,
+                backgroundColor: 'var(--color-surface)',
+                color: 'var(--color-primary)',
+                '&:hover': {
+                  backgroundColor: 'var(--color-bg)',
+                },
+              }}
+            >
+              Comenzar gratis
+            </Button>
+          </Paper>
+        </Container>
+      </Box>
     </Box>
   );
 };

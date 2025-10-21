@@ -1,10 +1,28 @@
 <!doctype html>
-<html lang="en">
+<html lang="es">
   <head>
     <meta charset="UTF-8" />
     <link rel="icon" type="image/svg+xml" href="/vite.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>JoinTravel</title>
+
+    <title>JoinTravel — Explora el mundo, conecta y viaja mejor</title>
+    <meta name="description" content="JoinTravel: planifica viajes personalizados, descubre guías auténticas y conecta con una comunidad de viajeros. Empieza gratis." />
+    <meta name="robots" content="index,follow" />
+    <link rel="canonical" href="/" />
+
+    <!-- Open Graph -->
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="JoinTravel" />
+    <meta property="og:title" content="JoinTravel — Explora el mundo, conecta y viaja mejor" />
+    <meta property="og:description" content="JoinTravel: planifica viajes personalizados, descubre guías auténticas y conecta con una comunidad de viajeros." />
+    <meta property="og:url" content="/" />
+    <meta property="og:image" content="/logo.png" />
+
+    <!-- Twitter -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="JoinTravel — Explora el mundo, conecta y viaja mejor" />
+    <meta name="twitter:description" content="Planifica viajes personalizados y conecta con viajeros." />
+    <meta name="twitter:image" content="/logo.png" />
 
     <!-- Inter Font -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -18,14 +36,43 @@
     <link rel="manifest" href="/site.webmanifest">
     <link rel="mask-icon" href="/safari-pinned-tab.svg" color="#05445e">
     <meta name="msapplication-TileColor" content="#05445e">
-    <meta name="theme-color" content="#d4f1f4">
+    <meta name="theme-color" content="#f3f7fb">
 
     <!-- Android Chrome Icons -->
     <link rel="icon" type="image/png" sizes="192x192" href="/android-chrome-192x192.png">
     <link rel="icon" type="image/png" sizes="512x512" href="/android-chrome-512x512.png">
+
+    <!-- Preload critical image to reduce CLS -->
+    <link rel="preload" as="image" href="/logo.png">
+
+    <!-- Structured Data -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "Organization",
+      "name": "JoinTravel",
+      "url": "https://jointravel.example/",
+      "logo": "https://jointravel.example/logo.png",
+      "sameAs": []
+    }
+    </script>
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "WebSite",
+      "name": "JoinTravel",
+      "url": "https://jointravel.example/",
+      "potentialAction": {
+        "@type": "SearchAction",
+        "target": "https://jointravel.example/search?q={search_term_string}",
+        "query-input": "required name=search_term_string"
+      }
+    }
+    </script>
   </head>
   <body>
     <div id="root"></div>
+    <noscript>Esta aplicación requiere JavaScript para funcionar correctamente.</noscript>
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>
