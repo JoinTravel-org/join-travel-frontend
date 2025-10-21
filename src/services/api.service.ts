@@ -100,6 +100,30 @@ class ApiService {
   }
 
   /**
+   * Agrega un nuevo lugar
+   * @param place - Información del lugar
+   * @returns Promise con la respuesta del servidor
+   */
+  async addPlace(place: { name: string; address: string; latitude: number; longitude: number }) {
+    const response = await this.api.post("/places", place);
+    return response.data;
+  }
+
+  /**
+   * Verifica si un lugar ya existe por nombre y coordenadas
+   * @param name - Nombre del lugar
+   * @param latitude - Latitud
+   * @param longitude - Longitud
+   * @returns Promise con la respuesta del servidor
+   */
+  async checkPlaceExists(name: string, latitude: number, longitude: number) {
+    const response = await this.api.get("/places/check", {
+      params: { name, latitude, longitude }
+    });
+    return response.data;
+  }
+
+  /**
    * Obtiene la instancia de axios para peticiones personalizadas
    * @returns Instancia de axios
    */

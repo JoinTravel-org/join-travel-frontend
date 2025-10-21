@@ -6,9 +6,21 @@ export default defineConfig({
   plugins: [react()],
   server: {
     host: "0.0.0.0", // Permite conexiones externas en Docker
-    port: 80,
+    port: 3060,
     watch: {
       usePolling: true, // Necesario para hot reload en Docker
     },
   },
+  optimizeDeps: {
+    include: ['@googlemaps/react-wrapper', '@googlemaps/js-api-loader']
+  },
+  build: {
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          'google-maps': ['@googlemaps/react-wrapper', '@googlemaps/js-api-loader']
+        }
+      }
+    }
+  }
 });
