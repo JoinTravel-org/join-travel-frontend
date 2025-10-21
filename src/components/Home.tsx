@@ -276,7 +276,7 @@ const Home: React.FC = () => {
                   <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                     <Rating value={place.rating || 0} readOnly size="small" />
                     <Typography variant="body2" color="text.secondary">
-                      ({(place.rating || 0).toFixed(1)})
+                      ({typeof place.rating === 'number' ? place.rating.toFixed(1) : '0.0'})
                     </Typography>
                   </Box>
                 </CardContent>
