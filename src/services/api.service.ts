@@ -18,10 +18,14 @@ class ApiService {
       timeout: 30000, // 30 segundos para permitir el envío de email
     });
 
-    // Request interceptor to log outgoing API calls
+    // Request interceptor to log outgoing API calls and add auth token
     this.api.interceptors.request.use(
       (config) => {
         Logger.getInstance().info(`API Request: ${config.method?.toUpperCase()} ${config.baseURL} ${config.url}`);
+        const token = localStorage.getItem('accessToken');
+        if (token) {
+          config.headers.Authorization = `Bearer ${token}`;
+        }
         return config;
       },
       (error) => {
@@ -44,11 +48,17 @@ class ApiService {
         } else if (error.request) {
           // La petición fue hecha pero no hubo respuesta
           Logger.getInstance().error("API Request failed: No response from server", error.request);
-          throw {
-            success: false,
-            message:
-              "No se pudo conectar con el servidor. Verifica tu conexión.",
-          };
+          if (error.code === 'ECONNABORTED') {
+            throw {
+              success: false,
+              message: "Tiempo de espera agotado.",
+            };
+          } else {
+            throw {
+              success: false,
+              message: "No se pudo conectar con el servidor. Verifica tu conexión.",
+            };
+          }
         } else {
           // Algo pasó al configurar la petición
           Logger.getInstance().error("API Request setup error", error.message);
@@ -96,6 +106,15 @@ class ApiService {
       email,
       password,
     });
+    return response.data;
+  }
+
+  /**
+   * Cierra sesión de un usuario
+   * @returns Promise con la respuesta del servidor
+   */
+  async logout() {
+    const response = await this.api.post("/auth/logout");
     return response.data;
   }
 

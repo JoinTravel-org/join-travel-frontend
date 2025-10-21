@@ -9,11 +9,16 @@ import {
   Link,
   InputAdornment,
   IconButton,
+  Snackbar,
+  Slide,
+  Backdrop,
+  CircularProgress,
 } from '@mui/material';
 import { Email, Lock, Visibility, VisibilityOff } from '@mui/icons-material';
 import { useNavigate } from 'react-router-dom';
 import authService from '../services/auth.service';
 import { getErrorMessage } from '../utils/validators';
+import { useAuth } from '../contexts/AuthContext';
 
 interface LoginProps {
   onSwitchToRegister: () => void;
@@ -21,6 +26,7 @@ interface LoginProps {
 
 const Login: React.FC<LoginProps> = ({ onSwitchToRegister }) => {
   const navigate = useNavigate();
+  const auth = useAuth();
 
   // Document title for SEO/UX
   useEffect(() => {
@@ -38,6 +44,9 @@ const Login: React.FC<LoginProps> = ({ onSwitchToRegister }) => {
 
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+  const [successMessage, setSuccessMessage] = useState('');
+  const [snackbarOpen, setSnackbarOpen] = useState(false);
+  const [isRedirecting, setIsRedirecting] = useState(false);
 
   // Extra UX from feature branch: disable button until inputs present and inline alerts
   const [buttonDisabled, setButtonDisabled] = useState(false);
@@ -95,8 +104,22 @@ const Login: React.FC<LoginProps> = ({ onSwitchToRegister }) => {
       const response = await authService.login({ email: trimmedEmail, password: trimmedPassword });
 
       if (response.success) {
-        // Redirect to home on successful login
-        navigate('/');
+        // Use user data if available, otherwise create basic user object
+        const user = response.data?.user || {
+          id: 'temp-id',
+          email: trimmedEmail,
+          isEmailConfirmed: true,
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString(),
+        };
+        auth.login(user, response.data!.accessToken, response.data!.refreshToken);
+        setSuccessMessage('Inicio de sesión exitoso.');
+        setSnackbarOpen(true);
+        setIsRedirecting(true);
+        // Redirect after a short delay to show the message
+        setTimeout(() => {
+          navigate('/');
+        }, 1500);
       } else {
         setError(response.message || 'Error al iniciar sesión. Inténtalo nuevamente.');
       }
@@ -108,17 +131,18 @@ const Login: React.FC<LoginProps> = ({ onSwitchToRegister }) => {
   };
 
   return (
-    <Paper
-      elevation={3}
-      sx={{
-        p: 4,
-        maxWidth: 420,
-        mx: 'auto',
-        mt: 8,
-        backgroundColor: 'var(--color-surface)',
-        color: 'var(--color-text)',
-      }}
-    >
+    <>
+      <Paper
+        elevation={3}
+        sx={{
+          p: 4,
+          maxWidth: 420,
+          mx: 'auto',
+          mt: 8,
+          backgroundColor: 'var(--color-surface)',
+          color: 'var(--color-text)',
+        }}
+      >
       <Typography variant="h4" component="h1" gutterBottom align="center" sx={{ fontWeight: 700 }}>
         Iniciar sesión
       </Typography>
@@ -240,6 +264,27 @@ const Login: React.FC<LoginProps> = ({ onSwitchToRegister }) => {
         </Typography>
       </Box>
     </Paper>
+
+    <Snackbar
+      open={snackbarOpen}
+      autoHideDuration={4000}
+      onClose={() => setSnackbarOpen(false)}
+      anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
+      TransitionComponent={(props) => <Slide {...props} direction="up" />}
+      transitionDuration={500}
+    >
+      <Alert onClose={() => setSnackbarOpen(false)} severity="success" sx={{ width: '100%' }}>
+        {successMessage}
+      </Alert>
+    </Snackbar>
+
+    <Backdrop
+      sx={{ color: '#fff', zIndex: (theme) => theme.zIndex.drawer + 1 }}
+      open={isRedirecting}
+    >
+      <CircularProgress color="inherit" />
+    </Backdrop>
+    </>
   );
 };
 
