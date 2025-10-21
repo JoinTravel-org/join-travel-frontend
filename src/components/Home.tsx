@@ -265,7 +265,7 @@ const Home: React.FC = () => {
       <Box
         component="section"
         aria-labelledby="features-title"
-        sx={{ py: { xs: 5, md: 8 } }}
+        sx={{ py: { xs: 3, md: 5 } }}
       >
         <Container maxWidth="lg">
           <Typography
@@ -335,7 +335,7 @@ const Home: React.FC = () => {
       </Box>
 
       {/* Call to Action */}
-      <Box component="section" aria-labelledby="cta-title" sx={{ py: { xs: 5, md: 8 } }}>
+      <Box component="section" aria-labelledby="cta-title" sx={{ py: { xs: 3, md: 5 } }}>
         <Container maxWidth="lg">
           <Paper
             elevation={3}
