@@ -14,10 +14,10 @@ import {
 } from '@mui/material';
 import { useTheme } from '../hooks/useTheme';
 import {
-  FlightTakeoff,
   Explore,
   Group,
   AddLocation,
+  Star,
 } from '@mui/icons-material';
 import { useNavigate } from 'react-router-dom';
 import { trackEvent } from '../utils/analytics';
@@ -86,9 +86,9 @@ const Home: React.FC = () => {
 
   const features = [
     {
-      icon: <FlightTakeoff sx={{ fontSize: 40, color: 'var(--color-primary)' }} aria-hidden />,
-      title: 'Viajes Personalizados',
-      description: 'Descubre destinos y rutas adaptadas a tus intereses, tiempo y presupuesto.',
+      icon: <Star sx={{ fontSize: 40, color: 'var(--color-primary)' }} aria-hidden />,
+      title: 'Reseñas y Comentarios',
+      description: 'Lee opiniones de otros viajeros y comparte tus experiencias para guiar a la comunidad.',
     },
     {
       icon: <Explore sx={{ fontSize: 40, color: 'var(--color-primary)' }} aria-hidden />,
@@ -124,7 +124,7 @@ const Home: React.FC = () => {
         component="section"
         aria-labelledby="hero-title"
         sx={{
-          py: { xs: 6, md: 10 },
+          py: { xs: 4, md: 6 },
           background:
             theme.palette.mode === 'light'
               ? 'linear-gradient(180deg, rgba(24,154,180,0.08) 0%, rgba(0,0,0,0) 60%)'
@@ -132,76 +132,39 @@ const Home: React.FC = () => {
         }}
       >
         <Container maxWidth="lg">
-          <Box
-            sx={{
-              display: 'grid',
-              gap: { xs: 3, md: 6 },
-              gridTemplateColumns: { xs: '1fr', md: '1.1fr 0.9fr' },
-              alignItems: 'center',
-            }}
-          >
-            <Box>
-              <Typography
-                id="hero-title"
-                variant="h1"
-                component="h1"
-                gutterBottom
-                sx={{ fontWeight: 700, fontSize: 'var(--fs-h1)', lineHeight: 'var(--lh-tight)' }}
-              >
-                Explora el mundo con JoinTravel
-              </Typography>
-              <Typography
-                variant="h5"
-                component="p"
-                sx={{ mb: 3, color: 'text.secondary' }}
-              >
-                Planifica aventuras únicas, conecta con viajeros como tú y crea recuerdos
-                inolvidables con itinerarios fáciles y confiables.
-              </Typography>
-              <Stack
-                direction={{ xs: 'column', sm: 'row' }}
-                spacing={2}
-                sx={{ alignItems: { xs: 'stretch', sm: 'center' } }}
-              >
-                <Button
-                  variant="contained"
-                  size="large"
-                  onClick={() => { trackEvent('cta_click', { cta: 'hero_primary', destination: '/register' }); navigate('/register'); }}
-                  aria-label="Crear cuenta para comenzar a viajar"
-                  sx={{ minWidth: 180 }}
-                >
-                  Crear cuenta
-                </Button>
-                <Button
-                  variant="outlined"
-                  size="large"
-                  onClick={() => { trackEvent('cta_click', { cta: 'hero_secondary', destination: '/login' }); navigate('/login'); }}
-                  aria-label="Iniciar sesión"
-                  sx={{ minWidth: 180 }}
-                >
-                  Iniciar sesión
-                </Button>
-              </Stack>
-            </Box>
-
-            {/* Optional visual panel (placeholder, can be replaced with an illustration) */}
-            <Paper
-              elevation={2}
-              aria-hidden
-              sx={{
-                height: { xs: 180, sm: 220, md: 260 },
-                borderRadius: 'var(--card-radius)',
-                backgroundColor: 'var(--color-surface)',
-                boxShadow: 'var(--card-shadow)',
-                display: 'grid',
-                placeItems: 'center',
-                color: 'var(--color-text-secondary)',
-              }}
+          <Box sx={{ textAlign: 'center' }}>
+            <Typography
+              id="hero-title"
+              variant="h1"
+              component="h1"
+              gutterBottom
+              sx={{ fontWeight: 700, fontSize: 'var(--fs-h1)', lineHeight: 'var(--lh-tight)' }}
             >
-              <Typography variant="body2">
-                Espacio para imagen/ilustración optimizada
-              </Typography>
-            </Paper>
+              Explora el mundo con JoinTravel
+            </Typography>
+            <Typography
+              variant="h5"
+              component="p"
+              sx={{ mb: 3, color: 'text.secondary' }}
+            >
+              Planifica aventuras únicas, conecta con viajeros como tú y crea recuerdos
+              inolvidables con itinerarios fáciles y confiables.
+            </Typography>
+            <Stack
+              direction={{ xs: 'column', sm: 'row' }}
+              spacing={2}
+              sx={{ alignItems: { xs: 'stretch', sm: 'center' }, justifyContent: 'center' }}
+            >
+              <Button
+                variant="contained"
+                size="large"
+                onClick={() => { trackEvent('cta_click', { cta: 'hero_primary', destination: '/register' }); navigate('/register'); }}
+                aria-label="Crear cuenta para comenzar a viajar"
+                sx={{ minWidth: 180 }}
+              >
+                Comenzar gratis
+              </Button>
+            </Stack>
           </Box>
         </Container>
       </Box>
