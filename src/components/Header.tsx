@@ -153,24 +153,20 @@ const Header: React.FC = () => {
         }}
       >
         <Box sx={{ display: "flex", alignItems: "center", flexGrow: 1 }}>
-          <img
-            src="/logo.png"
-            alt="JoinTravel"
-            width={36}
-            height={36}
-            decoding="async"
-            loading="eager"
-            fetchPriority="high"
-            style={{ display: "block", marginRight: 12 }}
-          />
-          <Typography
-            variant="h6"
+          <Box
             component={RouterLink}
             to="/"
             sx={{
-              fontWeight: 700,
-              color: "inherit",
+              display: "flex",
+              alignItems: "center",
               textDecoration: "none",
+              color: "inherit",
+              opacity: 1,
+              transition: "opacity 0.2s ease",
+              "&:hover": {
+                opacity: 0.7,
+                color: "inherit",
+              },
               ":focus-visible": {
                 outline: "none",
                 boxShadow: "0 0 0 3px var(--focus-ring-color)",
@@ -178,8 +174,26 @@ const Header: React.FC = () => {
               },
             }}
           >
-            JoinTravel
-          </Typography>
+            <img
+              src="/logo.png"
+              alt="JoinTravel"
+              width={36}
+              height={36}
+              decoding="async"
+              loading="eager"
+              fetchPriority="high"
+              style={{ display: "block", marginRight: 12 }}
+            />
+            <Typography
+              variant="h6"
+              sx={{
+                fontWeight: 700,
+                color: "inherit",
+              }}
+            >
+              JoinTravel
+            </Typography>
+          </Box>
         </Box>
         
 
