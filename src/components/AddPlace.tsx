@@ -120,6 +120,26 @@ const AddPlace: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
+  const [apiKey, setApiKey] = useState<string>('');
+
+  // Fetch API key from backend instead of environment
+  React.useEffect(() => {
+    const fetchApiKey = async () => {
+      try {
+        const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/maps/key`);
+        if (response.ok) {
+          const data = await response.json();
+          setApiKey(data.apiKey);
+        } else {
+          setError('No se pudo cargar la configuración de mapas');
+        }
+      } catch {
+        setError('Error al conectar con el servidor');
+      }
+    };
+
+    fetchApiKey();
+  }, []);
 
   const handlePlaceSelect = (place: Place) => {
     setSelectedPlace(place);
@@ -180,11 +200,17 @@ const AddPlace: React.FC = () => {
         </Typography>
 
         <Box sx={{ height: 400, position: 'relative', mb: 3 }}>
-          <Wrapper
-            apiKey={import.meta.env.VITE_GOOGLE_MAPS_API_KEY}
-            libraries={['places']}
-            render={renderMap}
-          />
+          {apiKey ? (
+            <Wrapper
+              apiKey={apiKey}
+              libraries={['places']}
+              render={renderMap}
+            />
+          ) : (
+            <Box sx={{ height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+              <CircularProgress />
+            </Box>
+          )}
         </Box>
 
         {selectedPlace && (
