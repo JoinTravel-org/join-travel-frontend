@@ -18,6 +18,7 @@ import {
 } from '@mui/icons-material';
 import { useNavigate } from 'react-router-dom';
 import { trackEvent } from '../utils/analytics';
+import { useAuth } from '../hooks/useAuth';
 
 /**
  * Home
@@ -29,6 +30,7 @@ import { trackEvent } from '../utils/analytics';
 const Home: React.FC = () => {
   const { theme } = useTheme();
   const navigate = useNavigate();
+  const auth = useAuth();
 
   React.useEffect(() => {
     document.title = 'JoinTravel — Explora el mundo, conecta y viaja mejor';
@@ -56,7 +58,13 @@ const Home: React.FC = () => {
       description: 'Enriquece nuestra base de datos agregando nuevos lugares desde Google Maps.',
       action: {
         text: 'Agregar Lugar',
-        onClick: () => navigate('/add-place'),
+        onClick: () => {
+          if (auth.isAuthenticated) {
+            navigate('/add-place');
+          } else {
+            navigate('/login');
+          }
+        },
       },
     },
   ];

@@ -1,4 +1,4 @@
-import React, { useState, useRef, useCallback } from 'react';
+import React, { useState, useRef, useCallback, useEffect } from 'react';
 import {
   Box,
   Button,
@@ -14,6 +14,7 @@ import { Wrapper, Status } from '@googlemaps/react-wrapper';
 import { useNavigate } from 'react-router-dom';
 import { trackEvent } from '../utils/analytics';
 import apiService from '../services/api.service';
+import { useAuth } from '../hooks/useAuth';
 
 interface Place {
   name: string;
@@ -116,6 +117,19 @@ const MapComponent: React.FC<{
 
 const AddPlace: React.FC = () => {
   const navigate = useNavigate();
+  const auth = useAuth();
+  const hasCheckedAuth = React.useRef(false);
+
+  useEffect(() => {
+    if (!hasCheckedAuth.current) {
+      hasCheckedAuth.current = true;
+      if (!auth.isAuthenticated) {
+        navigate('/login');
+      }
+    }
+  }, [auth.isAuthenticated, navigate]);
+
+  // ... resto del componente
   const [selectedPlace, setSelectedPlace] = useState<Place | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);

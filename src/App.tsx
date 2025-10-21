@@ -19,9 +19,15 @@ function AnalyticsListener() {
   useEffect(() => {
     initAnalytics();
     trackPageview();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+     
   }, [location.pathname]);
   return null;
+}
+
+function ConditionalFooter() {
+  const location = useLocation();
+  const hideFooterRoutes = ['/login', '/register'];
+  return hideFooterRoutes.includes(location.pathname) ? null : <Footer />;
 }
 
 function App() {
@@ -50,7 +56,7 @@ function App() {
               </Routes>
             </Suspense>
           </main>
-          <Footer />
+          <ConditionalFooter />
         </Router>
       </AuthProvider>
     </AppThemeProvider>

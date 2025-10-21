@@ -18,7 +18,7 @@ import { Email, Lock, Visibility, VisibilityOff } from '@mui/icons-material';
 import { useNavigate } from 'react-router-dom';
 import authService from '../services/auth.service';
 import { getErrorMessage } from '../utils/validators';
-import { useAuth } from '../contexts/AuthContext';
+import { useAuth } from '../hooks/useAuth';
 
 interface LoginProps {
   onSwitchToRegister: () => void;

@@ -17,12 +17,14 @@ import {
   Slide,
   Backdrop,
   CircularProgress,
+  Menu,
+  MenuItem,
 } from "@mui/material";
-import { Menu as MenuIcon, Close as CloseIcon, Person as PersonIcon, Logout as LogoutIcon } from "@mui/icons-material";
-import { Link as RouterLink, useLocation } from "react-router-dom";
+import { Menu as MenuIcon, Close as CloseIcon, Person as PersonIcon } from "@mui/icons-material";
+import { Link as RouterLink, useLocation, useNavigate } from "react-router-dom";
 import { useTheme as useMuiTheme } from "@mui/material/styles";
 import ThemeToggle from "./ThemeToggle";
-import { useAuth } from "../contexts/AuthContext";
+import { useAuth } from "../hooks/useAuth";
 
 /**
  * Accessible, responsive site header:
@@ -35,10 +37,12 @@ const Header: React.FC = () => {
   const isMobile = useMediaQuery(muiTheme.breakpoints.down("md"));
   const [open, setOpen] = React.useState(false);
   const location = useLocation();
+  const navigate = useNavigate();
   const auth = useAuth();
 
   const [logoutSnackbarOpen, setLogoutSnackbarOpen] = React.useState(false);
   const [isLoggingOut, setIsLoggingOut] = React.useState(false);
+  const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
 
   const navId = "primary-navigation";
 
@@ -58,6 +62,25 @@ const Header: React.FC = () => {
     }
   };
 
+  const handleProfileMenuOpen = (event: React.MouseEvent<HTMLElement>) => {
+    setAnchorEl(event.currentTarget);
+  };
+
+  const handleProfileMenuClose = () => {
+    setAnchorEl(null);
+  };
+
+  const handleProfileClick = () => {
+    // Por ahora no hace nada
+    handleProfileMenuClose();
+  };
+
+  const handleLogoutClick = async () => {
+    handleProfileMenuClose();
+    await handleLogout();
+    navigate('/');
+  };
+
   const NavItems = (
     <>
       <Button
@@ -68,24 +91,23 @@ const Header: React.FC = () => {
       >
         Inicio
       </Button>
+      <Button
+        color="inherit"
+        component={RouterLink}
+        to="/add-place"
+        aria-current={location.pathname === "/add-place" ? "page" : undefined}
+      >
+        Agregar Lugar
+      </Button>
       {auth.isAuthenticated ? (
         <>
           <IconButton
             color="inherit"
-            component={RouterLink}
-            to="/profile"
-            aria-label="Mi perfil"
+            onClick={handleProfileMenuOpen}
+            aria-label="Perfil"
             sx={{ ml: 1 }}
           >
             <PersonIcon />
-          </IconButton>
-          <IconButton
-            color="inherit"
-            onClick={handleLogout}
-            aria-label="Cerrar sesión"
-            sx={{ ml: 1 }}
-          >
-            <LogoutIcon />
           </IconButton>
         </>
       ) : (
@@ -106,14 +128,6 @@ const Header: React.FC = () => {
           >
             Registrarse
           </Button>
-          <Button
-        color="inherit"
-        component={RouterLink}
-        to="/add-place"
-        aria-current={location.pathname === "/add-place" ? "page" : undefined}
-      >
-        Agregar Lugar
-      </Button>
         </>
       )}
       <ThemeToggle />
@@ -167,6 +181,7 @@ const Header: React.FC = () => {
             JoinTravel
           </Typography>
         </Box>
+        
 
         {/* Desktop nav */}
         {!isMobile && (
@@ -265,6 +280,7 @@ const Header: React.FC = () => {
                   onClick={() => {
                     handleLogout();
                     toggleDrawer(false)();
+                    navigate('/');
                   }}
                 >
                   <ListItemText primary="Cerrar sesión" />
@@ -305,6 +321,23 @@ const Header: React.FC = () => {
           </Box>
         </Box>
       </Drawer>
+
+      <Menu
+        anchorEl={anchorEl}
+        open={Boolean(anchorEl)}
+        onClose={handleProfileMenuClose}
+        anchorOrigin={{
+          vertical: 'bottom',
+          horizontal: 'center',
+        }}
+        transformOrigin={{
+          vertical: 'top',
+          horizontal: 'center',
+        }}
+      >
+        <MenuItem onClick={handleProfileClick}>Mi perfil</MenuItem>
+        <MenuItem onClick={handleLogoutClick}>Cerrar sesión</MenuItem>
+      </Menu>
 
       <Snackbar
         open={logoutSnackbarOpen}
