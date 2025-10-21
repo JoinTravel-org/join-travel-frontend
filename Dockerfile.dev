@@ -21,7 +21,7 @@ RUN pnpm install
 COPY . .
 
 # Exponer puerto de Vite
-EXPOSE 80
+EXPOSE 3060
 
 # El comando se ejecutará desde docker-compose
 CMD ["pnpm", "dev"]

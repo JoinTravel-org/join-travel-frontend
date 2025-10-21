@@ -62,6 +62,14 @@ const Header: React.FC = () => {
       >
         Registrarse
       </Button>
+      <Button
+        color="inherit"
+        component={RouterLink}
+        to="/add-place"
+        aria-current={location.pathname === "/add-place" ? "page" : undefined}
+      >
+        Agregar Lugar
+      </Button>
       <ThemeToggle />
     </>
   );
@@ -213,6 +221,14 @@ const Header: React.FC = () => {
               onClick={toggleDrawer(false)}
             >
               <ListItemText primary="Registrarse" />
+            </ListItemButton>
+            <ListItemButton
+              component={RouterLink}
+              to="/add-place"
+              selected={location.pathname === "/add-place"}
+              onClick={toggleDrawer(false)}
+            >
+              <ListItemText primary="Agregar Lugar" />
             </ListItemButton>
           </List>
           <Divider sx={{ my: 1 }} />

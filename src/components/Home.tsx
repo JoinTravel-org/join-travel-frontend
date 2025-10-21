@@ -14,6 +14,7 @@ import {
   FlightTakeoff,
   Explore,
   Group,
+  AddLocation,
 } from '@mui/icons-material';
 import { useNavigate } from 'react-router-dom';
 import { trackEvent } from '../utils/analytics';
@@ -48,6 +49,15 @@ const Home: React.FC = () => {
       icon: <Group sx={{ fontSize: 40, color: 'var(--color-primary)' }} aria-hidden />,
       title: 'Conecta con Viajeros',
       description: 'Únete a una comunidad activa para compartir consejos y experiencias.',
+    },
+    {
+      icon: <AddLocation sx={{ fontSize: 40, color: 'var(--color-primary)' }} aria-hidden />,
+      title: 'Agrega Lugares',
+      description: 'Enriquece nuestra base de datos agregando nuevos lugares desde Google Maps.',
+      action: {
+        text: 'Agregar Lugar',
+        onClick: () => navigate('/add-place'),
+      },
     },
   ];
 
@@ -163,7 +173,7 @@ const Home: React.FC = () => {
               mt: 2,
               display: 'grid',
               gap: { xs: 3, md: 4 },
-              gridTemplateColumns: { xs: '1fr', sm: 'repeat(2, 1fr)', md: 'repeat(3, 1fr)' },
+              gridTemplateColumns: { xs: '1fr', sm: 'repeat(2, 1fr)', md: 'repeat(4, 1fr)' },
             }}
           >
             {features.map((feature, index) => (
@@ -194,6 +204,18 @@ const Home: React.FC = () => {
                   <Typography variant="body1" color="text.secondary">
                     {feature.description}
                   </Typography>
+                  {feature.action && (
+                    <Box sx={{ mt: 2 }}>
+                      <Button
+                        variant="outlined"
+                        size="small"
+                        onClick={feature.action.onClick}
+                        sx={{ minWidth: 'auto' }}
+                      >
+                        {feature.action.text}
+                      </Button>
+                    </Box>
+                  )}
                 </CardContent>
               </Card>
             ))}
