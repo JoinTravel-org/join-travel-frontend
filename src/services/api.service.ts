@@ -26,10 +26,11 @@ class ApiService {
         if (token) {
           config.headers.Authorization = `Bearer ${token}`;
         }
+        Logger.getInstance().info(`API Request: ${config.method?.toUpperCase()} ${config.baseURL} ${config.url} - Data: ${JSON.stringify(config.data || {})}`);
         return config;
       },
       (error) => {
-        Logger.getInstance().error("API Request Error", error);
+        Logger.getInstance().error("API Request Error", JSON.stringify(error));
         return Promise.reject(error);
       }
     );
@@ -43,7 +44,7 @@ class ApiService {
       (error: AxiosError) => {
         if (error.response) {
           // El servidor respondió con un código de error
-          Logger.getInstance().error(`API Error Response: ${error.response.status} ${error.config?.method?.toUpperCase()} ${error.config?.baseURL} ${error.config?.url}`, error.response.data);
+          Logger.getInstance().error(`API Error Response: ${error.response.status} ${error.config?.method?.toUpperCase()} ${error.config?.baseURL} ${error.config?.url}`, JSON.stringify(error.response.data));
           throw error.response.data;
         } else if (error.request) {
           // La petición fue hecha pero no hubo respuesta
@@ -61,7 +62,7 @@ class ApiService {
           }
         } else {
           // Algo pasó al configurar la petición
-          Logger.getInstance().error("API Request setup error", error.message);
+          Logger.getInstance().error("API Request setup error", JSON.stringify(error.message));
           throw {
             success: false,
             message: "Error inesperado. Por favor intenta de nuevo.",
@@ -114,8 +115,15 @@ class ApiService {
    * @param place - Información del lugar
    * @returns Promise con la respuesta del servidor
    */
-  async addPlace(place: { name: string; address: string; latitude: number; longitude: number }) {
-    const response = await this.api.post("/places", place);
+  async addPlace(place: { name: string; address: string; latitude: number; longitude: number; image?: string }) {
+    const placeData = {
+      name: place.name,
+      address: place.address,
+      latitude: place.latitude,
+      longitude: place.longitude,
+      ...(place.image && { image: place.image })
+    };
+    const response = await this.api.post("/places", placeData);
     return response.data;
   }
 
@@ -140,6 +148,20 @@ class ApiService {
   async logout() {
     const response = await this.api.post("/auth/logout");
     return response.data;
+  }
+
+  /*
+   * Obtiene una lista de lugares con paginación
+   * @param page - Número de página
+   * @param limit - Número de lugares por página
+   * @returns Promise con la respuesta del servidor
+   */
+  async getPlaces(page: number = 1, limit: number = 20) {
+    const response = await this.api.get("/places", {
+      params: { page, limit }
+    });
+
+    return response.data
   }
 
   /**
