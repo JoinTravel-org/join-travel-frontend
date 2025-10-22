@@ -70,6 +70,7 @@ const PlacesSection: React.FC<Props> = ({ places, loading, page, totalPages, onP
               sx={{
                 height: '100%',
                 display: 'flex',
+                cursor: "pointer",
                 flexDirection: 'column',
                 border: '2px solid #000',
                 borderRadius: 2,
