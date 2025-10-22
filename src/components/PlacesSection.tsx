@@ -60,14 +60,14 @@ const PlacesSection: React.FC<Props> = ({ places, loading, page, totalPages, onP
                 height: '100%',
                 display: 'flex',
                 flexDirection: 'column',
-                border: '4px solid #000',
-                borderRadius: 0,
+                border: '2px solid #000',
+                borderRadius: 2,
                 backgroundColor: '#fff',
-                boxShadow: '8px 8px 0px 0px rgba(0,0,0,1)',
-                transition: 'all 0.2s ease',
+                boxShadow: '6px 6px 4px 0px rgba(0,0,0,0.7)',
+                transition: 'all 0.3s ease',
                 '&:hover': {
-                  transform: 'translate(-4px, -4px)',
-                  boxShadow: '12px 12px 0px 0px rgba(0,0,0,1)',
+                  transform: 'translate(-2px, -2px)',
+                  boxShadow: '8px 8px 6px 0px rgba(0,0,0,0.7)',
                   borderColor: '#333',
                 },
               }}
@@ -79,7 +79,7 @@ const PlacesSection: React.FC<Props> = ({ places, loading, page, totalPages, onP
                   backgroundSize: 'cover',
                   backgroundPosition: 'center',
                   backgroundColor: '#f0f0f0',
-                  borderBottom: '4px solid #000',
+                  borderBottom: '2px solid #000',
                 }}
                 onError={(e) => {
                   const target = e.target as HTMLDivElement;
@@ -91,11 +91,10 @@ const PlacesSection: React.FC<Props> = ({ places, loading, page, totalPages, onP
                   variant="h6"
                   component="h3"
                   sx={{
-                    fontWeight: 900,
+                    fontWeight: 700,
                     mb: 2,
                     fontSize: '1.25rem',
-                    textTransform: 'uppercase',
-                    letterSpacing: '0.05em',
+                    letterSpacing: '0.02em',
                     color: '#000'
                   }}
                 >
