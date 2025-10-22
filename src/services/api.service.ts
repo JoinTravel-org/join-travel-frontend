@@ -164,6 +164,12 @@ class ApiService {
     return response.data
   }
 
+  async getPlaceById(id: string) {
+    const response = await this.api.get(`/places/${id}`);
+    return response.data;
+  }
+
+
   /**
    * Obtiene la instancia de axios para peticiones personalizadas
    * @returns Instancia de axios

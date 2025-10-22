@@ -156,13 +156,6 @@ const Login: React.FC<LoginProps> = ({ onSwitchToRegister }) => {
         )}
       </Box>
 
-      {/* Back link kept from feature branch, styled with MUI */}
-      <Box sx={{ mb: 2, textAlign: 'left' }}>
-        <Button variant="text" size="small" onClick={() => navigate(-1)} sx={{ px: 0 }}>
-          ← Volver
-        </Button>
-      </Box>
-
       <Box component="form" onSubmit={handleSubmit} noValidate sx={{ mt: 1 }}>
         <TextField
           margin="normal"
