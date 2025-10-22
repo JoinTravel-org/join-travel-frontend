@@ -10,11 +10,20 @@ import {
   Pagination,
 } from '@mui/material';
 
+import { useNavigate } from 'react-router-dom';
+
 export interface Place {
-  id: string;
-  name: string;
-  image?: string;
-  rating: number;
+    id: string;
+    name: string;
+    address: string;
+    latitude: string;
+    longitude: string;
+    image?: string;
+    rating: number | null;
+    createdAt: string;
+    updatedAt: string;
+    description: string | null;
+    city: string | null;
 }
 
 interface Props {
@@ -26,6 +35,7 @@ interface Props {
 }
 
 const PlacesSection: React.FC<Props> = ({ places, loading, page, totalPages, onPageChange }) => {
+    const navigate = useNavigate();
   return (
     <Box
       id="places-section"
@@ -55,10 +65,12 @@ const PlacesSection: React.FC<Props> = ({ places, loading, page, totalPages, onP
           {places.map((place) => (
             <Card
               key={place.id}
+              onClick={() => navigate(`/place/${place.id}`)}
               elevation={0}
               sx={{
                 height: '100%',
                 display: 'flex',
+                cursor: "pointer",
                 flexDirection: 'column',
                 border: '2px solid #000',
                 borderRadius: 2,

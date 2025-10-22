@@ -13,6 +13,7 @@ import Login from "./components/Login";
 import Register from "./components/Register";
 import ConfirmEmail from "./components/ConfirmEmail";
 import AddPlace from "./components/AddPlace";
+import PlaceDetail from "./components/PlaceDetail";
 
 function AnalyticsListener() {
   const location = useLocation();
@@ -35,12 +36,20 @@ function App() {
     <AppThemeProvider>
       <AuthProvider>
         <CssBaseline />
-        <a className="skip-link" href="#main-content">Skip to content</a>
+        <a className="skip-link" href="#main-content">
+          Skip to content
+        </a>
         <Router>
           <AnalyticsListener />
           <Header />
           <main id="main-content">
-            <Suspense fallback={<div aria-busy="true" style={{padding: '1rem'}}>Cargando…</div>}>
+            <Suspense
+              fallback={
+                <div aria-busy="true" style={{ padding: "1rem" }}>
+                  Cargando…
+                </div>
+              }
+            >
               <Routes>
                 <Route path="/" element={<Home />} />
                 <Route
@@ -53,6 +62,7 @@ function App() {
                 />
                 <Route path="/confirm-email" element={<ConfirmEmail />} />
                 <Route path="/add-place" element={<AddPlace />} />
+                <Route path="/place/:id" element={<PlaceDetail />} />
               </Routes>
             </Suspense>
           </main>
