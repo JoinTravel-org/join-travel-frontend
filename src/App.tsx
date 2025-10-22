@@ -45,11 +45,11 @@ function App() {
                 <Route path="/" element={<Home />} />
                 <Route
                   path="/login"
-                  element={<Login onSwitchToRegister={() => {}} />}
+                  element={<Login onSwitchToRegister={() => window.location.href = '/register'} />}
                 />
                 <Route
                   path="/register"
-                  element={<Register onSwitchToLogin={() => {}} />}
+                  element={<Register onSwitchToLogin={() => window.location.href = '/login'} />}
                 />
                 <Route path="/confirm-email" element={<ConfirmEmail />} />
                 <Route path="/add-place" element={<AddPlace />} />
