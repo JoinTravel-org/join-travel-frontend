@@ -169,11 +169,23 @@ class ApiService {
     return response.data;
   }
 
+  /**
+   * Actualiza la descripción de un lugar
+   * @param id - ID del lugar
+   * @param description - Nueva descripción
+   * @returns Promise con la respuesta del servidor
+   */
+  async updatePlaceDescription(id: string, description: string) {
+    const response = await this.api.put(`/places/${id}/description`, {
+      description,
+    });
+    return response.data;
+  }
 
   /**
-   * Obtiene la instancia de axios para peticiones personalizadas
-   * @returns Instancia de axios
-   */
+    * Obtiene la instancia de axios para peticiones personalizadas
+    * @returns Instancia de axios
+    */
   getAxiosInstance() {
     return this.api;
   }
