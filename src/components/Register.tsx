@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { TextField, Button, Paper, Typography, Box, Alert, Link, FormControlLabel, Checkbox, InputAdornment, IconButton, List, ListItem, Dialog, DialogTitle, DialogContent, DialogActions } from "@mui/material";
 import { Email, Lock, Visibility, VisibilityOff } from "@mui/icons-material";
-import { useNavigate } from "react-router-dom";
 import authService from "../services/auth.service";
 import { isValidEmail, validatePassword, getErrorMessage } from "../utils/validators";
 
@@ -15,7 +14,6 @@ type PasswordValidation = {
 };
 
 const Register: React.FC<RegisterProps> = ({ onSwitchToLogin }) => {
-  const navigate = useNavigate();
 
   // Document title for SEO/UX
   useEffect(() => {
@@ -125,10 +123,6 @@ const Register: React.FC<RegisterProps> = ({ onSwitchToLogin }) => {
         termsAccepted: false,
       });
 
-      // Navigate after a short delay
-      setTimeout(() => {
-        navigate("/");
-      }, 3000);
     } catch (err) {
       const errorMessage = getErrorMessage(err);
       setError(errorMessage);
