@@ -21,12 +21,20 @@ class ApiService {
     // Request interceptor to log outgoing API calls and add auth token
     this.api.interceptors.request.use(
       (config) => {
-        Logger.getInstance().info(`API Request: ${config.method?.toUpperCase()} ${config.baseURL} ${config.url}`);
-        const token = localStorage.getItem('accessToken');
+        Logger.getInstance().info(
+          `API Request: ${config.method?.toUpperCase()} ${config.baseURL} ${
+            config.url
+          }`
+        );
+        const token = localStorage.getItem("accessToken");
         if (token) {
           config.headers.Authorization = `Bearer ${token}`;
         }
-        Logger.getInstance().info(`API Request: ${config.method?.toUpperCase()} ${config.baseURL} ${config.url} - Data: ${JSON.stringify(config.data || {})}`);
+        Logger.getInstance().info(
+          `API Request: ${config.method?.toUpperCase()} ${config.baseURL} ${
+            config.url
+          } - Data: ${JSON.stringify(config.data || {})}`
+        );
         return config;
       },
       (error) => {
@@ -38,34 +46,53 @@ class ApiService {
     // Interceptor para manejar errores globalmente
     this.api.interceptors.response.use(
       (response) => {
-        Logger.getInstance().info(`API Response: ${response.status} ${response.config.method?.toUpperCase()} ${response.config.baseURL} ${response.config.url}`);
+        Logger.getInstance().info(
+          `API Response: ${
+            response.status
+          } ${response.config.method?.toUpperCase()} ${
+            response.config.baseURL
+          } ${response.config.url}`
+        );
         return response;
       },
       (error: AxiosError) => {
         if (error.response) {
           // El servidor respondió con un código de error
-          Logger.getInstance().error(`API Error Response: ${error.response.status} ${error.config?.method?.toUpperCase()} ${error.config?.baseURL} ${error.config?.url}`, JSON.stringify(error.response.data));
+          Logger.getInstance().error(
+            `API Error Response: ${
+              error.response.status
+            } ${error.config?.method?.toUpperCase()} ${error.config?.baseURL} ${
+              error.config?.url
+            }`,
+            JSON.stringify(error.response.data)
+          );
           throw error.response.data;
         } else if (error.request) {
           // La petición fue hecha pero no hubo respuesta
-          Logger.getInstance().error("API Request failed: No response from server", error.request);
-          if (error.code === 'ECONNABORTED') {
+          Logger.getInstance().error(
+            "API Request failed: No response from server",
+            error.request
+          );
+          if (error.code === "ECONNABORTED") {
             throw {
               success: false,
-              message: "Tiempo de espera agotado.",
+              message: "Error al guardar la reseña",
             };
           } else {
             throw {
               success: false,
-              message: "No se pudo conectar con el servidor. Verifica tu conexión.",
+              message: "Error al guardar la reseña",
             };
           }
         } else {
           // Algo pasó al configurar la petición
-          Logger.getInstance().error("API Request setup error", JSON.stringify(error.message));
+          Logger.getInstance().error(
+            "API Request setup error",
+            JSON.stringify(error.message)
+          );
           throw {
             success: false,
-            message: "Error inesperado. Por favor intenta de nuevo.",
+            message: "Error al guardar la reseña",
           };
         }
       }
@@ -111,17 +138,23 @@ class ApiService {
   }
 
   /**
-  * Agrega un nuevo lugar
+   * Agrega un nuevo lugar
    * @param place - Información del lugar
    * @returns Promise con la respuesta del servidor
    */
-  async addPlace(place: { name: string; address: string; latitude: number; longitude: number; image?: string }) {
+  async addPlace(place: {
+    name: string;
+    address: string;
+    latitude: number;
+    longitude: number;
+    image?: string;
+  }) {
     const placeData = {
       name: place.name,
       address: place.address,
       latitude: place.latitude,
       longitude: place.longitude,
-      ...(place.image && { image: place.image })
+      ...(place.image && { image: place.image }),
     };
     const response = await this.api.post("/places", placeData);
     return response.data;
@@ -136,7 +169,7 @@ class ApiService {
    */
   async checkPlaceExists(name: string, latitude: number, longitude: number) {
     const response = await this.api.get("/places/check", {
-      params: { name, latitude, longitude }
+      params: { name, latitude, longitude },
     });
     return response.data;
   }
@@ -158,10 +191,10 @@ class ApiService {
    */
   async getPlaces(page: number = 1, limit: number = 20) {
     const response = await this.api.get("/places", {
-      params: { page, limit }
+      params: { page, limit },
     });
 
-    return response.data
+    return response.data;
   }
 
   async getPlaceById(id: string) {
@@ -183,9 +216,9 @@ class ApiService {
   }
 
   /**
-    * Obtiene la instancia de axios para peticiones personalizadas
-    * @returns Instancia de axios
-    */
+   * Obtiene la instancia de axios para peticiones personalizadas
+   * @returns Instancia de axios
+   */
   getAxiosInstance() {
     return this.api;
   }

@@ -1,4 +1,4 @@
-import React, { useState, useRef, useCallback, useEffect } from 'react';
+import React, { useState, useRef, useCallback, useEffect } from "react";
 import {
   Box,
   Button,
@@ -9,12 +9,12 @@ import {
   Alert,
   CircularProgress,
   Stack,
-} from '@mui/material';
-import { Wrapper, Status } from '@googlemaps/react-wrapper';
-import { useNavigate } from 'react-router-dom';
-import { trackEvent } from '../utils/analytics';
-import apiService from '../services/api.service';
-import { useAuth } from '../hooks/useAuth';
+} from "@mui/material";
+import { Wrapper, Status } from "@googlemaps/react-wrapper";
+import { useNavigate } from "react-router-dom";
+import { trackEvent } from "../utils/analytics";
+import apiService from "../services/api.service";
+import { useAuth } from "../hooks/useAuth";
 
 interface Place {
   name: string;
@@ -31,52 +31,58 @@ const MapComponent: React.FC<{
   const [map, setMap] = useState<google.maps.Map>();
   const [, setSearchBox] = useState<google.maps.places.SearchBox | undefined>();
 
-  const onMapLoad = useCallback((map: google.maps.Map) => {
-    setMap(map);
+  const onMapLoad = useCallback(
+    (map: google.maps.Map) => {
+      setMap(map);
 
-    // Create search box
-    const input = document.getElementById('pac-input') as HTMLInputElement;
-    const searchBox = new google.maps.places.SearchBox(input);
+      // Create search box
+      const input = document.getElementById("pac-input") as HTMLInputElement;
+      const searchBox = new google.maps.places.SearchBox(input);
 
-    map.controls[google.maps.ControlPosition.TOP_LEFT].push(input);
+      map.controls[google.maps.ControlPosition.TOP_LEFT].push(input);
 
-    // Bias the SearchBox results towards current map's viewport
-    map.addListener('bounds_changed', () => {
-      searchBox.setBounds(map.getBounds() as google.maps.LatLngBounds);
-    });
+      // Bias the SearchBox results towards current map's viewport
+      map.addListener("bounds_changed", () => {
+        searchBox.setBounds(map.getBounds() as google.maps.LatLngBounds);
+      });
 
-    // Set default location to Buenos Aires
-    const buenosAires = new google.maps.LatLng(-34.6037, -58.3816);
-    map.setCenter(buenosAires);
-    map.setZoom(12);
+      // Set default location to Buenos Aires
+      const buenosAires = new google.maps.LatLng(-34.6037, -58.3816);
+      map.setCenter(buenosAires);
+      map.setZoom(12);
 
-    // Listen for the event fired when the user selects a prediction
-    searchBox.addListener('places_changed', () => {
-      const places = searchBox.getPlaces();
+      // Listen for the event fired when the user selects a prediction
+      searchBox.addListener("places_changed", () => {
+        const places = searchBox.getPlaces();
 
-      if (places && places.length > 0) {
-        const place = places[0];
+        if (places && places.length > 0) {
+          const place = places[0];
 
-        if (place.geometry && place.geometry.location) {
-          const selectedPlace: Place = {
-            name: place.name || '',
-            address: place.formatted_address || '',
-            latitude: place.geometry.location.lat(),
-            longitude: place.geometry.location.lng(),
-            image: place.photos && place.photos.length > 0 ? place.photos[0].getUrl() : undefined,
-          };
+          if (place.geometry && place.geometry.location) {
+            const selectedPlace: Place = {
+              name: place.name || "",
+              address: place.formatted_address || "",
+              latitude: place.geometry.location.lat(),
+              longitude: place.geometry.location.lng(),
+              image:
+                place.photos && place.photos.length > 0
+                  ? place.photos[0].getUrl()
+                  : undefined,
+            };
 
-          onPlaceSelect(selectedPlace);
+            onPlaceSelect(selectedPlace);
 
-          // Center map on selected place
-          map.setCenter(place.geometry.location);
-          map.setZoom(15);
+            // Center map on selected place
+            map.setCenter(place.geometry.location);
+            map.setZoom(15);
+          }
         }
-      }
-    });
+      });
 
-    setSearchBox(searchBox);
-  }, [onPlaceSelect]);
+      setSearchBox(searchBox);
+    },
+    [onPlaceSelect]
+  );
 
   React.useEffect(() => {
     if (ref.current && !map) {
@@ -95,24 +101,24 @@ const MapComponent: React.FC<{
         type="text"
         placeholder="Buscar lugares..."
         style={{
-          boxSizing: 'border-box',
-          border: '1px solid transparent',
-          width: '240px',
-          height: '32px',
-          padding: '0 12px',
-          borderRadius: '3px',
-          boxShadow: '0 2px 6px rgba(0, 0, 0, 0.3)',
-          fontSize: '14px',
-          outline: 'none',
-          textOverflow: 'ellipses',
-          position: 'absolute',
-          left: '50%',
-          marginLeft: '-120px',
-          top: '10px',
+          boxSizing: "border-box",
+          border: "1px solid transparent",
+          width: "240px",
+          height: "32px",
+          padding: "0 12px",
+          borderRadius: "3px",
+          boxShadow: "0 2px 6px rgba(0, 0, 0, 0.3)",
+          fontSize: "14px",
+          outline: "none",
+          textOverflow: "ellipses",
+          position: "absolute",
+          left: "50%",
+          marginLeft: "-120px",
+          top: "10px",
           zIndex: 1000,
         }}
       />
-      <div ref={ref} style={{ height: '400px', width: '100%' }} />
+      <div ref={ref} style={{ height: "400px", width: "100%" }} />
     </>
   );
 };
@@ -126,7 +132,7 @@ const AddPlace: React.FC = () => {
     if (!hasCheckedAuth.current) {
       hasCheckedAuth.current = true;
       if (!auth.isAuthenticated) {
-        navigate('/login');
+        navigate("/login");
       }
     }
   }, [auth.isAuthenticated, navigate]);
@@ -136,21 +142,23 @@ const AddPlace: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
-  const [apiKey, setApiKey] = useState<string>('');
+  const [apiKey, setApiKey] = useState<string>("");
 
   // Fetch API key from backend instead of environment
   React.useEffect(() => {
     const fetchApiKey = async () => {
       try {
-        const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/maps/key`);
+        const response = await fetch(
+          `${import.meta.env.VITE_BACKEND_URL}/api/maps/key`
+        );
         if (response.ok) {
           const data = await response.json();
           setApiKey(data.apiKey);
         } else {
-          setError('No se pudo cargar la configuración de mapas');
+          setError("No se pudo cargar la configuración de mapas");
         }
       } catch {
-        setError('Error al conectar con el servidor');
+        setError("Error al conectar con el servidor");
       }
     };
 
@@ -172,7 +180,7 @@ const AddPlace: React.FC = () => {
       // Call API to add place
       await apiService.addPlace(selectedPlace);
       setSuccess(true);
-      trackEvent('place_added', { place_name: selectedPlace.name });
+      trackEvent("place_added", { place_name: selectedPlace.name });
 
       // Reset after success
       setTimeout(() => {
@@ -180,13 +188,14 @@ const AddPlace: React.FC = () => {
         setSelectedPlace(null);
       }, 3000);
     } catch (err: unknown) {
-      const errorMessage = err instanceof Error ? err.message : 'Error desconocido';
-      if (errorMessage.includes('duplicate')) {
-        setError('Este lugar ya está registrado.');
-      } else if (errorMessage.includes('external service')) {
-        setError('Servicio externo no disponible.');
+      const errorMessage =
+        err instanceof Error ? err.message : "Error desconocido";
+      if (errorMessage.includes("duplicate")) {
+        setError("Este lugar ya está registrado.");
+      } else if (errorMessage.includes("external service")) {
+        setError("Servicio externo no disponible.");
       } else {
-        setError('Error al agregar el lugar. Por favor intenta de nuevo.');
+        setError("Error al agregar el lugar. Por favor intenta de nuevo.");
       }
     } finally {
       setLoading(false);
@@ -215,15 +224,22 @@ const AddPlace: React.FC = () => {
           Busca y selecciona un lugar en Google Maps
         </Typography>
 
-        <Box sx={{ height: 400, position: 'relative', mb: 3 }}>
+        <Box sx={{ height: 400, position: "relative", mb: 3 }}>
           {apiKey ? (
             <Wrapper
               apiKey={apiKey}
-              libraries={['places']}
+              libraries={["places"]}
               render={renderMap}
             />
           ) : (
-            <Box sx={{ height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            <Box
+              sx={{
+                height: "100%",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+              }}
+            >
               <CircularProgress />
             </Box>
           )}
@@ -257,7 +273,10 @@ const AddPlace: React.FC = () => {
             />
             {selectedPlace.image && (
               <Box sx={{ mb: 2 }}>
-                <Typography variant="body2" sx={{ mb: 1, color: 'text.secondary' }}>
+                <Typography
+                  variant="body2"
+                  sx={{ mb: 1, color: "text.secondary" }}
+                >
                   Imagen del lugar:
                 </Typography>
                 <Box
@@ -265,17 +284,17 @@ const AddPlace: React.FC = () => {
                   src={selectedPlace.image}
                   alt={`Vista previa de ${selectedPlace.name}`}
                   sx={{
-                    width: '100%',
+                    width: "100%",
                     maxWidth: 300,
                     height: 200,
-                    objectFit: 'cover',
+                    objectFit: "cover",
                     borderRadius: 1,
-                    border: '1px solid',
-                    borderColor: 'divider',
+                    border: "1px solid",
+                    borderColor: "divider",
                   }}
                   onError={(e) => {
                     const target = e.target as HTMLImageElement;
-                    target.style.display = 'none';
+                    target.style.display = "none";
                   }}
                 />
               </Box>
@@ -302,12 +321,9 @@ const AddPlace: React.FC = () => {
             disabled={!selectedPlace || loading}
             sx={{ minWidth: 120 }}
           >
-            {loading ? <CircularProgress size={20} /> : 'Agregar Lugar'}
+            {loading ? <CircularProgress size={20} /> : "Agregar Lugar"}
           </Button>
-          <Button
-            variant="outlined"
-            onClick={() => navigate('/')}
-          >
+          <Button variant="outlined" onClick={() => navigate("/")}>
             Cancelar
           </Button>
         </Stack>

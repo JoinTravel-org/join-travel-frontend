@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect } from "react";
 import {
   Typography,
   Button,
@@ -8,19 +8,14 @@ import {
   Card,
   CardContent,
   Stack,
-} from '@mui/material';
-import { useTheme } from '../hooks/useTheme';
-import {
-  Explore,
-  Group,
-  AddLocation,
-  Star,
-} from '@mui/icons-material';
-import { useNavigate } from 'react-router-dom';
-import { trackEvent } from '../utils/analytics';
-import { useAuth } from '../hooks/useAuth';
-import api from '../services/api.service';
-import PlacesSection, { type Place } from './PlacesSection';
+} from "@mui/material";
+import { useTheme } from "../hooks/useTheme";
+import { Explore, Group, AddLocation, Star } from "@mui/icons-material";
+import { useNavigate } from "react-router-dom";
+import { trackEvent } from "../utils/analytics";
+import { useAuth } from "../hooks/useAuth";
+import api from "../services/api.service";
+import PlacesSection, { type Place } from "./PlacesSection";
 
 /**
  * Home
@@ -40,7 +35,7 @@ const Home: React.FC = () => {
   const [totalPages, setTotalPages] = useState(1);
 
   React.useEffect(() => {
-    document.title = 'JoinTravel — Explora el mundo, conecta y viaja mejor';
+    document.title = "JoinTravel — Explora el mundo, conecta y viaja mejor";
   }, []);
 
   const fetchPlaces = async (pageNum: number) => {
@@ -51,7 +46,7 @@ const Home: React.FC = () => {
       setPlaces(newPlaces);
       setTotalPages(Math.ceil(totalCount / 20));
     } catch (error) {
-      console.error('Error fetching places:', error);
+      console.error("Error fetching places:", error);
     } finally {
       setLoading(false);
     }
@@ -61,13 +56,16 @@ const Home: React.FC = () => {
     fetchPlaces(1);
   }, []);
 
-  const handlePageChange = (_event: React.ChangeEvent<unknown>, value: number) => {
+  const handlePageChange = (
+    _event: React.ChangeEvent<unknown>,
+    value: number
+  ) => {
     setPage(value);
     // Scroll to top of places section with smooth animation
     setTimeout(() => {
-      const placesSection = document.getElementById('places-section');
+      const placesSection = document.getElementById("places-section");
       if (placesSection) {
-        placesSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        placesSection.scrollIntoView({ behavior: "smooth", block: "start" });
       }
     }, 100); // Small delay to allow new content to render
   };
@@ -78,31 +76,55 @@ const Home: React.FC = () => {
 
   const features = [
     {
-      icon: <Star sx={{ fontSize: 40, color: 'var(--color-primary)' }} aria-hidden />,
-      title: 'Reseñas y Comentarios',
-      description: 'Lee opiniones de otros viajeros y comparte tus experiencias para guiar a la comunidad.',
+      icon: (
+        <Star
+          sx={{ fontSize: 40, color: "var(--color-primary)" }}
+          aria-hidden
+        />
+      ),
+      title: "Reseñas y Comentarios",
+      description:
+        "Lee opiniones de otros viajeros y comparte tus experiencias para guiar a la comunidad.",
     },
     {
-      icon: <Explore sx={{ fontSize: 40, color: 'var(--color-primary)' }} aria-hidden />,
-      title: 'Explora el Mundo',
-      description: 'Accede a guías prácticas, mapas y recomendaciones de viajeros locales.',
+      icon: (
+        <Explore
+          sx={{ fontSize: 40, color: "var(--color-primary)" }}
+          aria-hidden
+        />
+      ),
+      title: "Explora el Mundo",
+      description:
+        "Accede a guías prácticas, mapas y recomendaciones de viajeros locales.",
     },
     {
-      icon: <Group sx={{ fontSize: 40, color: 'var(--color-primary)' }} aria-hidden />,
-      title: 'Conecta con Viajeros',
-      description: 'Únete a una comunidad activa para compartir consejos y experiencias.',
+      icon: (
+        <Group
+          sx={{ fontSize: 40, color: "var(--color-primary)" }}
+          aria-hidden
+        />
+      ),
+      title: "Conecta con Viajeros",
+      description:
+        "Únete a una comunidad activa para compartir consejos y experiencias.",
     },
     {
-      icon: <AddLocation sx={{ fontSize: 40, color: 'var(--color-primary)' }} aria-hidden />,
-      title: 'Agrega Lugares',
-      description: 'Enriquece nuestra base de datos agregando nuevos lugares desde Google Maps.',
+      icon: (
+        <AddLocation
+          sx={{ fontSize: 40, color: "var(--color-primary)" }}
+          aria-hidden
+        />
+      ),
+      title: "Agrega Lugares",
+      description:
+        "Enriquece nuestra base de datos agregando nuevos lugares desde Google Maps.",
       action: {
-        text: 'Agregar Lugar',
+        text: "Agregar Lugar",
         onClick: () => {
           if (auth.isAuthenticated) {
-            navigate('/add-place');
+            navigate("/add-place");
           } else {
-            navigate('/login');
+            navigate("/login");
           }
         },
       },

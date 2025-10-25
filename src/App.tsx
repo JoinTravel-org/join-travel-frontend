@@ -1,5 +1,10 @@
 import CssBaseline from "@mui/material/CssBaseline";
-import { BrowserRouter as Router, Routes, Route, useLocation } from "react-router-dom";
+import {
+  BrowserRouter as Router,
+  Routes,
+  Route,
+  useLocation,
+} from "react-router-dom";
 import { Suspense, useEffect } from "react";
 import "./App.css";
 import AppThemeProvider from "./contexts/ThemeProvider";
@@ -20,14 +25,13 @@ function AnalyticsListener() {
   useEffect(() => {
     initAnalytics();
     trackPageview();
-     
   }, [location.pathname]);
   return null;
 }
 
 function ConditionalFooter() {
   const location = useLocation();
-  const hideFooterRoutes = ['/login', '/register'];
+  const hideFooterRoutes = ["/login", "/register"];
   return hideFooterRoutes.includes(location.pathname) ? null : <Footer />;
 }
 
@@ -54,11 +58,21 @@ function App() {
                 <Route path="/" element={<Home />} />
                 <Route
                   path="/login"
-                  element={<Login onSwitchToRegister={() => window.location.href = '/register'} />}
+                  element={
+                    <Login
+                      onSwitchToRegister={() =>
+                        (window.location.href = "/register")
+                      }
+                    />
+                  }
                 />
                 <Route
                   path="/register"
-                  element={<Register onSwitchToLogin={() => window.location.href = '/login'} />}
+                  element={
+                    <Register
+                      onSwitchToLogin={() => (window.location.href = "/login")}
+                    />
+                  }
                 />
                 <Route path="/confirm-email" element={<ConfirmEmail />} />
                 <Route path="/add-place" element={<AddPlace />} />
