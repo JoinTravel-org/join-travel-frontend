@@ -1,9 +1,31 @@
 import React, { useEffect, useState } from "react";
-import { TextField, Button, Paper, Typography, Box, Alert, Link, FormControlLabel, Checkbox, InputAdornment, IconButton, List, ListItem, Dialog, DialogTitle, DialogContent, DialogActions } from "@mui/material";
+import {
+  TextField,
+  Button,
+  Paper,
+  Typography,
+  Box,
+  Alert,
+  Link,
+  FormControlLabel,
+  Checkbox,
+  InputAdornment,
+  IconButton,
+  List,
+  ListItem,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+} from "@mui/material";
 import { Email, Lock, Visibility, VisibilityOff } from "@mui/icons-material";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import authService from "../services/auth.service";
-import { isValidEmail, validatePassword, getErrorMessage } from "../utils/validators";
+import {
+  isValidEmail,
+  validatePassword,
+  getErrorMessage,
+} from "../utils/validators";
 
 interface RegisterProps {
   onSwitchToLogin: () => void;
@@ -40,32 +62,46 @@ const Register: React.FC<RegisterProps> = ({ onSwitchToLogin }) => {
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
   const [loading, setLoading] = useState(false);
-  const [passwordValidation, setPasswordValidation] = useState<PasswordValidation>({
-    isValid: false,
-    errors: [],
-  });
+  const [passwordValidation, setPasswordValidation] =
+    useState<PasswordValidation>({
+      isValid: false,
+      errors: [],
+    });
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirm, setShowConfirm] = useState(false);
   const [termsDialogOpen, setTermsDialogOpen] = useState(false);
 
-  const setField = (field: keyof typeof formData) => (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = field === "termsAccepted" ? (e.target as HTMLInputElement).checked : e.target.value;
-    setFormData((prev) => ({ ...prev, [field]: value as never }));
+  const setField =
+    (field: keyof typeof formData) =>
+    (e: React.ChangeEvent<HTMLInputElement>) => {
+      const value =
+        field === "termsAccepted"
+          ? (e.target as HTMLInputElement).checked
+          : e.target.value;
+      setFormData((prev) => ({ ...prev, [field]: value as never }));
 
-    if (field === "password") {
-      const validation = validatePassword(value as string);
-      setPasswordValidation(validation);
-    }
-  };
+      if (field === "password") {
+        const validation = validatePassword(value as string);
+        setPasswordValidation(validation);
+      }
+    };
 
-  const onBlur = (field: keyof typeof touched) => () => setTouched((t) => ({ ...t, [field]: true }));
+  const onBlur = (field: keyof typeof touched) => () =>
+    setTouched((t) => ({ ...t, [field]: true }));
 
   const emailInvalid = touched.email && !isValidEmail(formData.email);
-  const passwordInvalid = touched.password && !validatePassword(formData.password).isValid;
-  const confirmInvalid = touched.confirmPassword && formData.confirmPassword !== formData.password;
+  const passwordInvalid =
+    touched.password && !validatePassword(formData.password).isValid;
+  const confirmInvalid =
+    touched.confirmPassword && formData.confirmPassword !== formData.password;
   const termsInvalid = touched.termsAccepted && !formData.termsAccepted;
 
-  const canSubmit = isValidEmail(formData.email) && validatePassword(formData.password).isValid && formData.confirmPassword === formData.password && formData.termsAccepted && !loading;
+  const canSubmit =
+    isValidEmail(formData.email) &&
+    validatePassword(formData.password).isValid &&
+    formData.confirmPassword === formData.password &&
+    formData.termsAccepted &&
+    !loading;
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -109,12 +145,17 @@ const Register: React.FC<RegisterProps> = ({ onSwitchToLogin }) => {
         password: formData.password,
       });
 
-      setSuccess(response.message || "Usuario registrado exitosamente. Revisa tu correo para confirmar tu cuenta.");
+      setSuccess(
+        response.message ||
+          "Usuario registrado exitosamente. Revisa tu correo para confirmar tu cuenta."
+      );
 
       // Redirigir al login con el parámetro redirect si existe
-      const redirectPath = searchParams.get('redirect');
-      const loginUrl = redirectPath ? `/login?redirect=${encodeURIComponent(redirectPath)}` : '/login';
-      
+      const redirectPath = searchParams.get("redirect");
+      const loginUrl = redirectPath
+        ? `/login?redirect=${encodeURIComponent(redirectPath)}`
+        : "/login";
+
       // Esperar un poco para que el usuario vea el mensaje de éxito antes de redirigir
       setTimeout(() => {
         navigate(loginUrl);
@@ -134,7 +175,6 @@ const Register: React.FC<RegisterProps> = ({ onSwitchToLogin }) => {
         confirmPassword: false,
         termsAccepted: false,
       });
-
     } catch (err) {
       const errorMessage = getErrorMessage(err);
       setError(errorMessage);
@@ -155,7 +195,13 @@ const Register: React.FC<RegisterProps> = ({ onSwitchToLogin }) => {
         color: "var(--color-text)",
       }}
     >
-      <Typography variant="h4" component="h1" gutterBottom align="center" sx={{ fontWeight: 700 }}>
+      <Typography
+        variant="h4"
+        component="h1"
+        gutterBottom
+        align="center"
+        sx={{ fontWeight: 700 }}
+      >
         Crear cuenta
       </Typography>
 
@@ -243,7 +289,14 @@ const Register: React.FC<RegisterProps> = ({ onSwitchToLogin }) => {
             ),
             endAdornment: (
               <InputAdornment position="end">
-                <IconButton aria-label={showPassword ? "Ocultar contraseña" : "Mostrar contraseña"} onClick={() => setShowPassword((s) => !s)} onMouseDown={(e) => e.preventDefault()} edge="end">
+                <IconButton
+                  aria-label={
+                    showPassword ? "Ocultar contraseña" : "Mostrar contraseña"
+                  }
+                  onClick={() => setShowPassword((s) => !s)}
+                  onMouseDown={(e) => e.preventDefault()}
+                  edge="end"
+                >
                   {showPassword ? <VisibilityOff /> : <Visibility />}
                 </IconButton>
               </InputAdornment>
@@ -274,7 +327,14 @@ const Register: React.FC<RegisterProps> = ({ onSwitchToLogin }) => {
             ),
             endAdornment: (
               <InputAdornment position="end">
-                <IconButton aria-label={showConfirm ? "Ocultar contraseña" : "Mostrar contraseña"} onClick={() => setShowConfirm((s) => !s)} onMouseDown={(e) => e.preventDefault()} edge="end">
+                <IconButton
+                  aria-label={
+                    showConfirm ? "Ocultar contraseña" : "Mostrar contraseña"
+                  }
+                  onClick={() => setShowConfirm((s) => !s)}
+                  onMouseDown={(e) => e.preventDefault()}
+                  edge="end"
+                >
                   {showConfirm ? <VisibilityOff /> : <Visibility />}
                 </IconButton>
               </InputAdornment>
@@ -283,7 +343,16 @@ const Register: React.FC<RegisterProps> = ({ onSwitchToLogin }) => {
         />
 
         <FormControlLabel
-          control={<Checkbox color="primary" checked={formData.termsAccepted} onChange={setField("termsAccepted")} onBlur={onBlur("termsAccepted")} inputProps={{ "aria-invalid": termsInvalid ? "true" : "false" }} required />}
+          control={
+            <Checkbox
+              color="primary"
+              checked={formData.termsAccepted}
+              onChange={setField("termsAccepted")}
+              onBlur={onBlur("termsAccepted")}
+              inputProps={{ "aria-invalid": termsInvalid ? "true" : "false" }}
+              required
+            />
+          }
           sx={{ mt: 1 }}
           label={
             <Typography variant="body2">
@@ -303,12 +372,24 @@ const Register: React.FC<RegisterProps> = ({ onSwitchToLogin }) => {
           }
         />
         {termsInvalid && (
-          <Typography variant="caption" color="error" sx={{ display: "block", mt: 0.5 }} role="alert">
+          <Typography
+            variant="caption"
+            color="error"
+            sx={{ display: "block", mt: 0.5 }}
+            role="alert"
+          >
             Debes aceptar los términos y condiciones.
           </Typography>
         )}
 
-        <Button type="submit" fullWidth variant="contained" sx={{ mt: 3, mb: 2 }} disabled={!canSubmit} aria-busy={loading ? "true" : "false"}>
+        <Button
+          type="submit"
+          fullWidth
+          variant="contained"
+          sx={{ mt: 3, mb: 2 }}
+          disabled={!canSubmit}
+          aria-busy={loading ? "true" : "false"}
+        >
           {loading ? "Registrando…" : "Crear cuenta"}
         </Button>
       </Box>
@@ -331,22 +412,47 @@ const Register: React.FC<RegisterProps> = ({ onSwitchToLogin }) => {
         </Typography>
       </Box>
 
-      <Dialog open={termsDialogOpen} onClose={() => setTermsDialogOpen(false)} maxWidth="md" fullWidth>
+      <Dialog
+        open={termsDialogOpen}
+        onClose={() => setTermsDialogOpen(false)}
+        maxWidth="md"
+        fullWidth
+      >
         <DialogTitle>Términos y Condiciones</DialogTitle>
         <DialogContent>
           <Typography variant="body1" paragraph>
-            Esta aplicación es una herramienta educativa desarrollada con fines de aprendizaje y demostración. Al registrarte, aceptas los siguientes términos:
+            Esta aplicación es una herramienta educativa desarrollada con fines
+            de aprendizaje y demostración. Al registrarte, aceptas los
+            siguientes términos:
           </Typography>
           <Typography variant="body1" component="div">
             <ul>
-              <li>Esta aplicación está diseñada para uso productivo y educativo, con énfasis en entornos controlados y no críticos.</li>
               <li>
-                Los datos proporcionados se utilizarán exclusivamente para el funcionamiento y mejora de esta aplicación, y sus derechos de propiedad intelectual sobre los mismos se mantendrán intactos, excepto en lo necesario para prestar el
-                servicio.
+                Esta aplicación está diseñada para uso productivo y educativo,
+                con énfasis en entornos controlados y no críticos.
               </li>
-              <li>No ofrecemos garantías absolutas de seguridad, privacidad o disponibilidad continua, pero implementamos medidas razonables para proteger la información conforme a estándares de la industria.</li>
-              <li>El uso de esta aplicación es bajo tu propio riesgo, aunque nos esforzamos por minimizarlo mediante prácticas seguras y actualizaciones regulares.</li>
-              <li>Podemos modificar estos términos en cualquier momento, notificándote con antelación razonable a través de la aplicación o por correo electrónico.</li>
+              <li>
+                Los datos proporcionados se utilizarán exclusivamente para el
+                funcionamiento y mejora de esta aplicación, y sus derechos de
+                propiedad intelectual sobre los mismos se mantendrán intactos,
+                excepto en lo necesario para prestar el servicio.
+              </li>
+              <li>
+                No ofrecemos garantías absolutas de seguridad, privacidad o
+                disponibilidad continua, pero implementamos medidas razonables
+                para proteger la información conforme a estándares de la
+                industria.
+              </li>
+              <li>
+                El uso de esta aplicación es bajo tu propio riesgo, aunque nos
+                esforzamos por minimizarlo mediante prácticas seguras y
+                actualizaciones regulares.
+              </li>
+              <li>
+                Podemos modificar estos términos en cualquier momento,
+                notificándote con antelación razonable a través de la aplicación
+                o por correo electrónico.
+              </li>
             </ul>
           </Typography>
         </DialogContent>

@@ -74,7 +74,9 @@ const PlaceDetail: React.FC = () => {
     }
 
     if (description.length < 30 || description.length > 1000) {
-      setDescriptionError("La descripción debe tener entre 30 y 1000 caracteres.");
+      setDescriptionError(
+        "La descripción debe tener entre 30 y 1000 caracteres."
+      );
       return;
     }
 
@@ -94,10 +96,17 @@ const PlaceDetail: React.FC = () => {
       }, 3000);
     } catch (error: unknown) {
       const errorMessage = (error as { message?: string })?.message || "";
-      if (errorMessage.includes('network') || errorMessage.includes('connection')) {
-        setDescriptionError("Error de conexión. Por favor verifica tu conexión a internet.");
+      if (
+        errorMessage.includes("network") ||
+        errorMessage.includes("connection")
+      ) {
+        setDescriptionError(
+          "Error de conexión. Por favor verifica tu conexión a internet."
+        );
       } else {
-        setDescriptionError("Error al guardar la descripción. Por favor intenta de nuevo.");
+        setDescriptionError(
+          "Error al guardar la descripción. Por favor intenta de nuevo."
+        );
       }
     } finally {
       setSavingDescription(false);
@@ -106,7 +115,9 @@ const PlaceDetail: React.FC = () => {
 
   const handleEditDescription = () => {
     if (!auth.isAuthenticated) {
-      navigate(`/login?redirect=${encodeURIComponent(window.location.pathname)}`);
+      navigate(
+        `/login?redirect=${encodeURIComponent(window.location.pathname)}`
+      );
       return;
     }
     setIsEditingDescription(true);
@@ -202,9 +213,17 @@ const PlaceDetail: React.FC = () => {
                       onClick={handleSaveDescription}
                       disabled={savingDescription}
                       sx={{ minWidth: 120 }}
-                      startIcon={descriptionSuccess ? <CheckCircleIcon /> : undefined}
+                      startIcon={
+                        descriptionSuccess ? <CheckCircleIcon /> : undefined
+                      }
                     >
-                      {savingDescription ? <CircularProgress size={20} /> : descriptionSuccess ? 'Guardado' : 'Guardar'}
+                      {savingDescription ? (
+                        <CircularProgress size={20} />
+                      ) : descriptionSuccess ? (
+                        "Guardado"
+                      ) : (
+                        "Guardar"
+                      )}
                     </Button>
                     <Button
                       variant="outlined"
@@ -218,15 +237,16 @@ const PlaceDetail: React.FC = () => {
               ) : (
                 <Box>
                   <Typography variant="body1">
-                    {place.description ||
-                      "Lorem ipsum description"}
+                    {place.description || "Lorem ipsum description"}
                   </Typography>
                   <Button
                     variant="text"
                     onClick={handleEditDescription}
-                    sx={{ mt: 1, textTransform: 'none' }}
+                    sx={{ mt: 1, textTransform: "none" }}
                   >
-                    {place.description ? 'Editar descripción' : 'Agregar descripción'}
+                    {place.description
+                      ? "Editar descripción"
+                      : "Agregar descripción"}
                   </Button>
                 </Box>
               )}
@@ -246,7 +266,7 @@ const PlaceDetail: React.FC = () => {
           {/* --- Add Review Form --- */}
           <ReviewForm
             placeId={place.id}
-            onReviewCreated={() => setReviewRefreshTrigger(prev => prev + 1)}
+            onReviewCreated={() => setReviewRefreshTrigger((prev) => prev + 1)}
           />
 
           {/* --- Reviews List --- */}
@@ -261,11 +281,15 @@ const PlaceDetail: React.FC = () => {
         open={snackbarOpen}
         autoHideDuration={3000}
         onClose={() => setSnackbarOpen(false)}
-        anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
+        anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
         TransitionComponent={(props) => <Slide {...props} direction="up" />}
         transitionDuration={500}
       >
-        <Alert onClose={() => setSnackbarOpen(false)} severity="success" sx={{ width: '100%' }}>
+        <Alert
+          onClose={() => setSnackbarOpen(false)}
+          severity="success"
+          sx={{ width: "100%" }}
+        >
           ¡Descripción guardada exitosamente!
         </Alert>
       </Snackbar>
