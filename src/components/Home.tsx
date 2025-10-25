@@ -124,7 +124,7 @@ const Home: React.FC = () => {
           if (auth.isAuthenticated) {
             navigate("/add-place");
           } else {
-            navigate(`/login?redirect=${encodeURIComponent("/add-place")}`);
+            navigate("/login");
           }
         },
       },

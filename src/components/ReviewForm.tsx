@@ -105,7 +105,7 @@ const ReviewForm: React.FC<ReviewFormProps> = ({
   };
 
   const handleLoginRedirect = () => {
-    navigate(`/login?redirect=${encodeURIComponent(window.location.pathname)}`);
+    navigate("/login");
   };
 
   return (

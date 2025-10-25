@@ -15,7 +15,7 @@ class ApiService {
       headers: {
         "Content-Type": "application/json",
       },
-      timeout: 10000, // 30 segundos para permitir el envío de email
+      timeout: 30000, // 30 segundos para permitir el envío de email
     });
 
     // Request interceptor to log outgoing API calls and add auth token

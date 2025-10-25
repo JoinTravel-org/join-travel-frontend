@@ -4,8 +4,6 @@ import {
   Routes,
   Route,
   useLocation,
-  useNavigate,
-  useSearchParams,
 } from "react-router-dom";
 import { Suspense, useEffect } from "react";
 import "./App.css";
@@ -37,36 +35,6 @@ function ConditionalFooter() {
   return hideFooterRoutes.includes(location.pathname) ? null : <Footer />;
 }
 
-function LoginWrapper() {
-  const navigate = useNavigate();
-  const [searchParams] = useSearchParams();
-
-  const handleSwitchToRegister = () => {
-    const redirectPath = searchParams.get("redirect");
-    const registerUrl = redirectPath
-      ? `/register?redirect=${encodeURIComponent(redirectPath)}`
-      : "/register";
-    navigate(registerUrl);
-  };
-
-  return <Login onSwitchToRegister={handleSwitchToRegister} />;
-}
-
-function RegisterWrapper() {
-  const navigate = useNavigate();
-  const [searchParams] = useSearchParams();
-
-  const handleSwitchToLogin = () => {
-    const redirectPath = searchParams.get("redirect");
-    const loginUrl = redirectPath
-      ? `/login?redirect=${encodeURIComponent(redirectPath)}`
-      : "/login";
-    navigate(loginUrl);
-  };
-
-  return <Register onSwitchToLogin={handleSwitchToLogin} />;
-}
-
 function App() {
   return (
     <AppThemeProvider>
@@ -88,8 +56,24 @@ function App() {
             >
               <Routes>
                 <Route path="/" element={<Home />} />
-                <Route path="/login" element={<LoginWrapper />} />
-                <Route path="/register" element={<RegisterWrapper />} />
+                <Route
+                  path="/login"
+                  element={
+                    <Login
+                      onSwitchToRegister={() =>
+                        (window.location.href = "/register")
+                      }
+                    />
+                  }
+                />
+                <Route
+                  path="/register"
+                  element={
+                    <Register
+                      onSwitchToLogin={() => (window.location.href = "/login")}
+                    />
+                  }
+                />
                 <Route path="/confirm-email" element={<ConfirmEmail />} />
                 <Route path="/add-place" element={<AddPlace />} />
                 <Route path="/place/:id" element={<PlaceDetail />} />

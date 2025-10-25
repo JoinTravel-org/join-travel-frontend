@@ -115,9 +115,7 @@ const PlaceDetail: React.FC = () => {
 
   const handleEditDescription = () => {
     if (!auth.isAuthenticated) {
-      navigate(
-        `/login?redirect=${encodeURIComponent(window.location.pathname)}`
-      );
+      navigate("/login");
       return;
     }
     setIsEditingDescription(true);
