@@ -28,6 +28,8 @@ interface Itinerary {
     items: ItineraryItem[];
 }
 
+const defaultItinerary = { userID: "", name: "", items: [] }
+
 const defaultItineraryItem = { place: null, date: "" };
 
 const placesAtus = [
@@ -101,7 +103,7 @@ const CreateItinerary: React.FC = () => {
 
     // Itinerary
     const [selectedPlace, setSelectedPlace] = useState<ItineraryItem>(defaultItineraryItem);
-    const [currentItinerary, setCurrentItinerary] = useState<Itinerary | null>(null);
+    const [currentItinerary, setCurrentItinerary] = useState<Itinerary>(defaultItinerary);
 
     // Place search
     const [placeSearch, setPlaceSearch] = useState<string>("");
@@ -120,17 +122,11 @@ const CreateItinerary: React.FC = () => {
         if (place == null) {
             return;
         }
-        setSelectedPlace((curr) => {
-            curr.place = place;
-            return curr
-        })
+        setSelectedPlace((curr) => ({ ...curr, place }));
     }
 
     const handleDateSelect = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-        setSelectedPlace((curr) => {
-            curr.date = e.target.value;
-            return curr
-        })
+        setSelectedPlace((curr) => ({ ...curr, date: e.target.value }));
     }
 
     useEffect(() => {
@@ -150,14 +146,15 @@ const CreateItinerary: React.FC = () => {
             return;
         }
         console.log(`Adding place to itinerary: ${selectedPlace.place?.name} on ${selectedPlace.date}`)
-        setCurrentItinerary((i) => {
-            i?.items.push({
-                place: selectedPlace.place,
-                date: selectedPlace.date,
-            })
-            return i
-        })
+        setCurrentItinerary((prev) => ({
+            ...prev,
+            items: [
+                ...prev.items,
+                { place: selectedPlace.place, date: selectedPlace.date }
+            ]
+        }));
         setSelectedPlace(defaultItineraryItem);
+        setPlaceSearch("");
         setError(null);
     };
 
@@ -217,7 +214,7 @@ const CreateItinerary: React.FC = () => {
                         fullWidth
                         type='date'
                         onChange={handleDateSelect}
-                        value={selectedPlace?.date}
+                        value={selectedPlace.date}
                         sx={{ mb: 2 }}
                     />
 
@@ -234,7 +231,7 @@ const CreateItinerary: React.FC = () => {
                         <Typography variant="body2" sx={{ mb: 1, color: 'text.secondary' }}>
                             Lista de lugares:
                         </Typography>
-                        <ItineraryPlaceThumbnail places={placesAtus} navigate={navigate} />
+                        <ItineraryPlaceThumbnail itinerary={currentItinerary} navigate={navigate} />
                     </Box>
                 </Box>
 
@@ -270,7 +267,7 @@ const CreateItinerary: React.FC = () => {
     );
 };
 
-function ItineraryPlaceThumbnail({ places, navigate }: { places: Place[], navigate: any }) {
+function ItineraryPlaceThumbnail({ itinerary, navigate }: { itinerary: Itinerary, navigate: any }) {
     return (
         <Box
             sx={{
@@ -280,10 +277,10 @@ function ItineraryPlaceThumbnail({ places, navigate }: { places: Place[], naviga
                 gridTemplateColumns: { xs: '1fr', sm: 'repeat(2, 1fr)', md: 'repeat(3, 1fr)', lg: 'repeat(4, 1fr)' },
             }}
         >
-            {places.map((place) => (
+            {itinerary.items.map((item) => (
                 <Card
-                    key={place.id}
-                    onClick={() => navigate(`/place/${place.id}`)}
+                    key={item.place?.id}
+                    onClick={() => navigate(`/place/${item.place?.id}`)}
                     elevation={0}
                     sx={{
                         height: '100%',
@@ -305,7 +302,7 @@ function ItineraryPlaceThumbnail({ places, navigate }: { places: Place[], naviga
                     <Box
                         sx={{
                             height: 200,
-                            backgroundImage: `url(${place.image || '/placeholder-image.jpg'})`,
+                            backgroundImage: `url(${item.place?.image || '/placeholder-image.jpg'})`,
                             backgroundSize: 'cover',
                             backgroundPosition: 'center',
                             backgroundColor: '#f0f0f0',
@@ -328,7 +325,7 @@ function ItineraryPlaceThumbnail({ places, navigate }: { places: Place[], naviga
                                 color: '#000'
                             }}
                         >
-                            {place.name}
+                            {item.place?.name}
                         </Typography>
                         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                             <Typography
@@ -339,7 +336,7 @@ function ItineraryPlaceThumbnail({ places, navigate }: { places: Place[], naviga
                                     color: '#000'
                                 }}
                             >
-                                14 de mayo de 2025
+                                {item.date}
                             </Typography>
                         </Box>
                     </CardContent>
