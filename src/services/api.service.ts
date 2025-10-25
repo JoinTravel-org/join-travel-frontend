@@ -15,7 +15,7 @@ class ApiService {
       headers: {
         "Content-Type": "application/json",
       },
-      timeout: 30000, // 30 segundos para permitir el envío de email
+      timeout: 10000, // 30 segundos para permitir el envío de email
     });
 
     // Request interceptor to log outgoing API calls and add auth token
@@ -52,12 +52,12 @@ class ApiService {
           if (error.code === 'ECONNABORTED') {
             throw {
               success: false,
-              message: "Tiempo de espera agotado.",
+              message: "Error al guardar la reseña",
             };
           } else {
             throw {
               success: false,
-              message: "No se pudo conectar con el servidor. Verifica tu conexión.",
+              message: "Error al guardar la reseña",
             };
           }
         } else {
@@ -65,7 +65,7 @@ class ApiService {
           Logger.getInstance().error("API Request setup error", JSON.stringify(error.message));
           throw {
             success: false,
-            message: "Error inesperado. Por favor intenta de nuevo.",
+            message: "Error al guardar la reseña",
           };
         }
       }
