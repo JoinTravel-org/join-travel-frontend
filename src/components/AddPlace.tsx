@@ -126,7 +126,7 @@ const AddPlace: React.FC = () => {
     if (!hasCheckedAuth.current) {
       hasCheckedAuth.current = true;
       if (!auth.isAuthenticated) {
-        navigate('/login');
+        navigate(`/login?redirect=${encodeURIComponent(window.location.pathname)}`);
       }
     }
   }, [auth.isAuthenticated, navigate]);

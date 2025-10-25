@@ -102,7 +102,7 @@ const Home: React.FC = () => {
           if (auth.isAuthenticated) {
             navigate('/add-place');
           } else {
-            navigate('/login');
+            navigate(`/login?redirect=${encodeURIComponent('/add-place')}`);
           }
         },
       },

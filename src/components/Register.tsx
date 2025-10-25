@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { TextField, Button, Paper, Typography, Box, Alert, Link, FormControlLabel, Checkbox, InputAdornment, IconButton, List, ListItem, Dialog, DialogTitle, DialogContent, DialogActions } from "@mui/material";
 import { Email, Lock, Visibility, VisibilityOff } from "@mui/icons-material";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import authService from "../services/auth.service";
 import { isValidEmail, validatePassword, getErrorMessage } from "../utils/validators";
 
@@ -14,6 +15,8 @@ type PasswordValidation = {
 };
 
 const Register: React.FC<RegisterProps> = ({ onSwitchToLogin }) => {
+  const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
 
   // Document title for SEO/UX
   useEffect(() => {
@@ -107,6 +110,15 @@ const Register: React.FC<RegisterProps> = ({ onSwitchToLogin }) => {
       });
 
       setSuccess(response.message || "Usuario registrado exitosamente. Revisa tu correo para confirmar tu cuenta.");
+
+      // Redirigir al login con el parámetro redirect si existe
+      const redirectPath = searchParams.get('redirect');
+      const loginUrl = redirectPath ? `/login?redirect=${encodeURIComponent(redirectPath)}` : '/login';
+      
+      // Esperar un poco para que el usuario vea el mensaje de éxito antes de redirigir
+      setTimeout(() => {
+        navigate(loginUrl);
+      }, 2000);
 
       // Reset form
       setFormData({

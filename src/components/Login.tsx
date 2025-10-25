@@ -11,7 +11,7 @@ import {
   IconButton,
 } from '@mui/material';
 import { Email, Lock, Visibility, VisibilityOff } from '@mui/icons-material';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import authService from '../services/auth.service';
 import { getErrorMessage } from '../utils/validators';
 import { useAuth } from '../hooks/useAuth';
@@ -22,6 +22,7 @@ interface LoginProps {
 
 const Login: React.FC<LoginProps> = ({ onSwitchToRegister }) => {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const auth = useAuth();
 
   // Document title for SEO/UX
@@ -106,7 +107,10 @@ const Login: React.FC<LoginProps> = ({ onSwitchToRegister }) => {
           updatedAt: new Date().toISOString(),
         };
         auth.login(user, response.data!.accessToken, response.data!.refreshToken);
-        navigate('/');
+        
+        // Redirigir a la página donde estaba o a home si no hay redirect
+        const redirectPath = searchParams.get('redirect') || '/';
+        navigate(redirectPath);
       } else {
         setError(response.message || 'Error al iniciar sesión. Inténtalo nuevamente.');
       }
