@@ -18,7 +18,7 @@ import { useAuth } from '../hooks/useAuth';
 import type { Place } from '../types/place';
 
 interface ItineraryItem {
-    placeID: string;
+    place: Place | null;
     date: string;
 }
 
@@ -27,6 +27,8 @@ interface Itinerary {
     name: string;
     items: ItineraryItem[];
 }
+
+const defaultItineraryItem = { place: null, date: "" };
 
 const placesAtus = [
     {
@@ -44,7 +46,7 @@ const placesAtus = [
     },
     {
         id: "2",
-        name: "atus palace 2",
+        name: "atus place 2",
         address: "atus palace",
         latitude: "atus palace",
         longitude: "atus palace",
@@ -70,7 +72,7 @@ const placesAtus = [
     },
     {
         id: "4",
-        name: "atus palace 4",
+        name: "atus place 4",
         address: "atus palace",
         latitude: "atus palace",
         longitude: "atus palace",
@@ -97,22 +99,65 @@ const CreateItinerary: React.FC = () => {
         }
     }, [auth.isAuthenticated, navigate]);
 
-    // ... resto del componente
+    // Itinerary
+    const [selectedPlace, setSelectedPlace] = useState<ItineraryItem>(defaultItineraryItem);
     const [currentItinerary, setCurrentItinerary] = useState<Itinerary | null>(null);
+
+    // Place search
     const [placeSearch, setPlaceSearch] = useState<string>("");
-    const [placesRetrieved, setPlacesRetrieved] = useState<Place[]>(placesAtus);
+    const [placesRetrieved, setPlacesRetrieved] = useState<Place[]>([]);
+
+    // Metadata
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const [success, setSuccess] = useState(false);
 
-    const handlePlaceSelect = (place: Place, date: string) => {
+    const handlePlaceSearch = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+        setPlaceSearch(e.target.value);
+    }
+
+    const handlePlaceSelect = (_e: any, place: Place | null) => {
+        if (place == null) {
+            return;
+        }
+        setSelectedPlace((curr) => {
+            curr.place = place;
+            return curr
+        })
+    }
+
+    const handleDateSelect = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+        setSelectedPlace((curr) => {
+            curr.date = e.target.value;
+            return curr
+        })
+    }
+
+    useEffect(() => {
+        let resPlaces = placesAtus;
+        resPlaces.filter((val, _idx, _arr) => {
+            return val.name.includes(placeSearch);
+        });
+        setPlacesRetrieved(resPlaces);
+    }, [placeSearch]);
+
+    const handleAddPlace = () => {
+        if (selectedPlace.place == null) {
+            console.warn("No place selected")
+            return;
+        } else if (selectedPlace.date == "") {
+            console.warn("No date")
+            return;
+        }
+        console.log(`Adding place to itinerary: ${selectedPlace.place?.name} on ${selectedPlace.date}`)
         setCurrentItinerary((i) => {
             i?.items.push({
-                placeID: place.id,
-                date: date,
+                place: selectedPlace.place,
+                date: selectedPlace.date,
             })
             return i
         })
+        setSelectedPlace(defaultItineraryItem);
         setError(null);
     };
 
@@ -162,32 +207,24 @@ const CreateItinerary: React.FC = () => {
                     <Autocomplete
                         options={placesRetrieved}
                         getOptionLabel={(option) => option.name}
-                        filterOptions={(options, { inputValue }) =>
-                            options.filter((p) =>
-                                p.name.toLowerCase().includes(inputValue.toLowerCase())
-                            )
-                        }
-                        onChange={(_, value) => {
-                            if (value) {
-                                setPlaceSearch(value.name);
-                            }
-                        }}
+                        onChange={handlePlaceSelect}
                         renderInput={(params) => (
-                            <TextField {...params} label="Busca lugares" variant="outlined" />
+                            <TextField {...params} onChange={handlePlaceSearch} label="Busca lugares" variant="outlined" />
                         )}
                         sx={{ mb: 2 }}
                     />
                     <TextField
                         fullWidth
                         type='date'
-                        // value={selectedPlace.name}
+                        onChange={handleDateSelect}
+                        value={selectedPlace?.date}
                         sx={{ mb: 2 }}
                     />
 
                     <Stack direction="row" spacing={2}>
                         <Button
                             variant="outlined"
-                            onClick={() => { }}
+                            onClick={handleAddPlace}
                         >
                             Agregar
                         </Button>
