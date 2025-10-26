@@ -11,20 +11,7 @@ import {
 } from '@mui/material';
 
 import { useNavigate } from 'react-router-dom';
-
-export interface Place {
-    id: string;
-    name: string;
-    address: string;
-    latitude: string;
-    longitude: string;
-    image?: string;
-    rating: number | null;
-    createdAt: string;
-    updatedAt: string;
-    description: string | null;
-    city: string | null;
-}
+import type { Place } from '../types/place';
 
 interface Props {
   places: Place[];

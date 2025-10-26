@@ -1,5 +1,6 @@
 import axios, { AxiosError } from "axios";
 import Logger from "../logger";
+import type { CreateItineraryRequest, CreateItineraryResponse } from "../types/itinerary";
 
 /**
  * Configuración del cliente API con axios
@@ -179,6 +180,16 @@ class ApiService {
     const response = await this.api.put(`/places/${id}/description`, {
       description,
     });
+    return response.data;
+  }
+
+  /**
+   * Crea un nuevo itinerario
+   * @param itinerary - Información del itinerario
+   * @returns Promise con la respuesta del servidor
+   */
+  async createItinerary(itinerary: CreateItineraryRequest): Promise<CreateItineraryResponse> {
+    const response = await this.api.post("/itineraries", itinerary);
     return response.data;
   }
 

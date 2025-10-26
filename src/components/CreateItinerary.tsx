@@ -16,76 +16,13 @@ import {
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth';
 import type { Place } from '../types/place';
+import type { Itinerary, ItineraryItem, CreateItineraryRequest } from '../types/itinerary';
+import apiService from '../services/api.service';
 
-interface ItineraryItem {
-    place: Place | null;
-    date: string;
-}
+const defaultItinerary: Itinerary = { name: "", items: [] }
 
-interface Itinerary {
-    userID: string;
-    name: string;
-    items: ItineraryItem[];
-}
+const defaultItineraryItem: ItineraryItem = { place: null as any, date: "" };
 
-const defaultItinerary = { userID: "", name: "", items: [] }
-
-const defaultItineraryItem = { place: null, date: "" };
-
-const placesAtus = [
-    {
-        id: "1",
-        name: "atus palace 1",
-        address: "atus palace",
-        latitude: "atus palace",
-        longitude: "atus palace",
-        image: null,
-        rating: null,
-        createdAt: "atus palace",
-        updatedAt: "atus palace",
-        description: "atus palace",
-        city: "atus palace",
-    },
-    {
-        id: "2",
-        name: "atus place 2",
-        address: "atus palace",
-        latitude: "atus palace",
-        longitude: "atus palace",
-        image: null,
-        rating: null,
-        createdAt: "atus palace",
-        updatedAt: "atus palace",
-        description: "atus palace",
-        city: "atus palace",
-    },
-    {
-        id: "3",
-        name: "atus palace 3",
-        address: "atus palace",
-        latitude: "atus palace",
-        longitude: "atus palace",
-        image: null,
-        rating: null,
-        createdAt: "atus palace",
-        updatedAt: "atus palace",
-        description: "atus palace",
-        city: "atus palace",
-    },
-    {
-        id: "4",
-        name: "atus place 4",
-        address: "atus palace",
-        latitude: "atus palace",
-        longitude: "atus palace",
-        image: null,
-        rating: null,
-        createdAt: "atus palace",
-        updatedAt: "atus palace",
-        description: "atus palace",
-        city: "atus palace",
-    },
-]
 
 const CreateItinerary: React.FC = () => {
     const navigate = useNavigate();
@@ -101,6 +38,36 @@ const CreateItinerary: React.FC = () => {
         }
     }, [auth.isAuthenticated, navigate]);
 
+    // Fetch places from backend on component mount
+    useEffect(() => {
+        const fetchPlaces = async () => {
+            if (!auth.isAuthenticated) return;
+            
+            setLoadingPlaces(true);
+            setPlacesError(null);
+            
+            try {
+                // Fetch all places with a high limit to get all available places
+                const response = await apiService.getPlaces(1, 100);
+                
+                if (response.places && Array.isArray(response.places)) {
+                    setAllPlaces(response.places);
+                    setPlacesRetrieved(response.places);
+                } else {
+                    setPlacesError('No se pudieron cargar los lugares disponibles.');
+                }
+            } catch (err: unknown) {
+                const errorMessage = err instanceof Error ? err.message : 'Error desconocido al cargar lugares';
+                setPlacesError(`Error al cargar lugares: ${errorMessage}`);
+                console.error('Error fetching places:', err);
+            } finally {
+                setLoadingPlaces(false);
+            }
+        };
+
+        fetchPlaces();
+    }, [auth.isAuthenticated]);
+
     // Itinerary
     const [selectedPlace, setSelectedPlace] = useState<ItineraryItem>(defaultItineraryItem);
     const [currentItinerary, setCurrentItinerary] = useState<Itinerary>(defaultItinerary);
@@ -108,6 +75,9 @@ const CreateItinerary: React.FC = () => {
     // Place search
     const [placeSearch, setPlaceSearch] = useState<string>("");
     const [placesRetrieved, setPlacesRetrieved] = useState<Place[]>([]);
+    const [allPlaces, setAllPlaces] = useState<Place[]>([]);
+    const [loadingPlaces, setLoadingPlaces] = useState<boolean>(false);
+    const [placesError, setPlacesError] = useState<string | null>(null);
 
     // Metadata
     const [loading, setLoading] = useState(false);
@@ -129,23 +99,42 @@ const CreateItinerary: React.FC = () => {
         setSelectedPlace((curr) => ({ ...curr, date: e.target.value }));
     }
 
+    const handleNameChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+        setCurrentItinerary((curr) => ({ ...curr, name: e.target.value }));
+    }
+
+    // Debounced search for places
     useEffect(() => {
-        let resPlaces = placesAtus;
-        resPlaces.filter((val, _idx, _arr) => {
-            return val.name.includes(placeSearch);
-        });
-        setPlacesRetrieved(resPlaces);
-    }, [placeSearch]);
+        const timeoutId = setTimeout(() => {
+            if (!placeSearch.trim()) {
+                // If search is empty, show all places
+                setPlacesRetrieved(allPlaces);
+            } else {
+                // Filter places based on search input (case insensitive)
+                const filteredPlaces = allPlaces.filter(place => 
+                    place.name.toLowerCase().includes(placeSearch.toLowerCase()) ||
+                    place.address.toLowerCase().includes(placeSearch.toLowerCase()) ||
+                    (place.city && place.city.toLowerCase().includes(placeSearch.toLowerCase()))
+                );
+                setPlacesRetrieved(filteredPlaces);
+            }
+        }, 300); // 300ms debounce
+
+        return () => clearTimeout(timeoutId);
+    }, [placeSearch, allPlaces]);
 
     const handleAddPlace = () => {
         if (selectedPlace.place == null) {
-            console.warn("No place selected")
+            setError("Por favor selecciona un lugar para agregar.");
             return;
         } else if (selectedPlace.date == "") {
-            console.warn("No date")
+            setError("Por favor selecciona una fecha para el lugar.");
+            return;
+        } else if (currentItinerary.items.find((item) => item.place?.id === selectedPlace.place?.id)) {
+            setError("Este lugar ya está en el itinerario.");
             return;
         }
-        console.log(`Adding place to itinerary: ${selectedPlace.place?.name} on ${selectedPlace.date}`)
+        console.log(`Adding place to itinerary: ${selectedPlace.place?.name} on ${selectedPlace.date}`);
         setCurrentItinerary((prev) => ({
             ...prev,
             items: [
@@ -159,34 +148,53 @@ const CreateItinerary: React.FC = () => {
     };
 
     const handleSubmit = async () => {
-        if (currentItinerary?.items.length == 0) return;
+        if (currentItinerary?.items.length == 0) {
+            setError("El itinerario debe tener al menos un lugar.");
+            return;
+        } else if (currentItinerary.name.trim() === "") {
+            setError("El itinerario debe tener un nombre.");
+            return;
+        } else if (!auth.user) {
+            setError("Usuario no autenticado.");
+            return;
+        }
 
         setLoading(true);
         setError(null);
 
-        // try {
-        //     // Call API to add place
-        //     await apiService.addPlace(selectedPlace);
-        //     setSuccess(true);
-        //     trackEvent('place_added', { place_name: selectedPlace.name });
+        try {
+            // Convert to backend format (place IDs only)
+            const itineraryData: CreateItineraryRequest = {
+                name: currentItinerary.name,
+                items: currentItinerary.items
+                    .filter(item => item.place !== null)
+                    .map(item => ({
+                        placeId: item.place.id,
+                        date: item.date
+                    }))
+            };
+            
+            await apiService.createItinerary(itineraryData);
+            setSuccess(true);
 
-        //     // Reset after success
-        //     setTimeout(() => {
-        //         setSuccess(false);
-        //         setSelectedPlace(null);
-        //     }, 3000);
-        // } catch (err: unknown) {
-        //     const errorMessage = err instanceof Error ? err.message : 'Error desconocido';
-        //     if (errorMessage.includes('duplicate')) {
-        //         setError('Este lugar ya está registrado.');
-        //     } else if (errorMessage.includes('external service')) {
-        //         setError('Servicio externo no disponible.');
-        //     } else {
-        //         setError('Error al agregar el lugar. Por favor intenta de nuevo.');
-        //     }
-        // } finally {
-        //     setLoading(false);
-        // }
+            // Reset after success
+            setTimeout(() => {
+                setSuccess(false);
+                setCurrentItinerary(defaultItinerary);
+                navigate('/');
+            }, 3000);
+        } catch (err: unknown) {
+            const errorMessage = err instanceof Error ? err.message : 'Error desconocido';
+            if (errorMessage.includes('duplicate')) {
+                setError('Este itinerario ya existe.');
+            } else if (errorMessage.includes('external service')) {
+                setError('Servicio externo no disponible.');
+            } else {
+                setError('Error al crear el itinerario. Por favor intenta de nuevo.');
+            }
+        } finally {
+            setLoading(false);
+        }
     };
 
     return (
@@ -196,6 +204,15 @@ const CreateItinerary: React.FC = () => {
             </Typography>
 
             <Paper sx={{ p: 3, mb: 3 }}>
+                <TextField
+                    fullWidth
+                    type='text'
+                    label="Nombre del Itinerario"
+                    onChange={handleNameChange}
+                    value={currentItinerary.name}
+                    sx={{ mb: 2 }}
+                />
+
                 <Typography variant="h6" gutterBottom>
                     ¡Busca y agrega lugares que quisieras visitar!
                 </Typography>
@@ -205,8 +222,21 @@ const CreateItinerary: React.FC = () => {
                         options={placesRetrieved}
                         getOptionLabel={(option) => option.name}
                         onChange={handlePlaceSelect}
+                        loading={loadingPlaces}
+                        disabled={loadingPlaces || !!placesError}
                         renderInput={(params) => (
-                            <TextField {...params} onChange={handlePlaceSearch} label="Busca lugares" variant="outlined" />
+                            <TextField 
+                                {...params} 
+                                onChange={handlePlaceSearch} 
+                                label={loadingPlaces ? "Cargando lugares..." : "Busca lugares"} 
+                                variant="outlined"
+                                helperText={
+                                    placesError ? placesError : 
+                                    placesRetrieved.length === 0 && !loadingPlaces ? "No se encontraron lugares" :
+                                    `${placesRetrieved.length} lugar${placesRetrieved.length !== 1 ? 'es' : ''} encontrado${placesRetrieved.length !== 1 ? 's' : ''}`
+                                }
+                                error={!!placesError}
+                            />
                         )}
                         sx={{ mb: 2 }}
                     />
@@ -231,9 +261,15 @@ const CreateItinerary: React.FC = () => {
                         <Typography variant="body2" sx={{ mb: 1, color: 'text.secondary' }}>
                             Lista de lugares:
                         </Typography>
-                        <ItineraryPlaceThumbnail itinerary={currentItinerary} navigate={navigate} />
+                        <ItineraryPlaceThumbnail itinerary={currentItinerary} />
                     </Box>
                 </Box>
+
+                {placesError && (
+                    <Alert severity="error" sx={{ mb: 3 }}>
+                        {placesError}
+                    </Alert>
+                )}
 
                 {error && (
                     <Alert severity="error" sx={{ mb: 3 }}>
@@ -267,7 +303,7 @@ const CreateItinerary: React.FC = () => {
     );
 };
 
-function ItineraryPlaceThumbnail({ itinerary, navigate }: { itinerary: Itinerary, navigate: any }) {
+function ItineraryPlaceThumbnail({ itinerary }: { itinerary: Itinerary }) {
     return (
         <Box
             sx={{
@@ -280,7 +316,7 @@ function ItineraryPlaceThumbnail({ itinerary, navigate }: { itinerary: Itinerary
             {itinerary.items.map((item) => (
                 <Card
                     key={item.place?.id}
-                    onClick={() => navigate(`/place/${item.place?.id}`)}
+                    onClick={() => window.open(`/place/${item.place?.id}`, '_blank')}
                     elevation={0}
                     sx={{
                         height: '100%',
