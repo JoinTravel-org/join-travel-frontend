@@ -232,6 +232,36 @@ class ApiService {
   }
 
   /**
+   * Obtiene todos los itinerarios del usuario autenticado
+   * @returns Promise con los itinerarios del usuario
+   */
+  async getUserItineraries() {
+    const response = await this.api.get("/itineraries");
+    return response.data;
+  }
+
+  /**
+   * Obtiene un itinerario por su ID
+   * @param id - ID del itinerario
+   * @returns Promise con el itinerario
+   */
+  async getItineraryById(id: string) {
+    const response = await this.api.get(`/itineraries/${id}`);
+    return response.data;
+  }
+
+  /**
+   * Actualiza un itinerario existente
+   * @param id - ID del itinerario
+   * @param itinerary - Datos del itinerario a actualizar
+   * @returns Promise con la respuesta del servidor
+   */
+  async updateItinerary(id: string, itinerary: CreateItineraryRequest) {
+    const response = await this.api.put(`/itineraries/${id}`, itinerary);
+    return response.data;
+  }
+
+  /**
     * Obtiene la instancia de axios para peticiones personalizadas
     * @returns Instancia de axios
     */
