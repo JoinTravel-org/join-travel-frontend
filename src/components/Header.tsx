@@ -102,10 +102,10 @@ const Header: React.FC = () => {
             <Button
                 color="inherit"
                 component={RouterLink}
-                to="/create-itinerary"
-                aria-current={location.pathname === "/create-itinerary" ? "page" : undefined}
+                to="/itineraries"
+                aria-current={location.pathname === "/itineraries" ? "page" : undefined}
             >
-                Crear Itinerario
+                Itinerarios
             </Button>
             {auth.isAuthenticated ? (
                 <>
@@ -289,6 +289,22 @@ const Header: React.FC = () => {
                         >
                             <ListItemText primary="Inicio" />
                         </ListItemButton>
+                        <ListItemButton
+                            component={RouterLink}
+                            to="/add-place"
+                            selected={location.pathname === "/add-place"}
+                            onClick={toggleDrawer(false)}
+                        >
+                            <ListItemText primary="Agregar Lugar" />
+                        </ListItemButton>
+                        <ListItemButton
+                            component={RouterLink}
+                            to="/itineraries"
+                            selected={location.pathname === "/itineraries"}
+                            onClick={toggleDrawer(false)}
+                        >
+                            <ListItemText primary="Itinerarios" />
+                        </ListItemButton>
                         {auth.isAuthenticated ? (
                             <>
                                 <ListItemButton
@@ -325,14 +341,6 @@ const Header: React.FC = () => {
                                     onClick={toggleDrawer(false)}
                                 >
                                     <ListItemText primary="Registrarse" />
-                                </ListItemButton>
-                                <ListItemButton
-                                    component={RouterLink}
-                                    to="/add-place"
-                                    selected={location.pathname === "/add-place"}
-                                    onClick={toggleDrawer(false)}
-                                >
-                                    <ListItemText primary="Agregar Lugar" />
                                 </ListItemButton>
                             </>
                         )}
