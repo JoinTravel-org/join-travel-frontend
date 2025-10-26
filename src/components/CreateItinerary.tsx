@@ -12,7 +12,9 @@ import {
     Alert,
     CircularProgress,
     Stack,
+    IconButton,
 } from '@mui/material';
+import CloseIcon from '@mui/icons-material/Close';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth';
 import type { Place } from '../types/place';
@@ -188,6 +190,13 @@ const CreateItinerary: React.FC = () => {
         setError(null);
     };
 
+    const handleRemovePlace = (placeId: string) => {
+        setCurrentItinerary((prev) => ({
+            ...prev,
+            items: prev.items.filter(item => item.place?.id !== placeId)
+        }));
+    };
+
     const handleSubmit = async () => {
         if (currentItinerary?.items.length == 0) {
             setError("El itinerario debe tener al menos un lugar.");
@@ -312,7 +321,7 @@ const CreateItinerary: React.FC = () => {
                         <Typography variant="body2" sx={{ mb: 1, color: 'text.secondary' }}>
                             Lista de lugares:
                         </Typography>
-                        <ItineraryPlaceThumbnail itinerary={currentItinerary} />
+                        <ItineraryPlaceThumbnail itinerary={currentItinerary} onRemovePlace={handleRemovePlace} />
                     </Box>
                 </Box>
 
@@ -354,7 +363,7 @@ const CreateItinerary: React.FC = () => {
     );
 };
 
-function ItineraryPlaceThumbnail({ itinerary }: { itinerary: Itinerary }) {
+function ItineraryPlaceThumbnail({ itinerary, onRemovePlace }: { itinerary: Itinerary; onRemovePlace: (placeId: string) => void }) {
     return (
         <Box
             sx={{
@@ -367,12 +376,10 @@ function ItineraryPlaceThumbnail({ itinerary }: { itinerary: Itinerary }) {
             {itinerary.items.map((item) => (
                 <Card
                     key={item.place?.id}
-                    onClick={() => window.open(`/place/${item.place?.id}`, '_blank')}
                     elevation={0}
                     sx={{
                         height: '100%',
                         display: 'flex',
-                        cursor: "pointer",
                         flexDirection: 'column',
                         border: '2px solid #000',
                         borderRadius: 2,
@@ -384,6 +391,7 @@ function ItineraryPlaceThumbnail({ itinerary }: { itinerary: Itinerary }) {
                             boxShadow: '8px 8px 6px 0px rgba(0,0,0,0.7)',
                             borderColor: '#333',
                         },
+                        position: 'relative',
                     }}
                 >
                     <Box
@@ -394,13 +402,36 @@ function ItineraryPlaceThumbnail({ itinerary }: { itinerary: Itinerary }) {
                             backgroundPosition: 'center',
                             backgroundColor: '#f0f0f0',
                             borderBottom: '2px solid #000',
+                            position: 'relative',
                         }}
                         onError={(e: any) => {
                             const target = e.target as HTMLDivElement;
                             target.style.backgroundImage = 'url(/placeholder-image.jpg)';
                         }}
-                    />
-                    <CardContent sx={{ flexGrow: 1, p: 3, backgroundColor: '#fff' }}>
+                    >
+                        <IconButton
+                            onClick={(e) => {
+                                e.stopPropagation();
+                                onRemovePlace(item.place?.id || '');
+                            }}
+                            sx={{
+                                position: 'absolute',
+                                top: 8,
+                                right: 8,
+                                backgroundColor: 'rgba(255, 255, 255, 0.8)',
+                                '&:hover': {
+                                    backgroundColor: 'rgba(255, 255, 255, 1)',
+                                },
+                            }}
+                            size="small"
+                        >
+                            <CloseIcon fontSize="small" />
+                        </IconButton>
+                    </Box>
+                    <CardContent
+                        sx={{ flexGrow: 1, p: 3, backgroundColor: '#fff', cursor: 'pointer' }}
+                        onClick={() => window.open(`/place/${item.place?.id}`, '_blank')}
+                    >
                         <Typography
                             variant="h6"
                             component="h3"
