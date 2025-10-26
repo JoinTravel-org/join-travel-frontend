@@ -9,13 +9,11 @@ import {
     Paper,
     CircularProgress,
     Alert,
-    Grid,
     Chip,
     Stack,
 } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth';
-import type { Itinerary } from '../types/itinerary';
 import type { Place } from '../types/place';
 import apiService from '../services/api.service';
 
@@ -136,72 +134,72 @@ const ItineraryList: React.FC = () => {
             )}
 
             {!loading && !error && itineraries.length > 0 && (
-                <Grid container spacing={3}>
+                <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', sm: 'repeat(2, 1fr)', md: 'repeat(3, 1fr)' }, gap: 3 }}>
                     {itineraries.map((itinerary) => (
-                        <Grid item xs={12} md={6} lg={4} key={itinerary.id}>
-                            <Card
-                                elevation={2}
-                                sx={{
-                                    height: '100%',
-                                    display: 'flex',
-                                    flexDirection: 'column',
-                                    cursor: 'pointer',
-                                    transition: 'all 0.3s ease',
-                                    '&:hover': {
-                                        transform: 'translateY(-4px)',
-                                        boxShadow: 6,
-                                    },
-                                }}
-                            >
-                                <CardContent sx={{ flexGrow: 1, p: 3 }}>
-                                    <Typography
-                                        variant="h6"
-                                        component="h2"
-                                        gutterBottom
-                                        sx={{ fontWeight: 700, mb: 2 }}
-                                    >
-                                        {itinerary.name}
-                                    </Typography>
+                        <Card
+                            key={itinerary.id}
+                            elevation={2}
+                            onClick={() => navigate(`/itinerary/${itinerary.id}`)}
+                            sx={{
+                                height: '100%',
+                                display: 'flex',
+                                flexDirection: 'column',
+                                cursor: 'pointer',
+                                transition: 'all 0.3s ease',
+                                '&:hover': {
+                                    transform: 'translateY(-4px)',
+                                    boxShadow: 6,
+                                },
+                            }}
+                        >
+                            <CardContent sx={{ flexGrow: 1, p: 3 }}>
+                                <Typography
+                                    variant="h6"
+                                    component="h2"
+                                    gutterBottom
+                                    sx={{ fontWeight: 700, mb: 2 }}
+                                >
+                                    {itinerary.name}
+                                </Typography>
 
-                                    <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
-                                        {itinerary.items.length} lugar{itinerary.items.length !== 1 ? 'es' : ''}
-                                    </Typography>
+                                <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+                                    {itinerary.items.length} lugar{itinerary.items.length !== 1 ? 'es' : ''}
+                                </Typography>
 
-                                    {itinerary.items.length > 0 && (
-                                        <Box sx={{ mb: 2 }}>
-                                            <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mb: 1 }}>
-                                                Lugares:
-                                            </Typography>
-                                            <Stack direction="row" spacing={1} flexWrap="wrap" gap={1}>
-                                                {itinerary.items.slice(0, 3).map((item) => (
-                                                    <Chip
-                                                        key={item.id}
-                                                        label={item.place?.name || 'Lugar'}
-                                                        size="small"
-                                                        sx={{ fontSize: '0.75rem' }}
-                                                    />
-                                                ))}
-                                                {itinerary.items.length > 3 && (
-                                                    <Chip
-                                                        label={`+${itinerary.items.length - 3} más`}
-                                                        size="small"
-                                                        color="primary"
-                                                        variant="outlined"
-                                                        sx={{ fontSize: '0.75rem' }}
-                                                    />
-                                                )}
-                                            </Stack>
-                                        </Box>
-                                    )}
+                                {itinerary.items.length > 0 && (
+                                    <Box sx={{ mb: 2 }}>
+                                        <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mb: 1 }}>
+                                            Lugares:
+                                        </Typography>
+                                        <Stack direction="row" spacing={1} flexWrap="wrap" gap={1}>
+                                            {itinerary.items.slice(0, 3).map((item) => (
+                                                <Chip
+                                                    key={item.id}
+                                                    label={item.place?.name || 'Lugar'}
+                                                    size="small"
+                                                    sx={{ fontSize: '0.75rem' }}
+                                                />
+                                            ))}
+                                            {itinerary.items.length > 3 && (
+                                                <Chip
+                                                    label={`+${itinerary.items.length - 3} más`}
+                                                    size="small"
+                                                    color="primary"
+                                                    variant="outlined"
+                                                    sx={{ fontSize: '0.75rem' }}
+                                                />
+                                            )}
+                                        </Stack>
+                                    </Box>
+                                )}
 
-                                    <Typography variant="caption" color="text.secondary">
-                                        Creado: {formatDate(itinerary.createdAt)}
-                                    </Typography>
-                                </CardContent>
-                            </Card>
-                        </Grid>
+                                <Typography variant="caption" color="text.secondary">
+                                    Creado: {formatDate(itinerary.createdAt)}
+                                </Typography>
+                            </CardContent>
+                        </Card>
                     ))}
-                </Grid>
+                </Box>
             )}
         </Container>
     );

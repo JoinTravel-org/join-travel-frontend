@@ -293,7 +293,7 @@ const CreateItinerary: React.FC = () => {
                     </Button>
                     <Button
                         variant="outlined"
-                        onClick={() => navigate('/')}
+                        onClick={() => navigate('/itineraries')}
                     >
                         Cancelar
                     </Button>

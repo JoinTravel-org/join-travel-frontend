@@ -241,6 +241,16 @@ class ApiService {
   }
 
   /**
+   * Obtiene un itinerario por su ID
+   * @param id - ID del itinerario
+   * @returns Promise con el itinerario
+   */
+  async getItineraryById(id: string) {
+    const response = await this.api.get(`/itineraries/${id}`);
+    return response.data;
+  }
+
+  /**
     * Obtiene la instancia de axios para peticiones personalizadas
     * @returns Instancia de axios
     */
