@@ -1,8 +1,9 @@
 import React, { useContext, useState, useEffect } from 'react';
 import { AuthContext } from '../contexts/AuthContext';
-import { Box, Fab, Paper, Typography, TextField, Button, List, ListItem, ListItemText, Avatar, CircularProgress } from '@mui/material';
+import { Box, Fab, Paper, Typography, TextField, Button, List, ListItem, ListItemText, Avatar, CircularProgress, IconButton, Tooltip } from '@mui/material';
 import ChatIcon from '@mui/icons-material/Chat';
 import SendIcon from '@mui/icons-material/Send';
+import AddIcon from '@mui/icons-material/Add';
 import apiService from '../services/api.service';
 
 interface Message {
@@ -19,6 +20,7 @@ interface ChatMessage {
   response?: string;
   conversationId?: string;
   timestamp: number;
+  createdAt: string;
 }
 
 const ChatBubble: React.FC = () => {
@@ -42,7 +44,7 @@ const ChatBubble: React.FC = () => {
 
   const loadChatHistory = async () => {
     try {
-      const response = await apiService.getChatHistory(authContext.user!.id, { limit: 50 });
+      const response = await apiService.getChatHistory({ limit: 50 });
       if (response.success && response.messages) {
         const formattedMessages: Message[] = [];
         response.messages.forEach((msg: ChatMessage) => {
@@ -51,7 +53,7 @@ const ChatBubble: React.FC = () => {
             id: msg.id + '_user',
             text: msg.message,
             sender: 'user',
-            timestamp: msg.timestamp,
+            timestamp: new Date(msg.createdAt).getTime(),
           });
           // Add AI response if exists
           if (msg.response) {
@@ -59,10 +61,12 @@ const ChatBubble: React.FC = () => {
               id: msg.id + '_ai',
               text: msg.response,
               sender: 'ai',
-              timestamp: msg.timestamp + 1000, // Slight delay for AI response
+              timestamp: new Date(msg.createdAt).getTime() + 1000, // Slight delay for AI response
             });
           }
         });
+        // Sort messages by timestamp (oldest first)
+        formattedMessages.sort((a, b) => a.timestamp - b.timestamp);
         setMessages(formattedMessages);
         // Set conversation ID from the first message if available
         if (response.messages.length > 0 && response.messages[0].conversationId) {
@@ -76,6 +80,21 @@ const ChatBubble: React.FC = () => {
 
   const handleToggleChat = () => {
     setIsOpen(!isOpen);
+  };
+
+  const handleNewChat = async () => {
+    try {
+      // Delete current conversation if it exists
+      if (conversationId) {
+        await apiService.deleteCurrentConversation();
+      }
+      // Clear messages and conversation ID
+      setMessages([]);
+      setConversationId(null);
+      setInputMessage('');
+    } catch (error) {
+      console.error('Failed to start new chat:', error);
+    }
   };
 
   const handleSendMessage = async () => {
@@ -98,7 +117,6 @@ const ChatBubble: React.FC = () => {
     try {
       // Send message to API
       const response = await apiService.sendChatMessage({
-        userId: authContext.user.id,
         message: messageToSend,
         conversationId: conversationId || undefined,
         timestamp,
@@ -116,7 +134,7 @@ const ChatBubble: React.FC = () => {
             id: response.message.id + '_ai',
             text: response.message.response,
             sender: 'ai',
-            timestamp: response.message.timestamp + 1000,
+            timestamp: new Date(response.message.createdAt).getTime() + 1000,
           };
           setMessages(prev => [...prev, aiMessage]);
         }
@@ -178,8 +196,30 @@ const ChatBubble: React.FC = () => {
           }}
         >
           {/* Header */}
-          <Box sx={{ p: 2, borderBottom: 1, borderColor: 'divider' }}>
+          <Box sx={{ p: 2, borderBottom: 1, borderColor: 'divider', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
             <Typography variant="h6">AI Chat Assistant</Typography>
+            <Box sx={{ display: 'flex', gap: 1 }}>
+              <Tooltip title="Start New Chat">
+                <IconButton
+                  onClick={handleNewChat}
+                  size="medium"
+                  color="primary"
+                  disabled={isLoading}
+                  sx={{
+                    bgcolor: 'primary.main',
+                    color: 'white',
+                    '&:hover': {
+                      bgcolor: 'primary.dark',
+                    },
+                    '&:disabled': {
+                      bgcolor: 'grey.400',
+                    }
+                  }}
+                >
+                  <AddIcon />
+                </IconButton>
+              </Tooltip>
+            </Box>
           </Box>
 
           {/* Messages */}

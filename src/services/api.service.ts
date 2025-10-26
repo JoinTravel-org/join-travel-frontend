@@ -267,7 +267,6 @@ class ApiService {
    * @returns Promise con la respuesta del servidor
    */
   async sendChatMessage(messageData: {
-    userId: string;
     message: string;
     conversationId?: string;
     timestamp: number;
@@ -277,12 +276,11 @@ class ApiService {
   }
 
   /**
-   * Obtiene el historial de chat de un usuario
-   * @param userId - ID del usuario
+   * Obtiene el historial de chat del usuario autenticado
    * @param options - Opciones de paginación y filtrado
    * @returns Promise con el historial de mensajes
    */
-  async getChatHistory(userId: string, options?: {
+  async getChatHistory(options?: {
     limit?: number;
     offset?: number;
     conversationId?: string;
@@ -292,17 +290,16 @@ class ApiService {
     if (options?.offset) params.append('offset', options.offset.toString());
     if (options?.conversationId) params.append('conversationId', options.conversationId);
 
-    const response = await this.api.get(`/chat/messages/${userId}?${params.toString()}`);
+    const response = await this.api.get(`/chat/messages/me?${params.toString()}`);
     return response.data;
   }
 
   /**
-   * Obtiene las conversaciones de un usuario
-   * @param userId - ID del usuario
+   * Obtiene las conversaciones del usuario autenticado
    * @returns Promise con las conversaciones
    */
-  async getConversations(userId: string) {
-    const response = await this.api.get(`/chat/conversations/${userId}`);
+  async getConversations() {
+    const response = await this.api.get("/chat/conversations/me");
     return response.data;
   }
 
@@ -311,11 +308,19 @@ class ApiService {
    * @param conversationData - Datos de la conversación
    * @returns Promise con la conversación creada
    */
-  async createConversation(conversationData: {
-    userId: string;
+  async createConversation(conversationData?: {
     title?: string;
   }) {
-    const response = await this.api.post("/chat/conversations", conversationData);
+    const response = await this.api.post("/chat/conversations", conversationData || {});
+    return response.data;
+  }
+
+  /**
+   * Elimina la conversación actual del usuario autenticado
+   * @returns Promise con la respuesta del servidor
+   */
+  async deleteCurrentConversation() {
+    const response = await this.api.delete("/chat/conversations/current");
     return response.data;
   }
 
