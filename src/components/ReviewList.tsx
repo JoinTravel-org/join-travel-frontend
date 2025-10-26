@@ -9,6 +9,7 @@ import {
 import reviewService from "../services/review.service";
 import type { Review } from "../types/review";
 import { Rating } from '@fluentui/react-rating';
+import MediaCarousel from "./MediaCarousel";
 
 interface ReviewListProps {
   placeId: string;
@@ -198,6 +199,13 @@ const ReviewList: React.FC<ReviewListProps> = ({ placeId, refreshTrigger }) => {
                 >
                   {review.content}
                 </Typography>
+
+                {/* Media attachments */}
+                {review.media && review.media.length > 0 && (
+                  <Box sx={{ mt: 2, mb: 1 }}>
+                    <MediaCarousel media={review.media} />
+                  </Box>
+                )}
               </Card>
             ))}
           </Box>

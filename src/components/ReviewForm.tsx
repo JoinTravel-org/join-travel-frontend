@@ -13,6 +13,7 @@ import { useAuth } from "../hooks/useAuth";
 import { useNavigate } from "react-router-dom";
 import reviewService from "../services/review.service";
 import type { CreateReviewData } from "../types/review";
+import MediaUploader from "./MediaUploader";
 
 interface ReviewFormProps {
   placeId: string;
@@ -27,6 +28,7 @@ const ReviewForm: React.FC<ReviewFormProps> = ({
   const navigate = useNavigate();
   const [rating, setRating] = React.useState<number | null>(null);
   const [content, setContent] = React.useState("");
+  const [mediaFiles, setMediaFiles] = React.useState<File[]>([]);
   const [loading, setLoading] = React.useState(false);
   const [error, setError] = React.useState<string | null>(null);
   const [success, setSuccess] = React.useState(false);
@@ -66,6 +68,7 @@ const ReviewForm: React.FC<ReviewFormProps> = ({
         rating,
         content: content.trim(),
         placeId,
+        media: mediaFiles.length > 0 ? mediaFiles : undefined,
       };
 
       await reviewService.createReview(reviewData);
@@ -76,6 +79,7 @@ const ReviewForm: React.FC<ReviewFormProps> = ({
       // Limpiar formulario
       setRating(null);
       setContent("");
+      setMediaFiles([]);
 
       // Callback para actualizar la lista
       onReviewCreated();
@@ -173,6 +177,12 @@ const ReviewForm: React.FC<ReviewFormProps> = ({
               disabled={loading}
               helperText={`${content.length} caracteres`}
               sx={{ mb: 2 }}
+            />
+            <MediaUploader
+              onFilesChange={(files) => {
+                const fileObjects = files.map((fileItem: { file: File }) => fileItem.file);
+                setMediaFiles(fileObjects);
+              }}
             />
             <Button
               type="submit"

@@ -1,3 +1,13 @@
+export interface ReviewMedia {
+  id: string;
+  filename: string;
+  originalFilename: string;
+  fileSize: number;
+  mimeType: string;
+  url: string; // URL to fetch the media file
+  createdAt: string;
+}
+
 export interface Review {
   id: string;
   rating: number; // 1-5 stars
@@ -7,12 +17,14 @@ export interface Review {
   userEmail: string;
   createdAt: string;
   updatedAt: string;
+  media?: ReviewMedia[];
 }
 
 export interface CreateReviewData {
   rating: number;
   content: string;
   placeId: string;
+  media?: File[];
 }
 
 export interface ReviewResponse {
