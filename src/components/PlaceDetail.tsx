@@ -21,6 +21,7 @@ import type { Place } from "../types/place";
 import { useAuth } from "../hooks/useAuth";
 import ReviewForm from "./ReviewForm";
 import ReviewList from "./ReviewList";
+import reviewService from "../services/review.service";
 
 const PlaceDetail: React.FC = () => {
   const INFO_NOT_AVAILABLE = "Información no disponible temporalmente";
@@ -36,6 +37,26 @@ const PlaceDetail: React.FC = () => {
   const [descriptionSuccess, setDescriptionSuccess] = useState(false);
   const [snackbarOpen, setSnackbarOpen] = useState(false);
   const [reviewRefreshTrigger, setReviewRefreshTrigger] = useState(0);
+  const [reviewStats, setReviewStats] = useState<{ averageRating: number; totalReviews: number }>({
+    averageRating: 0,
+    totalReviews: 0,
+  });
+
+  useEffect (() => {
+    const fetchReviewStats = async () => {
+      try {
+        if (!id) return;
+        const stats = await reviewService.getReviewStats(id);
+        setReviewStats({
+          averageRating: stats.averageRating,
+          totalReviews: stats.totalReviews,
+        });
+      } catch (error) {
+        console.error("Error fetching review stats:", error);
+      }
+    };
+    fetchReviewStats();
+  }, [id]);
 
   useEffect(() => {
     const fetchPlace = async () => {
@@ -178,7 +199,7 @@ const PlaceDetail: React.FC = () => {
             <Box sx={{ display: "flex", alignItems: "flex-start", mt: 1 }}>
               <Rating value={place.rating || 0} readOnly size="small" />
               <Typography variant="body2" sx={{ ml: 1 }}>
-                {place.rating?.toFixed(1) || "0.0"} (124 Reseñas)
+                {reviewStats.averageRating|| "0.0"} ({reviewStats.totalReviews} reseñas)
               </Typography>
             </Box>
             <Box sx={{ mt: 2 }}>
