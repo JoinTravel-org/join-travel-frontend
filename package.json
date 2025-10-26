@@ -11,6 +11,7 @@
     "start": "pnpm run build && serve dist"
   },
   "dependencies": {
+    "@cometchat/chat-uikit-react": "^6.3.2",
     "@emotion/react": "^11.14.0",
     "@emotion/styled": "^11.14.1",
     "@fluentui/react-rating": "^9.3.8",

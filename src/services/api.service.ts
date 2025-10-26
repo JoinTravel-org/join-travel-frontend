@@ -262,6 +262,64 @@ class ApiService {
   }
 
   /**
+   * Envía un mensaje de chat
+   * @param messageData - Datos del mensaje
+   * @returns Promise con la respuesta del servidor
+   */
+  async sendChatMessage(messageData: {
+    userId: string;
+    message: string;
+    conversationId?: string;
+    timestamp: number;
+  }) {
+    const response = await this.api.post("/chat/messages", messageData);
+    return response.data;
+  }
+
+  /**
+   * Obtiene el historial de chat de un usuario
+   * @param userId - ID del usuario
+   * @param options - Opciones de paginación y filtrado
+   * @returns Promise con el historial de mensajes
+   */
+  async getChatHistory(userId: string, options?: {
+    limit?: number;
+    offset?: number;
+    conversationId?: string;
+  }) {
+    const params = new URLSearchParams();
+    if (options?.limit) params.append('limit', options.limit.toString());
+    if (options?.offset) params.append('offset', options.offset.toString());
+    if (options?.conversationId) params.append('conversationId', options.conversationId);
+
+    const response = await this.api.get(`/chat/messages/${userId}?${params.toString()}`);
+    return response.data;
+  }
+
+  /**
+   * Obtiene las conversaciones de un usuario
+   * @param userId - ID del usuario
+   * @returns Promise con las conversaciones
+   */
+  async getConversations(userId: string) {
+    const response = await this.api.get(`/chat/conversations/${userId}`);
+    return response.data;
+  }
+
+  /**
+   * Crea una nueva conversación
+   * @param conversationData - Datos de la conversación
+   * @returns Promise con la conversación creada
+   */
+  async createConversation(conversationData: {
+    userId: string;
+    title?: string;
+  }) {
+    const response = await this.api.post("/chat/conversations", conversationData);
+    return response.data;
+  }
+
+  /**
     * Obtiene la instancia de axios para peticiones personalizadas
     * @returns Instancia de axios
     */

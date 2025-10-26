@@ -12,6 +12,7 @@ import { AuthProvider } from "./contexts/AuthContext";
 import Home from "./components/Home";
 import Header from "./components/Header";
 import Footer from "./components/Footer";
+import ChatBubble from "./components/ChatBubble";
 import { initAnalytics, trackPageview } from "./utils/analytics";
 
 import Login from "./components/Login";
@@ -88,6 +89,7 @@ function App() {
             </Suspense>
           </main>
           <ConditionalFooter />
+          <ChatBubble />
         </Router>
       </AuthProvider>
     </AppThemeProvider>
