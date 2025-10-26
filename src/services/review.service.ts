@@ -17,11 +17,21 @@ class ReviewService {
    */
   async createReview(reviewData: CreateReviewData): Promise<ReviewResponse> {
     try {
+      const formData = new FormData();
+      formData.append('rating', reviewData.rating.toString());
+      formData.append('content', reviewData.content);
+      if (reviewData.media) {
+        reviewData.media.forEach((file, index) => {
+          formData.append(`media[${index}]`, file);
+        });
+      }
+
       const response = await apiService
         .getAxiosInstance()
-        .post(`/places/${reviewData.placeId}/reviews`, {
-          rating: reviewData.rating,
-          content: reviewData.content,
+        .post(`/places/${reviewData.placeId}/reviews`, formData, {
+          headers: {
+            'Content-Type': 'multipart/form-data',
+          },
         });
       return response.data;
     } catch (error) {
@@ -43,6 +53,20 @@ class ReviewService {
     } catch (error) {
       throw error as ReviewListResponse;
     }
+  }
+
+  /**
+   * Obtiene un archivo de media
+   * @param mediaId - ID del archivo de media
+   * @returns Promise con el blob del archivo
+   */
+  async getReviewMedia(mediaId: string): Promise<Blob> {
+    const response = await apiService
+      .getAxiosInstance()
+      .get(`/media/${mediaId}`, {
+        responseType: 'blob',
+      });
+    return response.data;
   }
 
   /**

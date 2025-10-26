@@ -20,6 +20,8 @@ import ConfirmEmail from "./components/ConfirmEmail";
 import AddPlace from "./components/AddPlace";
 import PlaceDetail from "./components/PlaceDetail";
 import CreateItinerary from "./components/CreateItinerary";
+import ItineraryList from "./components/ItineraryList";
+import ItineraryDetail from "./components/ItineraryDetail";
 
 function AnalyticsListener() {
   const location = useLocation();
@@ -77,6 +79,9 @@ function App() {
                 />
                 <Route path="/confirm-email" element={<ConfirmEmail />} />
                 <Route path="/add-place" element={<AddPlace />} />
+                <Route path="/itineraries" element={<ItineraryList />} />
+                <Route path="/itinerary/:id" element={<ItineraryDetail />} />
+                <Route path="/itinerary/:id/edit" element={<CreateItinerary />} />
                 <Route path="/create-itinerary" element={<CreateItinerary />} />
                 <Route path="/place/:id" element={<PlaceDetail />} />
               </Routes>
