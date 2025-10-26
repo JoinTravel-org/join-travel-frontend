@@ -2,13 +2,13 @@ import React, { useState, useEffect } from "react";
 import {
   Box,
   Typography,
-  Rating,
   Card,
   CircularProgress,
   Alert,
 } from "@mui/material";
 import reviewService from "../services/review.service";
 import type { Review } from "../types/review";
+import { Rating } from '@fluentui/react-rating';
 
 interface ReviewListProps {
   placeId: string;
@@ -169,7 +169,12 @@ const ReviewList: React.FC<ReviewListProps> = ({ placeId, refreshTrigger }) => {
                       alignItems: "flex-end",
                     }}
                   >
-                    <Rating size="small" value={review.rating} readOnly />
+                    <Rating
+                      color="marigold"
+                      size="small"
+                      value={review.rating}
+                      style={{ pointerEvents: 'none' }}
+                    />
                     <Typography
                       variant="caption"
                       color="text.secondary"
