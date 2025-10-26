@@ -7,6 +7,7 @@ export interface Review {
   userEmail: string;
   createdAt: string;
   updatedAt: string;
+  placeName?: string;
 }
 
 export interface CreateReviewData {

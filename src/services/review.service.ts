@@ -56,6 +56,18 @@ class ReviewService {
       .get(`/places/${placeId}/reviews/stats`);
     return response.data;
   }
+
+
+  async getAllReviews(page: number, limit: number): Promise<ReviewListResponse> {
+    try {
+      const response = await apiService
+        .getAxiosInstance()
+        .get(`/places/reviews?page=${page}&limit=${limit}`);
+      return response.data;
+    } catch (error) {
+      throw error as ReviewListResponse;
+    }
+  }
 }
 
 export default new ReviewService();
