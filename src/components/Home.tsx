@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { Typography, Button, Container, Box, Paper, Card, CardContent, Stack } from "@mui/material";
 import { useTheme } from "../hooks/useTheme";
-import { Explore, Group, AddLocation, Star } from "@mui/icons-material";
+import { Group, AddLocation, Star } from "@mui/icons-material";
 import { useNavigate } from "react-router-dom";
 import { trackEvent } from "../utils/analytics";
 import { useAuth } from "../hooks/useAuth";
