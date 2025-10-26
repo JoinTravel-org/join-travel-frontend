@@ -7,7 +7,6 @@ import {
   Typography,
   Container,
   CircularProgress,
-  Rating,
   Button,
   TextField,
   Alert,
@@ -22,6 +21,7 @@ import { useAuth } from "../hooks/useAuth";
 import ReviewForm from "./ReviewForm";
 import ReviewList from "./ReviewList";
 import reviewService from "../services/review.service";
+import { Rating } from '@fluentui/react-rating';
 
 const PlaceDetail: React.FC = () => {
   const INFO_NOT_AVAILABLE = "Información no disponible temporalmente";
@@ -196,10 +196,15 @@ const PlaceDetail: React.FC = () => {
             <Typography variant="h6" color="text.secondary" fontWeight={300}>
               {place.city || INFO_NOT_AVAILABLE}
             </Typography>
-            <Box sx={{ display: "flex", alignItems: "flex-start", mt: 1 }}>
-              <Rating value={place.rating || 0} readOnly size="small" />
+            <Box sx={{ display: "flex", alignItems: "center", mt: 1 }}>
+              <Rating
+                color="marigold"
+                size="small"
+                value={reviewStats.averageRating}
+                style={{ pointerEvents: 'none' }}
+              />
               <Typography variant="body2" sx={{ ml: 1 }}>
-                {reviewStats.averageRating|| "0.0"} ({reviewStats.totalReviews} reseñas)
+                {reviewStats.totalReviews} {reviewStats.totalReviews === 1 ? "reseña" : "reseñas"}
               </Typography>
             </Box>
             <Box sx={{ mt: 2 }}>
