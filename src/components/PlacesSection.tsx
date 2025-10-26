@@ -15,21 +15,8 @@ import {
 import { useNavigate } from "react-router-dom";
 import reviewService from "../services/review.service";
 import type { Review } from "../types/review";
+import type { Place } from "../types/place";
 import ReviewSkeleton from "./ReviewSkeleton";
-
-export interface Place {
-  id: string;
-  name: string;
-  address: string;
-  latitude: string;
-  longitude: string;
-  image?: string;
-  rating: number | null;
-  createdAt: string;
-  updatedAt: string;
-  description: string | null;
-  city: string | null;
-}
 
 interface Props {
   places: Place[];

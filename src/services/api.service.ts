@@ -148,6 +148,8 @@ class ApiService {
     latitude: number;
     longitude: number;
     image?: string;
+    city?: string;
+    description?: string;
   }) {
     const placeData = {
       name: place.name,
@@ -155,7 +157,10 @@ class ApiService {
       latitude: place.latitude,
       longitude: place.longitude,
       ...(place.image && { image: place.image }),
+      ...(place.city && { city: place.city }),
+      ...(place.description && { description: place.description }),
     };
+    Logger.getInstance().info(JSON.stringify(placeData))
     const response = await this.api.post("/places", placeData);
     return response.data;
   }

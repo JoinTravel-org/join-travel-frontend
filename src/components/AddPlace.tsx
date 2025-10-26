@@ -16,16 +16,16 @@ import { trackEvent } from "../utils/analytics";
 import apiService from "../services/api.service";
 import { useAuth } from "../hooks/useAuth";
 
-interface Place {
-  name: string;
-  address: string;
-  latitude: number;
-  longitude: number;
-  image?: string;
-}
-
 const MapComponent: React.FC<{
-  onPlaceSelect: (place: Place) => void;
+  onPlaceSelect: (place: {
+    name: string;
+    address: string;
+    latitude: number;
+    longitude: number;
+    image?: string;
+    city: string;
+    description: string;
+  }) => void;
 }> = ({ onPlaceSelect }) => {
   const ref = useRef<HTMLDivElement>(null);
   const [map, setMap] = useState<google.maps.Map>();
@@ -59,7 +59,16 @@ const MapComponent: React.FC<{
           const place = places[0];
 
           if (place.geometry && place.geometry.location) {
-            const selectedPlace: Place = {
+            // Extract city from address components
+            const addressComponents = place.address_components || [];
+            const cityComponent = addressComponents.find(component =>
+              component.types.includes('locality') ||
+              component.types.includes('administrative_area_level_2') ||
+              component.types.includes('administrative_area_level_1')
+            );
+            const city = cityComponent ? cityComponent.long_name : "";
+
+            const selectedPlace = {
               name: place.name || "",
               address: place.formatted_address || "",
               latitude: place.geometry.location.lat(),
@@ -68,6 +77,8 @@ const MapComponent: React.FC<{
                 place.photos && place.photos.length > 0
                   ? place.photos[0].getUrl()
                   : undefined,
+              city,
+              description: "",
             };
 
             onPlaceSelect(selectedPlace);
@@ -138,11 +149,20 @@ const AddPlace: React.FC = () => {
   }, [auth.isAuthenticated, navigate]);
 
   // ... resto del componente
-  const [selectedPlace, setSelectedPlace] = useState<Place | null>(null);
+  const [selectedPlace, setSelectedPlace] = useState<{
+    name: string;
+    address: string;
+    latitude: number;
+    longitude: number;
+    image?: string;
+    city: string;
+    description: string;
+  } | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
   const [apiKey, setApiKey] = useState<string>("");
+  const [descriptionError, setDescriptionError] = useState<string | null>(null);
 
   // Fetch API key from backend instead of environment
   React.useEffect(() => {
@@ -165,7 +185,15 @@ const AddPlace: React.FC = () => {
     fetchApiKey();
   }, []);
 
-  const handlePlaceSelect = (place: Place) => {
+  const handlePlaceSelect = (place: {
+    name: string;
+    address: string;
+    latitude: number;
+    longitude: number;
+    image?: string;
+    city: string;
+    description: string;
+  }) => {
     setSelectedPlace(place);
     setError(null);
   };
@@ -173,12 +201,27 @@ const AddPlace: React.FC = () => {
   const handleSubmit = async () => {
     if (!selectedPlace) return;
 
+    // Validate description length
+    if (selectedPlace.description && (selectedPlace.description.length < 30 || selectedPlace.description.length > 1000)) {
+      setDescriptionError("La descripción debe tener entre 30 y 1000 caracteres.");
+      return;
+    }
+
     setLoading(true);
     setError(null);
+    setDescriptionError(null);
 
     try {
       // Call API to add place
-      await apiService.addPlace(selectedPlace);
+      await apiService.addPlace({
+        name: selectedPlace.name,
+        address: selectedPlace.address,
+        latitude: selectedPlace.latitude,
+        longitude: selectedPlace.longitude,
+        image: selectedPlace.image,
+        city: selectedPlace.city,
+        description: selectedPlace.description,
+      });
       setSuccess(true);
       trackEvent("place_added", { place_name: selectedPlace.name });
 
@@ -271,6 +314,32 @@ const AddPlace: React.FC = () => {
               InputProps={{ readOnly: true }}
               sx={{ mb: 2 }}
             />
+            <TextField
+              fullWidth
+              label="Ciudad"
+              value={selectedPlace.city}
+              onChange={(e) => setSelectedPlace({ ...selectedPlace, city: e.target.value })}
+              sx={{ mb: 2 }}
+            />
+            <TextField
+              fullWidth
+              label="Descripción"
+              value={selectedPlace.description}
+              onChange={(e) => {
+                setSelectedPlace({ ...selectedPlace, description: e.target.value });
+                setDescriptionError(null);
+              }}
+              multiline
+              rows={3}
+              helperText={`${selectedPlace.description.length}/1000 caracteres`}
+              error={!!descriptionError}
+              sx={{ mb: 2 }}
+            />
+            {descriptionError && (
+              <Alert severity="error" sx={{ mb: 2 }}>
+                {descriptionError}
+              </Alert>
+            )}
             {selectedPlace.image && (
               <Box sx={{ mb: 2 }}>
                 <Typography

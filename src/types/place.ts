@@ -4,7 +4,7 @@ export interface Place {
     address: string;
     latitude: string;
     longitude: string;
-    image: string | null;
+    image?: string;
     rating: number | null;
     createdAt: string;
     updatedAt: string;
