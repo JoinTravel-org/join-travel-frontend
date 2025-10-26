@@ -5,7 +5,6 @@ import {
   Box,
   Card,
   CardContent,
-  Rating,
   CircularProgress,
   Pagination,
   Divider,
@@ -16,6 +15,7 @@ import reviewService from "../services/review.service";
 import type { Review } from "../types/review";
 import type { Place } from "../types/place";
 import ReviewSkeleton from "./ReviewSkeleton";
+import { Rating } from '@fluentui/react-rating';
 
 interface Props {
   places: Place[];
@@ -176,35 +176,21 @@ const PlacesSection: React.FC<Props> = ({
                 >
                   {place.name}
                 </Typography>
-                <Box
-                  sx={{ display: "flex", alignItems: "center", gap: 1, mb: 2 }}
-                >
+                <Box sx={{ display: "flex", alignItems: "center", justifyContent: "center", mb: 2 }}>
                   <Rating
-                    value={place.rating || 0}
-                    readOnly
-                    size="small"
-                    sx={{
-                      "& .MuiRating-iconFilled": {
-                        color: "#000",
-                      },
-                      "& .MuiRating-iconEmpty": {
-                        color: "#ccc",
-                      },
-                    }}
+                    value={
+                      place.reviews && place.reviews.length > 0
+                        ? place.reviews.reduce((sum, review) => sum + review.rating, 0) / place.reviews.length
+                        : 0
+                    }
+                    size="medium"
+                    style={{ pointerEvents: 'none' }}
                   />
-                  <Typography
-                    variant="body2"
-                    sx={{
-                      fontWeight: 700,
-                      fontSize: "0.9rem",
-                      color: "#000",
-                    }}
-                  >
-                    (
-                    {typeof place.rating === "number"
-                      ? place.rating.toFixed(1)
-                      : "0.0"}
-                    )
+                  <Typography variant="body2" sx={{ ml: 1 }}>
+                    {place.reviews && place.reviews.length > 0
+                      ? (place.reviews.reduce((sum, review) => sum + review.rating, 0) / place.reviews.length).toFixed(1)
+                      : "0.0"
+                    } ({place.reviews ? place.reviews.length : 0} {(place.reviews ? place.reviews.length : 0) === 1 ? "reseña" : "reseñas"})
                   </Typography>
                 </Box>
 
@@ -221,7 +207,7 @@ const PlacesSection: React.FC<Props> = ({
                       fontSize: "0.875rem",
                     }}
                   >
-                    Reseñas:
+                    Última reseña:
                   </Typography>
 
                   {place.reviewsLoading ? (
@@ -251,16 +237,8 @@ const PlacesSection: React.FC<Props> = ({
                         },
                       }}
                     >
-                      {place.reviews.slice(0, 3).map((review, index) => (
-                        <Box
-                          key={review.id}
-                          sx={{
-                            mb:
-                              index < place.reviews!.length - 1 && index < 2
-                                ? 1
-                                : 0,
-                          }}
-                        >
+                      {place.reviews.slice(-1).map((review) => (
+                        <Box key={review.id}>
                           <Box
                             sx={{
                               display: "flex",
@@ -272,8 +250,8 @@ const PlacesSection: React.FC<Props> = ({
                           >
                             <Rating
                               value={review.rating}
-                              readOnly
                               size="small"
+                              style={{ pointerEvents: 'none' }}
                             />
                             <Typography
                               variant="caption"
@@ -297,15 +275,12 @@ const PlacesSection: React.FC<Props> = ({
                           >
                             "{truncateReviewText(review.content, 150)}"
                           </Typography>
-                          {index < place.reviews!.length - 1 && index < 2 && (
-                            <Divider sx={{ mt: 1, opacity: 0.3 }} />
-                          )}
                         </Box>
                       ))}
 
-                      {place.reviews.length > 3 && (
+                      {place.reviews.length > 1 && (
                         <Chip
-                          label={`+${place.reviews.length - 3} más`}
+                          label={`+${place.reviews.length - 1} más`}
                           size="small"
                           variant="outlined"
                           sx={{
