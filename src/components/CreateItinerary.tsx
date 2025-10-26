@@ -181,7 +181,7 @@ const CreateItinerary: React.FC = () => {
             setTimeout(() => {
                 setSuccess(false);
                 setCurrentItinerary(defaultItinerary);
-                navigate('/');
+                navigate('/itineraries');
             }, 3000);
         } catch (err: unknown) {
             const errorMessage = err instanceof Error ? err.message : 'Error desconocido';

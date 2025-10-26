@@ -232,6 +232,15 @@ class ApiService {
   }
 
   /**
+   * Obtiene todos los itinerarios del usuario autenticado
+   * @returns Promise con los itinerarios del usuario
+   */
+  async getUserItineraries() {
+    const response = await this.api.get("/itineraries");
+    return response.data;
+  }
+
+  /**
     * Obtiene la instancia de axios para peticiones personalizadas
     * @returns Instancia de axios
     */
