@@ -4,10 +4,12 @@ npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 pnpm-debug.log*
-
+docs
+.pnpm-store
 # Build output
 dist
 build
+.github
 
 # Version control
 .git

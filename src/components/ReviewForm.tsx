@@ -1,14 +1,14 @@
-import React, { useState } from "react";
 import {
   Box,
   Typography,
-  Rating,
   TextField,
   Button,
   Alert,
   CircularProgress,
   Paper,
 } from "@mui/material";
+import { Rating } from '@fluentui/react-rating';
+import * as React from 'react';
 import { useAuth } from "../hooks/useAuth";
 import { useNavigate } from "react-router-dom";
 import reviewService from "../services/review.service";
@@ -25,11 +25,11 @@ const ReviewForm: React.FC<ReviewFormProps> = ({
 }) => {
   const { isAuthenticated } = useAuth();
   const navigate = useNavigate();
-  const [rating, setRating] = useState<number | null>(0);
-  const [content, setContent] = useState("");
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const [success, setSuccess] = useState(false);
+  const [rating, setRating] = React.useState<number | null>(null);
+  const [content, setContent] = React.useState("");
+  const [loading, setLoading] = React.useState(false);
+  const [error, setError] = React.useState<string | null>(null);
+  const [success, setSuccess] = React.useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -74,7 +74,7 @@ const ReviewForm: React.FC<ReviewFormProps> = ({
       setSuccess(true);
 
       // Limpiar formulario
-      setRating(0);
+      setRating(null);
       setContent("");
 
       // Callback para actualizar la lista
@@ -151,12 +151,16 @@ const ReviewForm: React.FC<ReviewFormProps> = ({
               <Typography variant="body2" sx={{ mb: 1 }}>
                 Calificación *
               </Typography>
-              <Rating
-                size="large"
-                value={rating}
-                onChange={(_, newValue) => setRating(newValue)}
-                disabled={loading}
-              />
+              <Box sx={{ display: 'flex', justifyContent: 'center' }}>
+                <Rating
+                  name="place-rating"
+                  size="extra-large"
+                  color="marigold"
+                  max={5}
+                  value={rating || 0}
+                  onChange={(_, data) => setRating(data.value)}
+                />
+              </Box>
             </Box>
             <TextField
               multiline
