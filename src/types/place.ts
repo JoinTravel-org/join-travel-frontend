@@ -2,9 +2,9 @@ export interface Place {
     id: string;
     name: string;
     address: string;
-    latitude: string;
-    longitude: string;
-    image?: string;
+    latitude: number;
+    longitude: number;
+    image: string | null;
     rating: number | null;
     createdAt: string;
     updatedAt: string;

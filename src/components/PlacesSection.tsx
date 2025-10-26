@@ -11,7 +11,6 @@ import {
   Divider,
   Chip,
 } from "@mui/material";
-
 import { useNavigate } from "react-router-dom";
 import reviewService from "../services/review.service";
 import type { Review } from "../types/review";
