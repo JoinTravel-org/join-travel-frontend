@@ -88,13 +88,22 @@ const ItineraryDetail: React.FC = () => {
 
     return (
         <Container maxWidth="lg" sx={{ py: 4 }}>
-            <Button
-                variant="outlined"
-                onClick={() => navigate('/itineraries')}
-                sx={{ mb: 3 }}
-            >
-                ← Volver a Itinerarios
-            </Button>
+            <Box sx={{ display: 'flex', gap: 2, mb: 3 }}>
+                <Button
+                    variant="outlined"
+                    onClick={() => navigate('/itineraries')}
+                >
+                    ← Volver a Itinerarios
+                </Button>
+                {!loading && !error && itinerary && (
+                    <Button
+                        variant="contained"
+                        onClick={() => navigate(`/itinerary/${id}/edit`)}
+                    >
+                        Editar Itinerario
+                    </Button>
+                )}
+            </Box>
 
             {loading && (
                 <Box sx={{ display: 'flex', justifyContent: 'center', my: 4 }}>

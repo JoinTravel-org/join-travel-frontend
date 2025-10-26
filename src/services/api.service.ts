@@ -251,6 +251,17 @@ class ApiService {
   }
 
   /**
+   * Actualiza un itinerario existente
+   * @param id - ID del itinerario
+   * @param itinerary - Datos del itinerario a actualizar
+   * @returns Promise con la respuesta del servidor
+   */
+  async updateItinerary(id: string, itinerary: CreateItineraryRequest) {
+    const response = await this.api.put(`/itineraries/${id}`, itinerary);
+    return response.data;
+  }
+
+  /**
     * Obtiene la instancia de axios para peticiones personalizadas
     * @returns Instancia de axios
     */

@@ -81,6 +81,7 @@ function App() {
                 <Route path="/add-place" element={<AddPlace />} />
                 <Route path="/itineraries" element={<ItineraryList />} />
                 <Route path="/itinerary/:id" element={<ItineraryDetail />} />
+                <Route path="/itinerary/:id/edit" element={<CreateItinerary />} />
                 <Route path="/create-itinerary" element={<CreateItinerary />} />
                 <Route path="/place/:id" element={<PlaceDetail />} />
               </Routes>
