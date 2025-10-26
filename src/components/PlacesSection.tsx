@@ -5,17 +5,17 @@ import {
   Box,
   Card,
   CardContent,
+  CardMedia,
+  Button,
   CircularProgress,
   Pagination,
-  Divider,
-  Chip,
 } from "@mui/material";
 import { useNavigate } from "react-router-dom";
 import reviewService from "../services/review.service";
 import type { Review } from "../types/review";
 import type { Place } from "../types/place";
+import { Rating } from "@fluentui/react-rating";
 import ReviewSkeleton from "./ReviewSkeleton";
-import { Rating } from '@fluentui/react-rating';
 
 interface Props {
   places: Place[];
@@ -42,7 +42,6 @@ const PlacesSection: React.FC<Props> = ({
     PlaceWithReviews[]
   >([]);
 
-  // Cargar reseñas para cada lugar cuando los lugares cambian
   useEffect(() => {
     const loadReviewsForPlaces = async () => {
       if (!places.length) {
@@ -50,7 +49,6 @@ const PlacesSection: React.FC<Props> = ({
         return;
       }
 
-      // Inicializar con loading state
       const placesWithLoadingState = places.map((place) => ({
         ...place,
         reviews: [],
@@ -68,11 +66,7 @@ const PlacesSection: React.FC<Props> = ({
               ? reviewResponse.data || []
               : [];
             return { ...place, reviews, reviewsLoading: false };
-          } catch (error) {
-            console.error(
-              `Error loading reviews for place ${place.id}:`,
-              error
-            );
+          } catch {
             return { ...place, reviews: [], reviewsLoading: false };
           }
         })
@@ -84,38 +78,43 @@ const PlacesSection: React.FC<Props> = ({
     loadReviewsForPlaces();
   }, [places]);
 
-  // Función para truncar texto de reseña a máximo 1000 caracteres
-  const truncateReviewText = (
-    text: string,
-    maxLength: number = 1000
-  ): string => {
-    if (text.length <= maxLength) return text;
-    return text.substring(0, maxLength).trim() + "...";
+  const averageRating = (reviews?: Review[]) => {
+    if (!reviews?.length) return 0;
+    return reviews.reduce((sum, r) => sum + r.rating, 0) / reviews.length;
   };
 
   return (
     <Box
-      id="places-section"
-      component="section"
-      aria-labelledby="places-title"
-      sx={{ py: { xs: 5, md: 8 } }}
+      sx={{
+        py: { xs: 5, md: 8 },
+        background: "linear-gradient(180deg, #f7fafc 0%, #eef3f7 100%)",
+      }}
     >
       <Container maxWidth="lg">
-        <Typography
-          id="places-title"
-          variant="h2"
-          component="h2"
-          gutterBottom
-          sx={{ fontWeight: 700, fontSize: "var(--fs-h2)" }}
-        >
-          Lugares Disponibles
-        </Typography>
+        <Box textAlign="center" mb={6}>
+          <Button
+            variant="contained"
+            color="primary"
+            size="large"
+            sx={{
+              px: 4,
+              py: 1.2,
+              fontWeight: 600,
+              borderRadius: 3,
+              backgroundColor: "#004C92",
+              "&:hover": { backgroundColor: "#003870" },
+            }}
+          >
+            Comenzar gratis
+          </Button>
+        </Box>
 
+        {/* Grid of Places */}
         <Box
           sx={{
-            mt: 2,
             display: "grid",
-            gap: { xs: 3, md: 4 },
+            gap: 3,
+            mb: 6,
             gridTemplateColumns: {
               xs: "1fr",
               sm: "repeat(2, 1fr)",
@@ -127,185 +126,87 @@ const PlacesSection: React.FC<Props> = ({
           {placesWithReviews.map((place) => (
             <Card
               key={place.id}
-              onClick={() => navigate(`/place/${place.id}`)}
               elevation={0}
               sx={{
-                height: "100%",
-                display: "flex",
+                borderRadius: 3,
+                textAlign: "center",
+                boxShadow: "0 4px 12px rgba(0,0,0,0.08)",
+                transition: "transform 0.3s ease, box-shadow 0.3s ease",
                 cursor: "pointer",
-                flexDirection: "column",
-                border: "2px solid #000",
-                borderRadius: 2,
-                backgroundColor: "#fff",
-                boxShadow: "6px 6px 4px 0px rgba(0,0,0,0.7)",
-                transition: "all 0.3s ease",
                 "&:hover": {
-                  transform: "translate(-2px, -2px)",
-                  boxShadow: "8px 8px 6px 0px rgba(0,0,0,0.7)",
-                  borderColor: "#333",
+                  transform: "translateY(-5px)",
+                  boxShadow: "0 8px 16px rgba(0,0,0,0.15)",
                 },
               }}
+              onClick={() => navigate(`/place/${place.id}`)}
             >
-              <Box
-                sx={{
-                  height: 200,
-                  backgroundImage: `url(${
-                    place.image || "/placeholder-image.jpg"
-                  })`,
-                  backgroundSize: "cover",
-                  backgroundPosition: "center",
-                  backgroundColor: "#f0f0f0",
-                  borderBottom: "2px solid #000",
-                }}
-                onError={(e) => {
-                  const target = e.target as HTMLDivElement;
-                  target.style.backgroundImage = "url(/placeholder-image.jpg)";
-                }}
+              <CardMedia
+                component="img"
+                height="180"
+                image={place.image || "/placeholder-image.jpg"}
+                alt={place.name}
+                sx={{ borderTopLeftRadius: 12, borderTopRightRadius: 12 }}
               />
-              <CardContent sx={{ flexGrow: 1, p: 3, backgroundColor: "#fff" }}>
+              <CardContent sx={{ p: 2.5 }}>
                 <Typography
                   variant="h6"
-                  component="h3"
                   sx={{
                     fontWeight: 700,
-                    mb: 2,
-                    fontSize: "1.25rem",
-                    letterSpacing: "0.02em",
-                    color: "#000",
+                    color: "#002B5B",
+                    mb: 1,
+                    fontSize: "1.1rem",
                   }}
                 >
                   {place.name}
                 </Typography>
-                <Box sx={{ display: "flex", alignItems: "center", justifyContent: "center", mb: 2 }}>
-                  <Rating
-                    value={
-                      place.reviews && place.reviews.length > 0
-                        ? place.reviews.reduce((sum, review) => sum + review.rating, 0) / place.reviews.length
-                        : 0
-                    }
-                    size="medium"
-                    style={{ pointerEvents: 'none' }}
-                  />
-                  <Typography variant="body2" sx={{ ml: 1 }}>
-                    {place.reviews && place.reviews.length > 0
-                      ? (place.reviews.reduce((sum, review) => sum + review.rating, 0) / place.reviews.length).toFixed(1)
-                      : "0.0"
-                    } ({place.reviews ? place.reviews.length : 0} {(place.reviews ? place.reviews.length : 0) === 1 ? "reseña" : "reseñas"})
-                  </Typography>
-                </Box>
 
-                {/* Sección de Reseñas */}
-                <Divider sx={{ my: 2, borderColor: "#000", opacity: 0.2 }} />
-
-                <Box>
-                  <Typography
-                    variant="subtitle2"
+                {place.reviewsLoading ? (
+                  <ReviewSkeleton count={1} />
+                ) : (
+                  <Box
                     sx={{
-                      fontWeight: 600,
-                      mb: 1,
-                      color: "#000",
-                      fontSize: "0.875rem",
+                      display: "flex",
+                      justifyContent: "center",
+                      alignItems: "center",
+                      mb: 1.5,
                     }}
                   >
-                    Última reseña:
-                  </Typography>
-
-                  {place.reviewsLoading ? (
-                    <ReviewSkeleton count={3} />
-                  ) : place.reviews && place.reviews.length > 0 ? (
-                    <Box
-                      sx={{
-                        flexGrow: 1,
-                        maxHeight: 160,
-                        overflowY: "auto",
-                        overflowX: "hidden",
-                        width: "100%",
-                        pr: 1,
-                        "&::-webkit-scrollbar": {
-                          width: 6,
-                          backgroundColor: "rgba(0,0,0,0.05)",
-                        },
-                        "&::-webkit-scrollbar-thumb": {
-                          backgroundColor: "rgba(0,0,0,0.2)",
-                          borderRadius: 3,
-                          "&:hover": {
-                            backgroundColor: "rgba(0,0,0,0.3)",
-                          },
-                        },
-                        "&::-webkit-scrollbar-track": {
-                          borderRadius: 3,
-                        },
-                      }}
-                    >
-                      {place.reviews.slice(-1).map((review) => (
-                        <Box key={review.id}>
-                          <Box
-                            sx={{
-                              display: "flex",
-                              alignItems: "center",
-                              justifyContent: "center",
-                              gap: 1,
-                              mb: 0.5,
-                            }}
-                          >
-                            <Rating
-                              value={review.rating}
-                              size="small"
-                              style={{ pointerEvents: 'none' }}
-                            />
-                            <Typography
-                              variant="caption"
-                              sx={{ color: "#666" }}
-                            >
-                              por {review.userEmail.split("@")[0]}
-                            </Typography>
-                          </Box>
-                          <Typography
-                            variant="body2"
-                            sx={{
-                              fontSize: "0.8rem",
-                              color: "#333",
-                              lineHeight: 1.3,
-                              fontStyle: "italic",
-                              wordWrap: "break-word",
-                              overflowWrap: "break-word",
-                              hyphens: "auto",
-                              maxWidth: "100%",
-                            }}
-                          >
-                            "{truncateReviewText(review.content, 150)}"
-                          </Typography>
-                        </Box>
-                      ))}
-
-                      {place.reviews.length > 1 && (
-                        <Chip
-                          label={`+${place.reviews.length - 1} más`}
-                          size="small"
-                          variant="outlined"
-                          sx={{
-                            mt: 1,
-                            height: 20,
-                            fontSize: "0.7rem",
-                            borderColor: "#000",
-                            color: "#000",
-                          }}
-                        />
-                      )}
-                    </Box>
-                  ) : (
+                    <Rating
+                      value={averageRating(place.reviews)}
+                      size="medium"
+                      style={{ pointerEvents: "none" }}
+                    />
                     <Typography
                       variant="body2"
-                      sx={{
-                        fontSize: "0.8rem",
-                        color: "#666",
-                        fontStyle: "italic",
-                      }}
+                      sx={{ ml: 1, color: "#666", fontSize: "0.9rem" }}
                     >
-                      No hay reseñas para este lugar.
+                      ({place.reviews?.length || 0}{" "}
+                      {(place.reviews?.length || 0) === 1
+                        ? "Reseña"
+                        : "Reseñas"}
+                      )
                     </Typography>
-                  )}
-                </Box>
+                  </Box>
+                )}
+
+                <Button
+                  variant="outlined"
+                  size="small"
+                  sx={{
+                    mt: 1,
+                    textTransform: "none",
+                    borderRadius: 2,
+                    borderColor: "#004C92",
+                    color: "#004C92",
+                    fontWeight: 600,
+                    "&:hover": {
+                      borderColor: "#003870",
+                      backgroundColor: "#f5faff",
+                    },
+                  }}
+                >
+                  Ver Reseñas
+                </Button>
               </CardContent>
             </Card>
           ))}
@@ -318,7 +219,7 @@ const PlacesSection: React.FC<Props> = ({
         )}
 
         {!loading && (
-          <Box sx={{ display: "flex", justifyContent: "center", mt: 4, mb: 2 }}>
+          <Box sx={{ display: "flex", justifyContent: "center", mt: 2 }}>
             <Pagination
               count={totalPages}
               page={page}

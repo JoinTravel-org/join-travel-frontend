@@ -8,6 +8,7 @@ import { useAuth } from "../hooks/useAuth";
 import api from "../services/api.service";
 import PlacesSection from "./PlacesSection";
 import type { Place } from "../types/place";
+import AllReviewsList from "./AllReviewsList";
 
 /**
  * Home
@@ -32,11 +33,11 @@ const Home: React.FC = () => {
 
   const fetchPlaces = async (pageNum: number) => {
     try {
-      const response = await api.getPlaces(pageNum, 20);
+      const response = await api.getPlaces(pageNum, 4);
       const newPlaces = response.places || [];
       const totalCount = response.totalCount || 0;
       setPlaces(newPlaces);
-      setTotalPages(Math.ceil(totalCount / 20));
+      setTotalPages(Math.ceil(totalCount / 4));
     } catch (error) {
       console.error("Error fetching places:", error);
     } finally {
@@ -70,11 +71,6 @@ const Home: React.FC = () => {
       description: "Lee opiniones de otros viajeros y comparte tus experiencias para guiar a la comunidad.",
     },
     {
-      icon: <Explore sx={{ fontSize: 40, color: "var(--color-primary)" }} aria-hidden />,
-      title: "Explora el Mundo",
-      description: "Accede a guías prácticas, mapas y recomendaciones de viajeros locales.",
-    },
-    {
       icon: <Group sx={{ fontSize: 40, color: "var(--color-primary)" }} aria-hidden />,
       title: "Conecta con Viajeros",
       description: "Únete a una comunidad activa para compartir consejos y experiencias.",
@@ -106,13 +102,15 @@ const Home: React.FC = () => {
       }}
     >
       {/* Hero Section */}
-
       <Box
         component="section"
         aria-labelledby="hero-title"
         sx={{
           py: { xs: 4, md: 6 },
-          background: theme.palette.mode === "light" ? "linear-gradient(180deg, rgba(24,154,180,0.08) 0%, rgba(0,0,0,0) 60%)" : "linear-gradient(180deg, rgba(24,154,180,0.15) 0%, rgba(0,0,0,0) 60%)",
+          background:
+            theme.palette.mode === "light"
+              ? "linear-gradient(180deg, rgba(24,154,180,0.08) 0%, rgba(0,0,0,0) 60%)"
+              : "linear-gradient(180deg, rgba(24,154,180,0.15) 0%, rgba(0,0,0,0) 60%)",
         }}
       >
         <Container maxWidth="lg">
@@ -130,8 +128,17 @@ const Home: React.FC = () => {
             >
               Explora el mundo con JoinTravel
             </Typography>
-            <Typography variant="h5" component="p" sx={auth.isAuthenticated ? { color: "text.secondary" } : { mb: 3, color: "text.secondary" }}>
-              Planifica aventuras únicas, conecta con viajeros como tú y crea recuerdos inolvidables con itinerarios fáciles y confiables.
+            <Typography
+              variant="h5"
+              component="p"
+              sx={
+                auth.isAuthenticated
+                  ? { color: "text.secondary" }
+                  : { mb: 3, color: "text.secondary" }
+              }
+            >
+              Planifica aventuras únicas, conecta con viajeros como tú y crea
+              recuerdos inolvidables con itinerarios fáciles y confiables.
             </Typography>
 
             {!auth.isAuthenticated && (
@@ -163,13 +170,28 @@ const Home: React.FC = () => {
           </Box>
         </Container>
       </Box>
-
-      <PlacesSection places={places} loading={loading} page={page} totalPages={totalPages} onPageChange={handlePageChange} />
-
+      <PlacesSection
+        places={places}
+        loading={loading}
+        page={page}
+        totalPages={totalPages}
+        onPageChange={handlePageChange}
+      />
+      <AllReviewsList />
       {/* Features Section */}
-      <Box component="section" aria-labelledby="features-title" sx={{ py: { xs: 3, md: 5 } }}>
+      <Box
+        component="section"
+        aria-labelledby="features-title"
+        sx={{ py: { xs: 3, md: 5 } }}
+      >
         <Container maxWidth="lg">
-          <Typography id="features-title" variant="h2" component="h2" gutterBottom sx={{ fontWeight: 700, fontSize: "var(--fs-h2)" }}>
+          <Typography
+            id="features-title"
+            variant="h2"
+            component="h2"
+            gutterBottom
+            sx={{ fontWeight: 700, fontSize: "var(--fs-h2)" }}
+          >
             Todo lo que necesitas para tu próximo viaje
           </Typography>
 
@@ -197,7 +219,8 @@ const Home: React.FC = () => {
                   flexDirection: "column",
                   borderRadius: "var(--card-radius)",
                   boxShadow: "var(--card-shadow)",
-                  transition: "transform var(--motion-duration-base) var(--motion-ease-standard), box-shadow var(--motion-duration-base) var(--motion-ease-standard)",
+                  transition:
+                    "transform var(--motion-duration-base) var(--motion-ease-standard), box-shadow var(--motion-duration-base) var(--motion-ease-standard)",
                   "&:hover": {
                     transform: "translateY(-2px)",
                     boxShadow: "var(--card-shadow-hover)",
@@ -214,7 +237,11 @@ const Home: React.FC = () => {
                     }}
                   >
                     {feature.icon}
-                    <Typography variant="h5" component="h3" sx={{ fontWeight: 700 }}>
+                    <Typography
+                      variant="h5"
+                      component="h3"
+                      sx={{ fontWeight: 700 }}
+                    >
                       {feature.title}
                     </Typography>
                   </Box>
@@ -223,7 +250,12 @@ const Home: React.FC = () => {
                   </Typography>
                   {feature.action && (
                     <Box sx={{ mt: 2 }}>
-                      <Button variant="outlined" size="small" onClick={feature.action.onClick} sx={{ minWidth: "auto" }}>
+                      <Button
+                        variant="outlined"
+                        size="small"
+                        onClick={feature.action.onClick}
+                        sx={{ minWidth: "auto" }}
+                      >
                         {feature.action.text}
                       </Button>
                     </Box>
@@ -234,10 +266,13 @@ const Home: React.FC = () => {
           </Box>
         </Container>
       </Box>
-
       {/* Call to Action */}
       {!auth.isAuthenticated && (
-        <Box component="section" aria-labelledby="cta-title" sx={{ py: { xs: 3, md: 5 } }}>
+        <Box
+          component="section"
+          aria-labelledby="cta-title"
+          sx={{ py: { xs: 3, md: 5 } }}
+        >
           <Container maxWidth="lg">
             <Paper
               elevation={3}
@@ -249,11 +284,22 @@ const Home: React.FC = () => {
                 borderRadius: "var(--card-radius)",
               }}
             >
-              <Typography id="cta-title" variant="h2" component="h2" gutterBottom sx={{ fontWeight: 700, fontSize: "var(--fs-h3)" }}>
+              <Typography
+                id="cta-title"
+                variant="h2"
+                component="h2"
+                gutterBottom
+                sx={{ fontWeight: 700, fontSize: "var(--fs-h3)" }}
+              >
                 ¿Listo para tu próxima aventura?
               </Typography>
-              <Typography variant="h6" component="p" sx={{ mb: 3, color: "inherit", opacity: 0.95 }}>
-                Únete hoy y empieza a planificar con confianza junto a miles de viajeros.
+              <Typography
+                variant="h6"
+                component="p"
+                sx={{ mb: 3, color: "inherit", opacity: 0.95 }}
+              >
+                Únete hoy y empieza a planificar con confianza junto a miles de
+                viajeros.
               </Typography>
               <Button
                 variant="contained"
