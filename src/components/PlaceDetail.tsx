@@ -10,18 +10,17 @@ import {
   Rating,
   Button,
   TextField,
-  Paper,
   Alert,
   Stack,
   Snackbar,
   Slide,
 } from "@mui/material";
-import PhotoCamera from "@mui/icons-material/PhotoCamera";
-import VideoLibraryIcon from "@mui/icons-material/VideoLibrary";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import api from "../services/api.service";
 import type { Place } from "../types/place";
 import { useAuth } from "../hooks/useAuth";
+import ReviewForm from "./ReviewForm";
+import ReviewList from "./ReviewList";
 
 const PlaceDetail: React.FC = () => {
   const INFO_NOT_AVAILABLE = "Información no disponible temporalmente";
@@ -36,6 +35,7 @@ const PlaceDetail: React.FC = () => {
   const [descriptionError, setDescriptionError] = useState<string | null>(null);
   const [descriptionSuccess, setDescriptionSuccess] = useState(false);
   const [snackbarOpen, setSnackbarOpen] = useState(false);
+  const [reviewRefreshTrigger, setReviewRefreshTrigger] = useState(0);
 
   useEffect(() => {
     const fetchPlace = async () => {
@@ -74,7 +74,9 @@ const PlaceDetail: React.FC = () => {
     }
 
     if (description.length < 30 || description.length > 1000) {
-      setDescriptionError("La descripción debe tener entre 30 y 1000 caracteres.");
+      setDescriptionError(
+        "La descripción debe tener entre 30 y 1000 caracteres."
+      );
       return;
     }
 
@@ -92,11 +94,19 @@ const PlaceDetail: React.FC = () => {
         setDescriptionSuccess(false);
         setSnackbarOpen(false);
       }, 3000);
-    } catch (error: any) {
-      if (error.message?.includes('network') || error.message?.includes('connection')) {
-        setDescriptionError("Error de conexión. Por favor verifica tu conexión a internet.");
+    } catch (error: unknown) {
+      const errorMessage = (error as { message?: string })?.message || "";
+      if (
+        errorMessage.includes("network") ||
+        errorMessage.includes("connection")
+      ) {
+        setDescriptionError(
+          "Error de conexión. Por favor verifica tu conexión a internet."
+        );
       } else {
-        setDescriptionError("Error al guardar la descripción. Por favor intenta de nuevo.");
+        setDescriptionError(
+          "Error al guardar la descripción. Por favor intenta de nuevo."
+        );
       }
     } finally {
       setSavingDescription(false);
@@ -105,7 +115,7 @@ const PlaceDetail: React.FC = () => {
 
   const handleEditDescription = () => {
     if (!auth.isAuthenticated) {
-      navigate('/login');
+      navigate("/login");
       return;
     }
     setIsEditingDescription(true);
@@ -201,9 +211,17 @@ const PlaceDetail: React.FC = () => {
                       onClick={handleSaveDescription}
                       disabled={savingDescription}
                       sx={{ minWidth: 120 }}
-                      startIcon={descriptionSuccess ? <CheckCircleIcon /> : undefined}
+                      startIcon={
+                        descriptionSuccess ? <CheckCircleIcon /> : undefined
+                      }
                     >
-                      {savingDescription ? <CircularProgress size={20} /> : descriptionSuccess ? 'Guardado' : 'Guardar'}
+                      {savingDescription ? (
+                        <CircularProgress size={20} />
+                      ) : descriptionSuccess ? (
+                        "Guardado"
+                      ) : (
+                        "Guardar"
+                      )}
                     </Button>
                     <Button
                       variant="outlined"
@@ -217,15 +235,16 @@ const PlaceDetail: React.FC = () => {
               ) : (
                 <Box>
                   <Typography variant="body1">
-                    {place.description ||
-                      "Lorem ipsum description"}
+                    {place.description || "Lorem ipsum description"}
                   </Typography>
                   <Button
                     variant="text"
                     onClick={handleEditDescription}
-                    sx={{ mt: 1, textTransform: 'none' }}
+                    sx={{ mt: 1, textTransform: "none" }}
                   >
-                    {place.description ? 'Editar descripción' : 'Agregar descripción'}
+                    {place.description
+                      ? "Editar descripción"
+                      : "Agregar descripción"}
                   </Button>
                 </Box>
               )}
@@ -242,126 +261,17 @@ const PlaceDetail: React.FC = () => {
             gap: 3,
           }}
         >
-          {/* --- Add Review Card --- */}
-          <Paper
-            elevation={3}
-            sx={{
-              p: 3,
-              borderRadius: 3,
-              display: "flex",
-              flexDirection: "column",
-              gap: 2,
-            }}
-          >
-            <Typography variant="h6" fontWeight={700}>
-              Escribir una Reseña
-            </Typography>
-            <Rating size="large" />
-            <TextField
-              multiline
-              minRows={3}
-              placeholder="Comparte tu experiencia..."
-              fullWidth
-            />
-            <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
-              <Button
-                variant="outlined"
-                startIcon={<PhotoCamera />}
-                sx={{ textTransform: "none" }}
-              >
-                Añadir Fotos
-              </Button>
-              <Button
-                variant="outlined"
-                startIcon={<VideoLibraryIcon />}
-                sx={{ textTransform: "none" }}
-              >
-                Videos
-              </Button>
-            </Box>
-            <Button variant="contained" sx={{ alignSelf: "flex-start" }}>
-              Publicar Reseña
-            </Button>
-          </Paper>
+          {/* --- Add Review Form --- */}
+          <ReviewForm
+            placeId={place.id}
+            onReviewCreated={() => setReviewRefreshTrigger((prev) => prev + 1)}
+          />
 
           {/* --- Reviews List --- */}
-          <Box
-            sx={{
-              height: "400px",
-              display: "flex",
-              flexDirection: "column",
-            }}
-          >
-            <Typography variant="h6" fontWeight={700} gutterBottom>
-              Reseñas de Usuarios
-            </Typography>
-
-            <Box
-              sx={{
-                flexGrow: 1,
-                maxHeight: "calc(100% - 40px)", // Account for the header
-                overflowY: "auto",
-                pr: 1,
-                "&::-webkit-scrollbar": {
-                  width: 6,
-                  backgroundColor: "rgba(0,0,0,0.05)",
-                },
-                "&::-webkit-scrollbar-thumb": {
-                  backgroundColor: "rgba(0,0,0,0.2)",
-                  borderRadius: 3,
-                  "&:hover": {
-                    backgroundColor: "rgba(0,0,0,0.3)",
-                  },
-                },
-                "&::-webkit-scrollbar-track": {
-                  borderRadius: 3,
-                },
-              }}
-            >
-              <Box
-                sx={{
-                  display: "grid",
-                  gridTemplateColumns: "repeat(2, 1fr)",
-                  gap: 2,
-                  width: "100%",
-                  pb: 2,
-                }}
-              >
-                {[...Array(10)].map((_, i) => (
-                  <Card
-                    key={i}
-                    sx={{
-                      borderRadius: 2,
-                      p: 1.5,
-                      display: "flex",
-                      flexDirection: "column",
-                      gap: 0.5,
-                      "&:hover": {
-                        backgroundColor: "rgba(0,0,0,0.02)",
-                      },
-                    }}
-                  >
-                    <Typography variant="body2" fontWeight={600}>
-                      {" "}
-                      {/* Changed from subtitle1 to body2 */}
-                      Usuario X ({Math.floor(Math.random() * 5) + 1}/5)
-                    </Typography>
-                    <Rating size="small" readOnly />
-                    <Typography
-                      variant="body2"
-                      color="text.secondary"
-                      sx={{ fontSize: "x-small" }}
-                    >
-                      {" "}
-                      {/* Added smaller font size */}
-                      Lorem ipsum dolor sit amet, consectetur adipiscing elit.
-                      Pellentesque vel felis nec justo tristique luctus.
-                    </Typography>
-                  </Card>
-                ))}
-              </Box>
-            </Box>
-          </Box>
+          <ReviewList
+            placeId={place.id}
+            refreshTrigger={reviewRefreshTrigger}
+          />
         </Box>
       </Box>
 
@@ -369,11 +279,15 @@ const PlaceDetail: React.FC = () => {
         open={snackbarOpen}
         autoHideDuration={3000}
         onClose={() => setSnackbarOpen(false)}
-        anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
+        anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
         TransitionComponent={(props) => <Slide {...props} direction="up" />}
         transitionDuration={500}
       >
-        <Alert onClose={() => setSnackbarOpen(false)} severity="success" sx={{ width: '100%' }}>
+        <Alert
+          onClose={() => setSnackbarOpen(false)}
+          severity="success"
+          sx={{ width: "100%" }}
+        >
           ¡Descripción guardada exitosamente!
         </Alert>
       </Snackbar>
