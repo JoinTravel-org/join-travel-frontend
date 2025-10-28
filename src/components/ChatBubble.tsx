@@ -32,12 +32,35 @@ const ChatBubble: React.FC = () => {
   const [conversationId, setConversationId] = useState<string | null>(null);
   const chatRef = useRef<HTMLDivElement>(null);
   const fabRef = useRef<HTMLButtonElement>(null);
+  const messagesEndRef = useRef<HTMLDivElement>(null);
+
+  // Welcome message
+  const welcomeMessage: Message = {
+    id: 'welcome',
+    text: '¡Hola! Puedo ayudarte con tus necesidades de viaje. ¡Pregúntame sobre lugares, reseñas o qué lugares se adaptan mejor a tus necesidades!',
+    sender: 'ai',
+    timestamp: Date.now(),
+  };
 
   useEffect(() => {
     if (isOpen && authContext?.user) {
       loadChatHistory();
     }
   }, [isOpen, authContext?.user]);
+
+  // Separate effect to show welcome message immediately when chat opens
+  useEffect(() => {
+    if (isOpen && authContext?.isAuthenticated && authContext?.user && messages.length === 0) {
+      setMessages([welcomeMessage]);
+    }
+  }, [isOpen, authContext?.isAuthenticated, authContext?.user, messages.length]);
+
+  // Auto-scroll to bottom when messages change
+  useEffect(() => {
+    if (messagesEndRef.current) {
+      messagesEndRef.current.scrollIntoView({ behavior: 'smooth' });
+    }
+  }, [messages]);
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -90,26 +113,39 @@ const ChatBubble: React.FC = () => {
         if (response.messages.length > 0 && response.messages[0].conversationId) {
           setConversationId(response.messages[0].conversationId);
         }
+      } else {
+        // No chat history, show welcome message for authenticated users
+        setMessages([welcomeMessage]);
       }
     } catch (error) {
       console.error('Failed to load chat history:', error);
+      // On error, show welcome message
+      setMessages([welcomeMessage]);
     }
   };
 
   const handleToggleChat = () => {
     setIsOpen(!isOpen);
+    // Clear messages when closing chat
+    if (isOpen) {
+      setMessages([]);
+    }
   };
 
   const handleNewChat = async () => {
     try {
       // Delete all chat history for the user
       await apiService.deleteAllChatHistory();
-      // Clear messages and conversation ID
-      setMessages([]);
+      // Clear messages and conversation ID, show welcome message
+      setMessages([welcomeMessage]);
       setConversationId(null);
       setInputMessage('');
     } catch (error) {
       console.error('Failed to start new chat:', error);
+      // On error, still show welcome message
+      setMessages([welcomeMessage]);
+      setConversationId(null);
+      setInputMessage('');
     }
   };
 
@@ -222,7 +258,7 @@ const ChatBubble: React.FC = () => {
                   onClick={handleNewChat}
                   size="medium"
                   color="primary"
-                  disabled={isLoading}
+                  disabled={isLoading || !authContext?.isAuthenticated}
                   sx={{
                     bgcolor: 'primary.main',
                     color: 'white',
@@ -263,6 +299,7 @@ const ChatBubble: React.FC = () => {
                     />
                   </ListItem>
                 ))}
+                <div ref={messagesEndRef} />
               </List>
             ) : (
               <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '100%' }}>
