@@ -91,24 +91,6 @@ const PlacesSection: React.FC<Props> = ({
       }}
     >
       <Container maxWidth="lg">
-        <Box textAlign="center" mb={6}>
-          <Button
-            variant="contained"
-            color="primary"
-            size="large"
-            sx={{
-              px: 4,
-              py: 1.2,
-              fontWeight: 600,
-              borderRadius: 3,
-              backgroundColor: "#004C92",
-              "&:hover": { backgroundColor: "#003870" },
-            }}
-          >
-            Comenzar gratis
-          </Button>
-        </Box>
-
         {/* Grid of Places */}
         <Box
           sx={{

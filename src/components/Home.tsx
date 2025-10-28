@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { Typography, Button, Container, Box, Paper, Card, CardContent, Stack } from "@mui/material";
 import { useTheme } from "../hooks/useTheme";
-import { Group, AddLocation, Star } from "@mui/icons-material";
+import { Group, AddLocation, Star, Explore } from "@mui/icons-material";
 import { useNavigate } from "react-router-dom";
 import { trackEvent } from "../utils/analytics";
 import { useAuth } from "../hooks/useAuth";
@@ -69,6 +69,11 @@ const Home: React.FC = () => {
       icon: <Star sx={{ fontSize: 40, color: "var(--color-primary)" }} aria-hidden />,
       title: "Reseñas y Comentarios",
       description: "Lee opiniones de otros viajeros y comparte tus experiencias para guiar a la comunidad.",
+    },
+    {
+      icon: <Explore sx={{ fontSize: 40, color: "var(--color-primary)" }} aria-hidden />,
+      title: "Explora el Mundo",
+      description: "Accede a guías prácticas, mapas y recomendaciones de viajeros locales.",
     },
     {
       icon: <Group sx={{ fontSize: 40, color: "var(--color-primary)" }} aria-hidden />,
