@@ -72,8 +72,8 @@ const Home: React.FC = () => {
     },
     {
       icon: <Explore sx={{ fontSize: 40, color: "var(--color-primary)" }} aria-hidden />,
-      title: "Explora el Mundo",
-      description: "Accede a guías prácticas, mapas y recomendaciones de viajeros locales.",
+      title: "Explora Lugares",
+      description: "Descubre destinos increíbles y accede a mapas interactivos.",
     },
     {
       icon: <Group sx={{ fontSize: 40, color: "var(--color-primary)" }} aria-hidden />,
