@@ -163,7 +163,7 @@ const AllReviewsList: React.FC = () => {
                       alignSelf: "flex-start",
                     }}
                   >
-                    {review.placeName || "Lugar desconocido"}
+                    📍 {review.placeName || "Lugar desconocido"}
                   </Typography>
 
                   <Box

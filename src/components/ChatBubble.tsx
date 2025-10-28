@@ -37,7 +37,7 @@ const ChatBubble: React.FC = () => {
   // Welcome message
   const welcomeMessage: Message = {
     id: 'welcome',
-    text: '¡Hola! Puedo ayudarte con tus necesidades de viaje. ¡Pregúntame sobre lugares, reseñas o qué lugares se adaptan mejor a tus necesidades!',
+    text: '¡Hola! 👋✨\n Puedo ayudarte con tus necesidades de viaje 🌍✈️\n¡Pregúntame sobre lugares increíbles 🏖️, reseñas 📝 o qué destinos se adaptan mejor a ti!',
     sender: 'ai',
     timestamp: Date.now(),
   };
