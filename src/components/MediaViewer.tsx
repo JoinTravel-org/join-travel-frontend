@@ -130,6 +130,7 @@ const MediaViewer: React.FC<MediaViewerProps> = ({
               ) : media.mimeType.startsWith('video/') ? (
                 <video
                   controls
+                  crossOrigin="anonymous"
                   style={{
                     maxWidth: '100%',
                     maxHeight: '100%',
