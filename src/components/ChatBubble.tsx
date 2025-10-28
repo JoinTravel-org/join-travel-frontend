@@ -1,4 +1,4 @@
-import React, { useContext, useState, useEffect } from 'react';
+import React, { useContext, useState, useEffect, useRef } from 'react';
 import { AuthContext } from '../contexts/AuthContext';
 import { Box, Fab, Paper, Typography, TextField, Button, List, ListItem, ListItemText, Avatar, CircularProgress, IconButton, Tooltip } from '@mui/material';
 import ChatIcon from '@mui/icons-material/Chat';
@@ -30,6 +30,8 @@ const ChatBubble: React.FC = () => {
   const [inputMessage, setInputMessage] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [conversationId, setConversationId] = useState<string | null>(null);
+  const chatRef = useRef<HTMLDivElement>(null);
+  const fabRef = useRef<HTMLButtonElement>(null);
 
   useEffect(() => {
     if (isOpen && authContext?.user) {
@@ -37,10 +39,26 @@ const ChatBubble: React.FC = () => {
     }
   }, [isOpen, authContext?.user]);
 
-  // Only show chat bubble if user is authenticated
-  if (!authContext?.isAuthenticated || !authContext?.user) {
-    return null;
-  }
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (
+        chatRef.current &&
+        fabRef.current &&
+        !chatRef.current.contains(event.target as Node) &&
+        !fabRef.current.contains(event.target as Node)
+      ) {
+        setIsOpen(false);
+      }
+    };
+
+    if (isOpen) {
+      document.addEventListener('mousedown', handleClickOutside);
+    }
+
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [isOpen]);
 
   const loadChatHistory = async () => {
     try {
@@ -165,6 +183,7 @@ const ChatBubble: React.FC = () => {
     <>
       {/* Chat Bubble Button */}
       <Fab
+        ref={fabRef}
         color="primary"
         aria-label="chat"
         onClick={handleToggleChat}
@@ -181,13 +200,14 @@ const ChatBubble: React.FC = () => {
       {/* Chat Interface */}
       {isOpen && (
         <Paper
+          ref={chatRef}
           elevation={8}
           sx={{
             position: 'fixed',
             bottom: 80,
             right: 16,
-            width: 350,
-            height: 500,
+            width: 400,
+            height: 550,
             borderRadius: 2,
             zIndex: 1000,
             display: 'flex',
@@ -222,51 +242,64 @@ const ChatBubble: React.FC = () => {
             </Box>
           </Box>
 
-          {/* Messages */}
+          {/* Messages or Login Prompt */}
           <Box sx={{ flex: 1, overflow: 'auto', p: 2 }}>
-            <List>
-              {messages.map((message) => (
-                <ListItem key={message.id} sx={{ alignItems: 'flex-start', px: 0 }}>
-                  <Avatar sx={{ mr: 1, bgcolor: message.sender === 'ai' ? 'primary.main' : 'secondary.main' }}>
-                    {message.sender === 'ai' ? 'AI' : 'U'}
-                  </Avatar>
-                  <ListItemText
-                    primary={message.text}
-                    secondary={new Date(message.timestamp).toLocaleTimeString()}
-                    sx={{
-                      '& .MuiListItemText-primary': {
-                        bgcolor: message.sender === 'ai' ? 'grey.100' : 'primary.light',
-                        p: 1,
-                        borderRadius: 1,
-                        color: message.sender === 'ai' ? 'text.primary' : 'white',
-                      },
-                    }}
-                  />
-                </ListItem>
-              ))}
-            </List>
+            {authContext?.isAuthenticated && authContext?.user ? (
+              <List>
+                {messages.map((message) => (
+                  <ListItem key={message.id} sx={{ alignItems: 'flex-start', px: 0 }}>
+                    <Avatar sx={{ mr: 1, bgcolor: message.sender === 'ai' ? 'primary.main' : 'secondary.main' }}>
+                      {message.sender === 'ai' ? 'AI' : 'U'}
+                    </Avatar>
+                    <ListItemText
+                      primary={message.text}
+                      secondary={new Date(message.timestamp).toLocaleTimeString()}
+                      sx={{
+                        '& .MuiListItemText-primary': {
+                          bgcolor: message.sender === 'ai' ? 'grey.100' : 'primary.light',
+                          p: 1,
+                          borderRadius: 1,
+                          color: message.sender === 'ai' ? 'text.primary' : 'white',
+                        },
+                      }}
+                    />
+                  </ListItem>
+                ))}
+              </List>
+            ) : (
+              <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '100%' }}>
+                <Typography variant="h6" sx={{ mb: 2 }}>
+                  Por favor inicie sesión para poder usar el AI Chat Assistant
+                </Typography>
+                <Typography variant="body2" color="text.secondary">
+                  Debes estar logeado para usar esta característica.
+                </Typography>
+              </Box>
+            )}
           </Box>
 
           {/* Input */}
-          <Box sx={{ p: 2, borderTop: 1, borderColor: 'divider', display: 'flex' }}>
-            <TextField
-              fullWidth
-              variant="outlined"
-              placeholder="Type your message..."
-              value={inputMessage}
-              onChange={(e) => setInputMessage(e.target.value)}
-              onKeyPress={handleKeyPress}
-              size="small"
-            />
-            <Button
-              variant="contained"
-              onClick={handleSendMessage}
-              disabled={!inputMessage.trim() || isLoading}
-              sx={{ ml: 1 }}
-            >
-              {isLoading ? <CircularProgress size={20} color="inherit" /> : <SendIcon />}
-            </Button>
-          </Box>
+          {authContext?.isAuthenticated && authContext?.user && (
+            <Box sx={{ p: 2, borderTop: 1, borderColor: 'divider', display: 'flex' }}>
+              <TextField
+                fullWidth
+                variant="outlined"
+                placeholder="Type your message..."
+                value={inputMessage}
+                onChange={(e) => setInputMessage(e.target.value)}
+                onKeyPress={handleKeyPress}
+                size="small"
+              />
+              <Button
+                variant="contained"
+                onClick={handleSendMessage}
+                disabled={!inputMessage.trim() || isLoading}
+                sx={{ ml: 1 }}
+              >
+                {isLoading ? <CircularProgress size={20} color="inherit" /> : <SendIcon />}
+              </Button>
+            </Box>
+          )}
         </Paper>
       )}
     </>
