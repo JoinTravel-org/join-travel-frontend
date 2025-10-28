@@ -86,9 +86,10 @@ const AllReviewsList: React.FC = () => {
   return (
     <Box
       sx={{
-        height: "500px",
+        height: reviews.length === 0 ? "auto" : "500px",
         display: "flex",
         flexDirection: "column",
+        mt: 4,
       }}
     >
       <Typography variant="h6" fontWeight={700} gutterBottom>
