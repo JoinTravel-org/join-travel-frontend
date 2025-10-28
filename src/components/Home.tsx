@@ -1,26 +1,14 @@
-import React, { useState, useEffect } from 'react';
-import {
-  Typography,
-  Button,
-  Container,
-  Box,
-  Paper,
-  Card,
-  CardContent,
-  Stack,
-} from '@mui/material';
-import { useTheme } from '../hooks/useTheme';
-import {
-  Explore,
-  Group,
-  AddLocation,
-  Star,
-} from '@mui/icons-material';
-import { useNavigate } from 'react-router-dom';
-import { trackEvent } from '../utils/analytics';
-import { useAuth } from '../hooks/useAuth';
-import api from '../services/api.service';
-import PlacesSection, { type Place } from './PlacesSection';
+import React, { useState, useEffect } from "react";
+import { Typography, Button, Container, Box, Paper, Card, CardContent, Stack } from "@mui/material";
+import { useTheme } from "../hooks/useTheme";
+import { Group, AddLocation, Star, Explore } from "@mui/icons-material";
+import { useNavigate } from "react-router-dom";
+import { trackEvent } from "../utils/analytics";
+import { useAuth } from "../hooks/useAuth";
+import api from "../services/api.service";
+import PlacesSection from "./PlacesSection";
+import type { Place } from "../types/place";
+import AllReviewsList from "./AllReviewsList";
 
 /**
  * Home
@@ -40,18 +28,18 @@ const Home: React.FC = () => {
   const [totalPages, setTotalPages] = useState(1);
 
   React.useEffect(() => {
-    document.title = 'JoinTravel — Explora el mundo, conecta y viaja mejor';
+    document.title = "JoinTravel — Explora el mundo, conecta y viaja mejor";
   }, []);
 
   const fetchPlaces = async (pageNum: number) => {
     try {
-      const response = await api.getPlaces(pageNum, 20);
+      const response = await api.getPlaces(pageNum, 4);
       const newPlaces = response.places || [];
       const totalCount = response.totalCount || 0;
       setPlaces(newPlaces);
-      setTotalPages(Math.ceil(totalCount / 20));
+      setTotalPages(Math.ceil(totalCount / 4));
     } catch (error) {
-      console.error('Error fetching places:', error);
+      console.error("Error fetching places:", error);
     } finally {
       setLoading(false);
     }
@@ -65,9 +53,9 @@ const Home: React.FC = () => {
     setPage(value);
     // Scroll to top of places section with smooth animation
     setTimeout(() => {
-      const placesSection = document.getElementById('places-section');
+      const placesSection = document.getElementById("places-section");
       if (placesSection) {
-        placesSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        placesSection.scrollIntoView({ behavior: "smooth", block: "start" });
       }
     }, 100); // Small delay to allow new content to render
   };
@@ -78,31 +66,31 @@ const Home: React.FC = () => {
 
   const features = [
     {
-      icon: <Star sx={{ fontSize: 40, color: 'var(--color-primary)' }} aria-hidden />,
-      title: 'Reseñas y Comentarios',
-      description: 'Lee opiniones de otros viajeros y comparte tus experiencias para guiar a la comunidad.',
+      icon: <Star sx={{ fontSize: 40, color: "var(--color-primary)" }} aria-hidden />,
+      title: "Reseñas y Comentarios",
+      description: "Lee opiniones de otros viajeros y comparte tus experiencias para guiar a la comunidad.",
     },
     {
-      icon: <Explore sx={{ fontSize: 40, color: 'var(--color-primary)' }} aria-hidden />,
-      title: 'Explora el Mundo',
-      description: 'Accede a guías prácticas, mapas y recomendaciones de viajeros locales.',
+      icon: <Explore sx={{ fontSize: 40, color: "var(--color-primary)" }} aria-hidden />,
+      title: "Explora Lugares",
+      description: "Descubre destinos increíbles y accede a mapas interactivos.",
     },
     {
-      icon: <Group sx={{ fontSize: 40, color: 'var(--color-primary)' }} aria-hidden />,
-      title: 'Conecta con Viajeros',
-      description: 'Únete a una comunidad activa para compartir consejos y experiencias.',
+      icon: <Group sx={{ fontSize: 40, color: "var(--color-primary)" }} aria-hidden />,
+      title: "Conecta con Viajeros",
+      description: "Únete a una comunidad activa para compartir consejos y experiencias.",
     },
     {
-      icon: <AddLocation sx={{ fontSize: 40, color: 'var(--color-primary)' }} aria-hidden />,
-      title: 'Agrega Lugares',
-      description: 'Enriquece nuestra base de datos agregando nuevos lugares desde Google Maps.',
+      icon: <AddLocation sx={{ fontSize: 40, color: "var(--color-primary)" }} aria-hidden />,
+      title: "Agrega Lugares",
+      description: "Enriquece nuestra base de datos agregando nuevos lugares desde Google Maps.",
       action: {
-        text: 'Agregar Lugar',
+        text: "Agregar Lugar",
         onClick: () => {
           if (auth.isAuthenticated) {
-            navigate('/add-place');
+            navigate("/add-place");
           } else {
-            navigate('/login');
+            navigate("/login");
           }
         },
       },
@@ -148,39 +136,45 @@ const Home: React.FC = () => {
             <Typography
               variant="h5"
               component="p"
-              sx={{ mb: 3, color: "text.secondary" }}
+              sx={
+                auth.isAuthenticated
+                  ? { color: "text.secondary" }
+                  : { mb: 3, color: "text.secondary" }
+              }
             >
               Planifica aventuras únicas, conecta con viajeros como tú y crea
               recuerdos inolvidables con itinerarios fáciles y confiables.
             </Typography>
-            <Stack
-              direction={{ xs: "column", sm: "row" }}
-              spacing={2}
-              sx={{
-                alignItems: { xs: "stretch", sm: "center" },
-                justifyContent: "center",
-              }}
-            >
-              <Button
-                variant="contained"
-                size="large"
-                onClick={() => {
-                  trackEvent("cta_click", {
-                    cta: "hero_primary",
-                    destination: "/register",
-                  });
-                  navigate("/register");
+
+            {!auth.isAuthenticated && (
+              <Stack
+                direction={{ xs: "column", sm: "row" }}
+                spacing={2}
+                sx={{
+                  alignItems: { xs: "stretch", sm: "center" },
+                  justifyContent: "center",
                 }}
-                aria-label="Crear cuenta para comenzar a viajar"
-                sx={{ minWidth: 180 }}
               >
-                Comenzar gratis
-              </Button>
-            </Stack>
+                <Button
+                  variant="contained"
+                  size="large"
+                  onClick={() => {
+                    trackEvent("cta_click", {
+                      cta: "hero_primary",
+                      destination: "/register",
+                    });
+                    navigate("/register");
+                  }}
+                  aria-label="Crear cuenta para comenzar a viajar"
+                  sx={{ minWidth: 180 }}
+                >
+                  Comenzar gratis
+                </Button>
+              </Stack>
+            )}
           </Box>
         </Container>
       </Box>
-
       <PlacesSection
         places={places}
         loading={loading}
@@ -188,7 +182,7 @@ const Home: React.FC = () => {
         totalPages={totalPages}
         onPageChange={handlePageChange}
       />
-
+      <AllReviewsList />
       {/* Features Section */}
       <Box
         component="section"
@@ -277,66 +271,67 @@ const Home: React.FC = () => {
           </Box>
         </Container>
       </Box>
-
       {/* Call to Action */}
-      <Box
-        component="section"
-        aria-labelledby="cta-title"
-        sx={{ py: { xs: 3, md: 5 } }}
-      >
-        <Container maxWidth="lg">
-          <Paper
-            elevation={3}
-            sx={{
-              p: { xs: 3, sm: 4 },
-              textAlign: "center",
-              backgroundColor: "var(--color-primary)",
-              color: "var(--color-primary-contrast)",
-              borderRadius: "var(--card-radius)",
-            }}
-          >
-            <Typography
-              id="cta-title"
-              variant="h2"
-              component="h2"
-              gutterBottom
-              sx={{ fontWeight: 700, fontSize: "var(--fs-h3)" }}
-            >
-              ¿Listo para tu próxima aventura?
-            </Typography>
-            <Typography
-              variant="h6"
-              component="p"
-              sx={{ mb: 3, color: "inherit", opacity: 0.95 }}
-            >
-              Únete hoy y empieza a planificar con confianza junto a miles de
-              viajeros.
-            </Typography>
-            <Button
-              variant="contained"
-              size="large"
-              onClick={() => {
-                trackEvent("cta_click", {
-                  cta: "cta_bottom",
-                  destination: "/register",
-                });
-                navigate("/register");
-              }}
-              aria-label="Comenzar registro"
+      {!auth.isAuthenticated && (
+        <Box
+          component="section"
+          aria-labelledby="cta-title"
+          sx={{ py: { xs: 3, md: 5 } }}
+        >
+          <Container maxWidth="lg">
+            <Paper
+              elevation={3}
               sx={{
-                minWidth: 200,
-                backgroundColor: "var(--color-surface)",
-                color: "var(--color-primary)",
-                "&:hover": {
-                  backgroundColor: "var(--color-bg)",
-                },
+                p: { xs: 3, sm: 4 },
+                textAlign: "center",
+                backgroundColor: "var(--color-primary)",
+                color: "var(--color-primary-contrast)",
+                borderRadius: "var(--card-radius)",
               }}
             >
-              Comenzar gratis
-            </Button>
-          </Paper>
-        </Container>
-      </Box>
+              <Typography
+                id="cta-title"
+                variant="h2"
+                component="h2"
+                gutterBottom
+                sx={{ fontWeight: 700, fontSize: "var(--fs-h3)" }}
+              >
+                ¿Listo para tu próxima aventura?
+              </Typography>
+              <Typography
+                variant="h6"
+                component="p"
+                sx={{ mb: 3, color: "inherit", opacity: 0.95 }}
+              >
+                Únete hoy y empieza a planificar con confianza junto a miles de
+                viajeros.
+              </Typography>
+              <Button
+                variant="contained"
+                size="large"
+                onClick={() => {
+                  trackEvent("cta_click", {
+                    cta: "cta_bottom",
+                    destination: "/register",
+                  });
+                  navigate("/register");
+                }}
+                aria-label="Comenzar registro"
+                sx={{
+                  minWidth: 200,
+                  backgroundColor: "var(--color-surface)",
+                  color: "var(--color-primary)",
+                  "&:hover": {
+                    backgroundColor: "var(--color-bg)",
+                  },
+                }}
+              >
+                Comenzar gratis
+              </Button>
+            </Paper>
+          </Container>
+        </Box>
+      )}
     </Box>
   );
 };
