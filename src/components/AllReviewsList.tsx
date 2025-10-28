@@ -218,6 +218,70 @@ const AllReviewsList: React.FC = () => {
                   >
                     {review.content}
                   </Typography>
+
+                  {/* Media preview */}
+                  {review.media && review.media.length > 0 && (
+                    <Box sx={{ mt: 1, display: "flex", gap: 1, flexWrap: "wrap" }}>
+                      {review.media.slice(0, 3).map((media) => (
+                        <Box
+                          key={media.id}
+                          sx={{
+                            width: 60,
+                            height: 60,
+                            borderRadius: 1,
+                            overflow: "hidden",
+                            border: "1px solid",
+                            borderColor: "divider",
+                          }}
+                        >
+                          {media.mimeType.startsWith("image/") ? (
+                            <img
+                              src={`${import.meta.env.VITE_BACKEND_URL || "http://localhost:8080"}/api/media/${media.id}`}
+                              alt={media.originalFilename}
+                              style={{
+                                width: "100%",
+                                height: "100%",
+                                objectFit: "cover",
+                                borderRadius: "4px",
+                              }}
+                            />
+                          ) : media.mimeType.startsWith("video/") ? (
+                            <video
+                              src={`${import.meta.env.VITE_BACKEND_URL || "http://localhost:8080"}/api/media/${media.id}`}
+                              style={{
+                                width: "100%",
+                                height: "100%",
+                                objectFit: "cover",
+                                borderRadius: "4px",
+                              }}
+                              controls
+                              muted
+                              preload="metadata"
+                            />
+                          ) : null}
+                        </Box>
+                      ))}
+                      {review.media.length > 3 && (
+                        <Box
+                          sx={{
+                            width: 60,
+                            height: 60,
+                            borderRadius: 1,
+                            border: "1px solid",
+                            borderColor: "divider",
+                            display: "flex",
+                            alignItems: "center",
+                            justifyContent: "center",
+                            backgroundColor: "rgba(0,0,0,0.04)",
+                          }}
+                        >
+                          <Typography variant="caption" color="text.secondary">
+                            +{review.media.length - 3}
+                          </Typography>
+                        </Box>
+                      )}
+                    </Box>
+                  )}
                 </Card>
               ))}
             </Box>

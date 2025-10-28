@@ -57,8 +57,6 @@ const MediaViewer: React.FC<MediaViewerProps> = ({
     }
   };
 
-  const isVideo = media.mimeType.startsWith('video/');
-  const isImage = media.mimeType.startsWith('image/');
 
   return (
     <Modal
@@ -119,7 +117,7 @@ const MediaViewer: React.FC<MediaViewerProps> = ({
           {error && <Alert severity="error">{error}</Alert>}
           {mediaUrl && !loading && (
             <>
-              {isImage && (
+              {media.mimeType.startsWith('image/') ? (
                 <img
                   src={mediaUrl}
                   alt={media.filename}
@@ -129,8 +127,7 @@ const MediaViewer: React.FC<MediaViewerProps> = ({
                     objectFit: 'contain',
                   }}
                 />
-              )}
-              {isVideo && (
+              ) : media.mimeType.startsWith('video/') ? (
                 <video
                   controls
                   style={{
@@ -142,7 +139,7 @@ const MediaViewer: React.FC<MediaViewerProps> = ({
                   <source src={mediaUrl} type={media.mimeType} />
                   Tu navegador no soporta la reproducción de video.
                 </video>
-              )}
+              ) : null}
             </>
           )}
         </Box>

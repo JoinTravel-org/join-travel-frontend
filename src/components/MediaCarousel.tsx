@@ -8,8 +8,6 @@ import {
 import {
   KeyboardArrowLeft,
   KeyboardArrowRight,
-  PlayArrow,
-  InsertDriveFile,
 } from '@mui/icons-material';
 import MediaViewer from './MediaViewer';
 import type { ReviewMedia } from '../types/review';
@@ -42,14 +40,6 @@ const MediaCarousel: React.FC<MediaCarouselProps> = ({ media }) => {
     setSelectedMedia(null);
   };
 
-  const getFileTypeIcon = (mimeType: string) => {
-    if (mimeType.startsWith('video/')) {
-      return <PlayArrow sx={{ fontSize: 48, color: 'white' }} />;
-    } else if (!mimeType.startsWith('image/')) {
-      return <InsertDriveFile sx={{ fontSize: 48, color: 'white' }} />;
-    }
-    return null;
-  };
 
   const currentMedia = media[activeStep];
 
@@ -84,7 +74,7 @@ const MediaCarousel: React.FC<MediaCarouselProps> = ({ media }) => {
         >
           {currentMedia.mimeType.startsWith('image/') ? (
             <img
-              src={currentMedia.url}
+              src={`${import.meta.env.VITE_BACKEND_URL || "http://localhost:8080"}/api/media/${currentMedia.id}`}
               alt={currentMedia.originalFilename}
               style={{
                 width: '100%',
@@ -92,21 +82,19 @@ const MediaCarousel: React.FC<MediaCarouselProps> = ({ media }) => {
                 objectFit: 'cover',
               }}
             />
-          ) : (
-            <Box
-              sx={{
+          ) : currentMedia.mimeType.startsWith('video/') ? (
+            <video
+              src={`${import.meta.env.VITE_BACKEND_URL || "http://localhost:8080"}/api/media/${currentMedia.id}`}
+              style={{
                 width: '100%',
                 height: '100%',
-                bgcolor: 'grey.300',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                position: 'relative',
+                objectFit: 'cover',
               }}
-            >
-              {getFileTypeIcon(currentMedia.mimeType)}
-            </Box>
-          )}
+              controls
+              muted
+              preload="metadata"
+            />
+          ) : null}
 
           {/* Navigation Arrows */}
           {maxSteps > 1 && (
