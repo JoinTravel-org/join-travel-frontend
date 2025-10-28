@@ -316,11 +316,20 @@ class ApiService {
   }
 
   /**
-   * Elimina la conversación actual del usuario autenticado
-   * @returns Promise con la respuesta del servidor
-   */
+    * Elimina la conversación actual del usuario autenticado
+    * @returns Promise con la respuesta del servidor
+    */
   async deleteCurrentConversation() {
     const response = await this.api.delete("/chat/conversations/current");
+    return response.data;
+  }
+
+  /**
+    * Elimina todo el historial de chat del usuario autenticado
+    * @returns Promise con la respuesta del servidor
+    */
+  async deleteAllChatHistory() {
+    const response = await this.api.delete("/chat/messages");
     return response.data;
   }
 

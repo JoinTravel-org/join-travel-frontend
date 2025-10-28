@@ -102,10 +102,8 @@ const ChatBubble: React.FC = () => {
 
   const handleNewChat = async () => {
     try {
-      // Delete current conversation if it exists
-      if (conversationId) {
-        await apiService.deleteCurrentConversation();
-      }
+      // Delete all chat history for the user
+      await apiService.deleteAllChatHistory();
       // Clear messages and conversation ID
       setMessages([]);
       setConversationId(null);
@@ -162,7 +160,7 @@ const ChatBubble: React.FC = () => {
       // Add error message
       const errorMessage: Message = {
         id: (timestamp + 1).toString(),
-        text: 'Sorry, I encountered an error. Please try again.',
+        text: 'Perdona, hubo un error. Intenta de nuevo!',
         sender: 'ai',
         timestamp: timestamp + 1000,
       };
