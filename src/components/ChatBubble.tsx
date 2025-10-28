@@ -150,7 +150,7 @@ const ChatBubble: React.FC = () => {
   };
 
   const handleSendMessage = async () => {
-    if (!inputMessage.trim() || !authContext.user) return;
+    if (!inputMessage.trim() || !authContext?.user) return;
 
     const timestamp = Date.now();
     setIsLoading(true);
