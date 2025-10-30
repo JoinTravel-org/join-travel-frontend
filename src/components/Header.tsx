@@ -25,6 +25,7 @@ import { Link as RouterLink, useLocation, useNavigate } from "react-router-dom";
 import { useTheme as useMuiTheme } from "@mui/material/styles";
 import ThemeToggle from "./ThemeToggle";
 import { useAuth } from "../hooks/useAuth";
+import { useUserStats } from "../hooks/useUserStats";
 
 /**
  * Accessible, responsive site header:
@@ -39,6 +40,7 @@ const Header: React.FC = () => {
     const location = useLocation();
     const navigate = useNavigate();
     const auth = useAuth();
+    const { stats, loading } = useUserStats();
 
     const [logoutSnackbarOpen, setLogoutSnackbarOpen] = React.useState(false);
     const [isLoggingOut, setIsLoggingOut] = React.useState(false);
@@ -108,16 +110,19 @@ const Header: React.FC = () => {
                 Itinerarios
             </Button>
             {auth.isAuthenticated ? (
-                <>
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                    <Typography variant="body2" sx={{ color: 'inherit', fontWeight: 600 }}>
+                        {loading ? '...' : (stats ? `Lv.${stats.level}` : 'Lv.?')}
+                    </Typography>
                     <IconButton
                         color="inherit"
                         onClick={handleProfileMenuOpen}
                         aria-label="Perfil"
-                        sx={{ ml: 1 }}
+                        sx={{ ml: 0 }}
                     >
                         <PersonIcon />
                     </IconButton>
-                </>
+                </Box>
             ) : (
                 <>
                     <Button
@@ -312,7 +317,9 @@ const Header: React.FC = () => {
                                     to="/profile"
                                     onClick={toggleDrawer(false)}
                                 >
-                                    <ListItemText primary="Mi perfil" />
+                                    <ListItemText
+                                        primary={`Mi perfil ${loading ? '(...)' : (stats ? `(Lv.${stats.level})` : '(Lv.?)')}`}
+                                    />
                                 </ListItemButton>
                                 <ListItemButton
                                     onClick={() => {
