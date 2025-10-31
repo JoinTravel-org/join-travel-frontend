@@ -43,9 +43,6 @@ const Header: React.FC = () => {
     const auth = useAuth();
     const { stats, loading, notification } = useUserStats();
 
-    console.log('[DEBUG] Header stats:', stats);
-    console.log('[DEBUG] Header notification:', notification);
-
     const [logoutSnackbarOpen, setLogoutSnackbarOpen] = React.useState(false);
     const [isLoggingOut, setIsLoggingOut] = React.useState(false);
     const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);

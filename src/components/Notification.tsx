@@ -11,29 +11,22 @@ const Notification: React.FC<NotificationProps> = ({ notification, onClose, auto
   const [isVisible, setIsVisible] = useState(false);
 
   useEffect(() => {
-    console.log('[DEBUG] Notification component received notification:', notification);
     if (notification) {
-      console.log('[DEBUG] Setting notification visible');
       setIsVisible(true);
       const timer = setTimeout(() => {
-        console.log(`[DEBUG] Auto-hiding notification after ${autoHideDuration / 1000} seconds`);
         setIsVisible(false);
         onClose();
       }, autoHideDuration);
 
       return () => clearTimeout(timer);
     } else {
-      console.log('[DEBUG] No notification received, hiding');
       setIsVisible(false);
     }
-  }, [notification, onClose]);
+  }, [notification, onClose, autoHideDuration]);
 
-  console.log('[DEBUG] Rendering notification component, notification:', notification, 'isVisible:', isVisible);
   if (!notification || !isVisible) {
-    console.log('[DEBUG] Notification not rendered because notification is null or not visible');
     return null;
   }
-  console.log('[DEBUG] Notification will be rendered with content:', notification);
 
   return (
     <div

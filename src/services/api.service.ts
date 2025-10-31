@@ -161,7 +161,6 @@ class ApiService {
       ...(place.city && { city: place.city }),
       ...(place.description && { description: place.description }),
     };
-    Logger.getInstance().info(JSON.stringify(placeData))
     const response = await this.api.post("/places", placeData);
     return response.data;
   }

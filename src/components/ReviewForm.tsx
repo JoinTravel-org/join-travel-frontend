@@ -75,7 +75,6 @@ const ReviewForm: React.FC<ReviewFormProps> = ({
 
       await reviewService.createReview(reviewData);
 
-      console.log('[DEBUG] Review created successfully');
       // Note: Points are updated automatically by the backend when review is created
       // No need to call updatePoints here as it would be redundant
 
