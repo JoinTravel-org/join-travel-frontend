@@ -27,7 +27,7 @@ const ReviewForm: React.FC<ReviewFormProps> = ({
 }) => {
   const { isAuthenticated, user } = useAuth();
   const navigate = useNavigate();
-  const { } = useUserStats();
+  const { fetchUserStats } = useUserStats();
   const [rating, setRating] = React.useState<number | null>(null);
   const [content, setContent] = React.useState("");
   const [mediaFiles, setMediaFiles] = React.useState<File[]>([]);
@@ -75,8 +75,8 @@ const ReviewForm: React.FC<ReviewFormProps> = ({
 
       await reviewService.createReview(reviewData);
 
-      // Note: Points are updated automatically by the backend when review is created
-      // No need to call updatePoints here as it would be redundant
+      // Refresh user stats to trigger level up notifications
+      await fetchUserStats();
 
       // Mostrar mensaje de éxito
       setSuccess(true);

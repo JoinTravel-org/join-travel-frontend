@@ -17,6 +17,7 @@ import {
 import CloseIcon from '@mui/icons-material/Close';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth';
+import { useUserStats } from '../hooks/useUserStats';
 import type { Place } from '../types/place';
 import type { Itinerary, ItineraryItem, CreateItineraryRequest } from '../types/itinerary';
 import apiService from '../services/api.service';
@@ -30,6 +31,7 @@ const CreateItinerary: React.FC = () => {
     const { id } = useParams<{ id: string }>();
     const navigate = useNavigate();
     const auth = useAuth();
+    const { fetchUserStats } = useUserStats();
     const hasCheckedAuth = React.useRef(false);
     const isEditMode = Boolean(id);
 
@@ -229,6 +231,10 @@ const CreateItinerary: React.FC = () => {
             } else {
                 await apiService.createItinerary(itineraryData);
             }
+
+            // Refresh user stats to trigger level up notifications
+            await fetchUserStats();
+
             setSuccess(true);
 
             // Reset after success

@@ -15,6 +15,7 @@ import { useNavigate } from "react-router-dom";
 import { trackEvent } from "../utils/analytics";
 import apiService from "../services/api.service";
 import { useAuth } from "../hooks/useAuth";
+import { useUserStats } from "../hooks/useUserStats";
 
 const MapComponent: React.FC<{
   onPlaceSelect: (place: {
@@ -137,6 +138,7 @@ const MapComponent: React.FC<{
 const AddPlace: React.FC = () => {
   const navigate = useNavigate();
   const auth = useAuth();
+  const { fetchUserStats } = useUserStats();
   const hasCheckedAuth = React.useRef(false);
 
   useEffect(() => {
@@ -222,6 +224,10 @@ const AddPlace: React.FC = () => {
         city: selectedPlace.city,
         description: selectedPlace.description,
       });
+
+      // Refresh user stats to trigger level up notifications
+      await fetchUserStats();
+
       setSuccess(true);
       trackEvent("place_added", { place_name: selectedPlace.name });
 
