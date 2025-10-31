@@ -27,7 +27,7 @@ const ReviewForm: React.FC<ReviewFormProps> = ({
 }) => {
   const { isAuthenticated, user } = useAuth();
   const navigate = useNavigate();
-  const { updatePoints, stats } = useUserStats();
+  const { } = useUserStats();
   const [rating, setRating] = React.useState<number | null>(null);
   const [content, setContent] = React.useState("");
   const [mediaFiles, setMediaFiles] = React.useState<File[]>([]);
@@ -75,13 +75,9 @@ const ReviewForm: React.FC<ReviewFormProps> = ({
 
       await reviewService.createReview(reviewData);
 
-      console.log('[DEBUG] Review created successfully, updating user points');
-      // Forzar refresh de estadísticas después de crear reseña
-      console.log('[DEBUG] Current user stats before update:', stats);
-      console.log('[DEBUG] Current user before update:', user);
-      // Actualizar puntos del usuario por crear reseña
-      await updatePoints('review_created');
-      console.log('[DEBUG] Points updated after review creation');
+      console.log('[DEBUG] Review created successfully');
+      // Note: Points are updated automatically by the backend when review is created
+      // No need to call updatePoints here as it would be redundant
 
       // Mostrar mensaje de éxito
       setSuccess(true);

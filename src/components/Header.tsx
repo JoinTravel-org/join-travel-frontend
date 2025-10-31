@@ -20,12 +20,13 @@ import {
     Menu,
     MenuItem,
 } from "@mui/material";
-import { Menu as MenuIcon, Close as CloseIcon, Person as PersonIcon } from "@mui/icons-material";
+import { Menu as MenuIcon, Close as CloseIcon, Person as PersonIcon, Notifications as NotificationsIcon, Badge } from "@mui/icons-material";
 import { Link as RouterLink, useLocation, useNavigate } from "react-router-dom";
 import { useTheme as useMuiTheme } from "@mui/material/styles";
 import ThemeToggle from "./ThemeToggle";
 import { useAuth } from "../hooks/useAuth";
 import { useUserStats } from "../hooks/useUserStats";
+import Notification from "./Notification";
 
 /**
  * Accessible, responsive site header:
@@ -40,11 +41,16 @@ const Header: React.FC = () => {
     const location = useLocation();
     const navigate = useNavigate();
     const auth = useAuth();
-    const { stats, loading } = useUserStats();
+    const { stats, loading, notification } = useUserStats();
+
+    console.log('[DEBUG] Header stats:', stats);
+    console.log('[DEBUG] Header notification:', notification);
 
     const [logoutSnackbarOpen, setLogoutSnackbarOpen] = React.useState(false);
     const [isLoggingOut, setIsLoggingOut] = React.useState(false);
     const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
+    const [notificationAnchorEl, setNotificationAnchorEl] = React.useState<null | HTMLElement>(null);
+    const { clearNotification } = useUserStats();
 
     const navId = "primary-navigation";
 
@@ -83,6 +89,14 @@ const Header: React.FC = () => {
         navigate('/');
     };
 
+    const handleNotificationMenuOpen = (event: React.MouseEvent<HTMLElement>) => {
+        setNotificationAnchorEl(event.currentTarget);
+    };
+
+    const handleNotificationMenuClose = () => {
+        setNotificationAnchorEl(null);
+    };
+
     const NavItems = (
         <>
             <Button
@@ -112,8 +126,18 @@ const Header: React.FC = () => {
             {auth.isAuthenticated ? (
                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                     <Typography variant="body2" sx={{ color: 'inherit', fontWeight: 600 }}>
-                        {loading ? '...' : (stats ? `Lv.${stats.level}` : 'Lv.?')}
+                        {loading ? '...' : (stats ? `Lv.${stats.level} ${stats.levelName}` : 'Lv.0')}
                     </Typography>
+                    <IconButton
+                        color="inherit"
+                        onClick={handleNotificationMenuOpen}
+                        aria-label="Notificaciones"
+                        sx={{ ml: 0 }}
+                    >
+                        <Badge color="error" variant="dot" invisible={notification === null}>
+                            <NotificationsIcon />
+                        </Badge>
+                    </IconButton>
                     <IconButton
                         color="inherit"
                         onClick={handleProfileMenuOpen}
@@ -318,7 +342,7 @@ const Header: React.FC = () => {
                                     onClick={toggleDrawer(false)}
                                 >
                                     <ListItemText
-                                        primary={`Mi perfil ${loading ? '(...)' : (stats ? `(Lv.${stats.level})` : '(Lv.?)')}`}
+                                        primary={`Mi perfil ${loading ? '(...)' : (stats ? `(Lv.${stats.level} ${stats.levelName})` : '(Lv.0)')}`}
                                     />
                                 </ListItemButton>
                                 <ListItemButton
@@ -376,6 +400,50 @@ const Header: React.FC = () => {
                 <MenuItem onClick={handleLogoutClick}>Cerrar sesión</MenuItem>
             </Menu>
 
+            <Menu
+                anchorEl={notificationAnchorEl}
+                open={Boolean(notificationAnchorEl)}
+                onClose={handleNotificationMenuClose}
+                anchorOrigin={{
+                    vertical: 'bottom',
+                    horizontal: 'center',
+                }}
+                transformOrigin={{
+                    vertical: 'top',
+                    horizontal: 'center',
+                }}
+                PaperProps={{
+                    sx: { minWidth: 300 }
+                }}
+            >
+                {notification ? (
+                    <Box sx={{ p: 2 }}>
+                        <Typography variant="h6" sx={{ mb: 1 }}>
+                            ¡Felicidades!
+                        </Typography>
+                        <Typography variant="body2">
+                            Has alcanzado el Nivel {notification.newLevel}: {notification.levelName}
+                        </Typography>
+                        <Button
+                            size="small"
+                            onClick={() => {
+                                clearNotification();
+                                handleNotificationMenuClose();
+                            }}
+                            sx={{ mt: 1 }}
+                        >
+                            Cerrar
+                        </Button>
+                    </Box>
+                ) : (
+                    <MenuItem disabled>
+                        <Typography variant="body2" color="text.secondary">
+                            No hay notificaciones nuevas
+                        </Typography>
+                    </MenuItem>
+                )}
+            </Menu>
+
             <Snackbar
                 open={logoutSnackbarOpen}
                 autoHideDuration={4000}
@@ -395,6 +463,12 @@ const Header: React.FC = () => {
             >
                 <CircularProgress color="inherit" />
             </Backdrop>
+
+            {/* Global Level Up Notification */}
+            <Notification
+                notification={notification}
+                onClose={clearNotification}
+            />
         </AppBar>
     );
 };
