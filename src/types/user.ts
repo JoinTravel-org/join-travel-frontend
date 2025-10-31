@@ -1,9 +1,16 @@
+export interface Badge {
+  name: string;
+  description: string;
+  earned_at: string;
+  iconUrl?: string;
+}
+
 export interface UserStats {
   points: number;
   level: number;
   levelName: string;
   progressToNext: number; // Percentage to next level (0-100)
-  badges: string[];
+  badges: Badge[];
 }
 
 export interface User {
@@ -19,6 +26,7 @@ export interface LevelUpNotification {
   newLevel: number;
   levelName: string;
   message: string;
+  newBadges?: string[];
 }
 
 export interface UserStatsResponse {

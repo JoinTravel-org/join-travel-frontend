@@ -34,7 +34,7 @@ const Notification: React.FC<NotificationProps> = ({ notification, onClose, auto
         position: 'fixed',
         top: '20px',
         right: '20px',
-        backgroundColor: '#4caf50',
+        backgroundColor: notification.newBadges && notification.newBadges.length > 0 ? '#ff9800' : '#4caf50',
         color: 'white',
         padding: '16px',
         borderRadius: '8px',
@@ -47,11 +47,41 @@ const Notification: React.FC<NotificationProps> = ({ notification, onClose, auto
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
         <div>
           <h3 style={{ margin: '0 0 8px 0', fontSize: '18px' }}>
-            🎉 ¡Felicidades!
+            {notification.newBadges && notification.newBadges.length > 0 ? '🏆 ¡Nueva insignia!' : '🎉 ¡Felicidades!'}
           </h3>
-          <p style={{ margin: 0, fontSize: '16px' }}>
-            Has alcanzado el Nivel {notification.newLevel}: {notification.levelName}
-          </p>
+          {notification.newBadges && notification.newBadges.length > 0 ? (
+            <div>
+              <p style={{ margin: 0, fontSize: '16px' }}>
+                {notification.message}
+              </p>
+              <div style={{ margin: '8px 0 0 0' }}>
+                <p style={{ margin: '0 0 4px 0', fontSize: '14px', fontWeight: 'bold' }}>
+                  🏆 ¡Nuevas insignias obtenidas!
+                </p>
+                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '4px' }}>
+                  {notification.newBadges.map((badgeName, index) => (
+                    <span
+                      key={index}
+                      style={{
+                        padding: '2px 6px',
+                        backgroundColor: '#ffe0b2',
+                        borderRadius: '12px',
+                        fontSize: '12px',
+                        color: '#e65100',
+                        fontWeight: 'bold'
+                      }}
+                    >
+                      {badgeName}
+                    </span>
+                  ))}
+                </div>
+              </div>
+            </div>
+          ) : (
+            <p style={{ margin: 0, fontSize: '16px' }}>
+              {notification.message}
+            </p>
+          )}
         </div>
         <button
           onClick={() => {

@@ -45,6 +45,27 @@ export const useUserStats = () => {
         } else if (!response.notification && newLevel <= currentLevel) {
           setNotification(null);
         }
+
+        // Check for badge changes in the updated stats
+        if (response.data && response.data.badges) {
+          const currentBadges = stats?.badges || [];
+          const newBadges = response.data.badges;
+          const earnedBadges = newBadges.filter(newBadge =>
+            !currentBadges.some(existingBadge => existingBadge.name === newBadge.name)
+          );
+
+          if (earnedBadges.length > 0 && !response.notification) {
+            // Create notification for newly earned badges if not already present
+            const badgeNotification: LevelUpNotification = {
+              newLevel: newLevel,
+              levelName: response.data.levelName,
+              message: `¡Felicidades! Has obtenido ${earnedBadges.length === 1 ? 'una nueva insignia' : `${earnedBadges.length} nuevas insignias`}.`,
+              newBadges: earnedBadges.map(badge => badge.name)
+            };
+            setNotification(badgeNotification);
+            console.log('Created badge notification:', badgeNotification);
+          }
+        }
       } else {
         setError(response.message || 'Error al obtener estadísticas');
       }
@@ -80,8 +101,30 @@ export const useUserStats = () => {
 
         if (response.notification) {
           setNotification(response.notification);
+          console.log('Badge notification received:', response.notification);
         } else if (!response.notification && newLevel <= currentLevel) {
           setNotification(null);
+        }
+
+        // Check for badge changes in the updated stats
+        if (response.data && response.data.badges) {
+          const currentBadges = stats?.badges || [];
+          const newBadges = response.data.badges;
+          const earnedBadges = newBadges.filter(newBadge =>
+            !currentBadges.some(existingBadge => existingBadge.name === newBadge.name)
+          );
+
+          if (earnedBadges.length > 0 && !response.notification) {
+            // Create notification for newly earned badges if not already present
+            const badgeNotification: LevelUpNotification = {
+              newLevel: newLevel,
+              levelName: response.data.levelName,
+              message: `¡Felicidades! Has obtenido ${earnedBadges.length === 1 ? 'una nueva insignia' : `${earnedBadges.length} nuevas insignias`}.`,
+              newBadges: earnedBadges.map(badge => badge.name)
+            };
+            setNotification(badgeNotification);
+            console.log('Created badge notification:', badgeNotification);
+          }
         }
       } else {
         setError(response.message || 'Error al actualizar puntos');
