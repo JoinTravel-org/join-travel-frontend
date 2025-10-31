@@ -23,6 +23,8 @@ import PlaceDetail from "./components/PlaceDetail";
 import CreateItinerary from "./components/CreateItinerary";
 import ItineraryList from "./components/ItineraryList";
 import ItineraryDetail from "./components/ItineraryDetail";
+import Profile from "./components/Profile";
+import Notification from "./components/Notification";
 
 function AnalyticsListener() {
   const location = useLocation();
@@ -85,15 +87,23 @@ function App() {
                 <Route path="/itinerary/:id/edit" element={<CreateItinerary />} />
                 <Route path="/create-itinerary" element={<CreateItinerary />} />
                 <Route path="/place/:id" element={<PlaceDetail />} />
+                <Route path="/profile" element={<Profile />} />
               </Routes>
             </Suspense>
           </main>
           <ConditionalFooter />
           <ChatBubble />
+          <NotificationWrapper />
         </Router>
       </AuthProvider>
     </AppThemeProvider>
   );
+}
+
+function NotificationWrapper() {
+  // This component will handle global notifications
+  // In a real implementation, this would be connected to a global notification state
+  return null; // Placeholder for now
 }
 
 export default App;

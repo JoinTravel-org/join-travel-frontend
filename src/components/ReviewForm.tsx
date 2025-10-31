@@ -14,6 +14,7 @@ import { useNavigate } from "react-router-dom";
 import reviewService from "../services/review.service";
 import type { CreateReviewData } from "../types/review";
 import MediaUploader from "./MediaUploader";
+import { useUserStats } from "../hooks/useUserStats";
 
 interface ReviewFormProps {
   placeId: string;
@@ -24,8 +25,9 @@ const ReviewForm: React.FC<ReviewFormProps> = ({
   placeId,
   onReviewCreated,
 }) => {
-  const { isAuthenticated } = useAuth();
+  const { isAuthenticated, user } = useAuth();
   const navigate = useNavigate();
+  const { fetchUserStats } = useUserStats();
   const [rating, setRating] = React.useState<number | null>(null);
   const [content, setContent] = React.useState("");
   const [mediaFiles, setMediaFiles] = React.useState<File[]>([]);
@@ -72,6 +74,9 @@ const ReviewForm: React.FC<ReviewFormProps> = ({
       };
 
       await reviewService.createReview(reviewData);
+
+      // Refresh user stats to trigger level up notifications
+      await fetchUserStats();
 
       // Mostrar mensaje de éxito
       setSuccess(true);

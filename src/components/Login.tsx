@@ -124,7 +124,13 @@ const Login: React.FC<LoginProps> = ({ onSwitchToRegister }) => {
         );
       }
     } catch (err) {
-      setError(getErrorMessage(err));
+      const errorMessage = getErrorMessage(err);
+      // Provide more specific error messages for login
+      if (errorMessage.includes("Error de conexión") || errorMessage.includes("Error interno")) {
+        setError("Error al iniciar sesión. Verifica tu conexión a internet e intenta nuevamente.");
+      } else {
+        setError(errorMessage);
+      }
     } finally {
       setLoading(false);
     }

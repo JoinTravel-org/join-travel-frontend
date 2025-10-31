@@ -77,12 +77,12 @@ class ApiService {
           if (error.code === "ECONNABORTED") {
             throw {
               success: false,
-              message: "Error al guardar la reseña",
+              message: "Error de conexión: La solicitud tardó demasiado tiempo.",
             };
           } else {
             throw {
               success: false,
-              message: "Error al guardar la reseña",
+              message: "Error de conexión: No se pudo conectar al servidor.",
             };
           }
         } else {
@@ -93,7 +93,7 @@ class ApiService {
           );
           throw {
             success: false,
-            message: "Error al guardar la reseña",
+            message: "Error interno: Problema al configurar la solicitud.",
           };
         }
       }
@@ -161,7 +161,6 @@ class ApiService {
       ...(place.city && { city: place.city }),
       ...(place.description && { description: place.description }),
     };
-    Logger.getInstance().info(JSON.stringify(placeData))
     const response = await this.api.post("/places", placeData);
     return response.data;
   }
