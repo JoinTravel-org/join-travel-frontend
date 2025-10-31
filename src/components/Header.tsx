@@ -49,7 +49,6 @@ const Header: React.FC = () => {
     const [logoutSnackbarOpen, setLogoutSnackbarOpen] = React.useState(false);
     const [isLoggingOut, setIsLoggingOut] = React.useState(false);
     const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
-    const [notificationAnchorEl, setNotificationAnchorEl] = React.useState<null | HTMLElement>(null);
     const { clearNotification } = useUserStats();
 
     const navId = "primary-navigation";
@@ -89,13 +88,6 @@ const Header: React.FC = () => {
         navigate('/');
     };
 
-    const handleNotificationMenuOpen = (event: React.MouseEvent<HTMLElement>) => {
-        setNotificationAnchorEl(event.currentTarget);
-    };
-
-    const handleNotificationMenuClose = () => {
-        setNotificationAnchorEl(null);
-    };
 
     const NavItems = (
         <>
@@ -130,7 +122,7 @@ const Header: React.FC = () => {
                     </Typography>
                     <IconButton
                         color="inherit"
-                        onClick={handleNotificationMenuOpen}
+                        onClick={() => clearNotification()}
                         aria-label="Notificaciones"
                         sx={{ ml: 0 }}
                     >
@@ -400,49 +392,6 @@ const Header: React.FC = () => {
                 <MenuItem onClick={handleLogoutClick}>Cerrar sesión</MenuItem>
             </Menu>
 
-            <Menu
-                anchorEl={notificationAnchorEl}
-                open={Boolean(notificationAnchorEl)}
-                onClose={handleNotificationMenuClose}
-                anchorOrigin={{
-                    vertical: 'bottom',
-                    horizontal: 'center',
-                }}
-                transformOrigin={{
-                    vertical: 'top',
-                    horizontal: 'center',
-                }}
-                PaperProps={{
-                    sx: { minWidth: 300 }
-                }}
-            >
-                {notification ? (
-                    <Box sx={{ p: 2 }}>
-                        <Typography variant="h6" sx={{ mb: 1 }}>
-                            ¡Felicidades!
-                        </Typography>
-                        <Typography variant="body2">
-                            Has alcanzado el Nivel {notification.newLevel}: {notification.levelName}
-                        </Typography>
-                        <Button
-                            size="small"
-                            onClick={() => {
-                                clearNotification();
-                                handleNotificationMenuClose();
-                            }}
-                            sx={{ mt: 1 }}
-                        >
-                            Cerrar
-                        </Button>
-                    </Box>
-                ) : (
-                    <MenuItem disabled>
-                        <Typography variant="body2" color="text.secondary">
-                            No hay notificaciones nuevas
-                        </Typography>
-                    </MenuItem>
-                )}
-            </Menu>
 
             <Snackbar
                 open={logoutSnackbarOpen}
@@ -468,6 +417,7 @@ const Header: React.FC = () => {
             <Notification
                 notification={notification}
                 onClose={clearNotification}
+                autoHideDuration={30000} // 30 seconds
             />
         </AppBar>
     );

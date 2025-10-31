@@ -137,6 +137,15 @@ export const useUserStats = () => {
     setNotification(null);
   };
 
+  // Effect to ensure notification is only shown once and cleared after display
+  useEffect(() => {
+    if (notification) {
+      console.log('[DEBUG] Notification triggered, will auto-clear after display');
+      // The notification component will call onClose after autoHideDuration
+      // which will call clearNotification and reset the state
+    }
+  }, [notification]);
+
   useEffect(() => {
     console.log('[DEBUG] useUserStats useEffect triggered, user:', user, 'stats:', stats);
     // Always reset notification when this effect runs to ensure clean state

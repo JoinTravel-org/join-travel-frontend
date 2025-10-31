@@ -4,9 +4,10 @@ import type { LevelUpNotification } from '../types/user';
 interface NotificationProps {
   notification: LevelUpNotification | null;
   onClose: () => void;
+  autoHideDuration?: number;
 }
 
-const Notification: React.FC<NotificationProps> = ({ notification, onClose }) => {
+const Notification: React.FC<NotificationProps> = ({ notification, onClose, autoHideDuration = 10000 }) => {
   const [isVisible, setIsVisible] = useState(false);
 
   useEffect(() => {
@@ -15,10 +16,10 @@ const Notification: React.FC<NotificationProps> = ({ notification, onClose }) =>
       console.log('[DEBUG] Setting notification visible');
       setIsVisible(true);
       const timer = setTimeout(() => {
-        console.log('[DEBUG] Auto-hiding notification after 10 seconds');
+        console.log(`[DEBUG] Auto-hiding notification after ${autoHideDuration / 1000} seconds`);
         setIsVisible(false);
         onClose();
-      }, 10000); // Increased to 10 seconds for better visibility
+      }, autoHideDuration);
 
       return () => clearTimeout(timer);
     } else {
