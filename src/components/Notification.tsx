@@ -34,7 +34,7 @@ const Notification: React.FC<NotificationProps> = ({ notification, onClose, auto
         position: 'fixed',
         top: '20px',
         right: '20px',
-        backgroundColor: notification.newBadges && notification.newBadges.length > 0 ? '#ff9800' : '#4caf50',
+        backgroundColor: notification.newBadges && notification.newBadges.length > 0 ? '#ff6f00' : '#1976d2',
         color: 'white',
         padding: '16px',
         borderRadius: '8px',

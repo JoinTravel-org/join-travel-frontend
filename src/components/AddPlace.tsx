@@ -138,7 +138,7 @@ const MapComponent: React.FC<{
 const AddPlace: React.FC = () => {
   const navigate = useNavigate();
   const auth = useAuth();
-  const { fetchUserStats } = useUserStats();
+  const { updatePoints } = useUserStats();
   const hasCheckedAuth = React.useRef(false);
 
   useEffect(() => {
@@ -225,8 +225,12 @@ const AddPlace: React.FC = () => {
         description: selectedPlace.description,
       });
 
-      // Refresh user stats to trigger level up notifications
-      await fetchUserStats();
+      // Award points for adding a place and handle badge notifications
+      try {
+        await updatePoints('place_added');
+      } catch (pointsError) {
+        console.log('No points awarded for place addition (this is normal)');
+      }
 
       setSuccess(true);
       trackEvent("place_added", { place_name: selectedPlace.name });

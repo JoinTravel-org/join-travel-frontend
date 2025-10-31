@@ -28,7 +28,7 @@ const ReviewForm: React.FC<ReviewFormProps> = ({
 }) => {
   const { isAuthenticated, user } = useAuth();
   const navigate = useNavigate();
-  const { fetchUserStats, notification, clearNotification } = useUserStats();
+  const { fetchUserStats, notification, clearNotification, setNotification } = useUserStats();
   const [rating, setRating] = React.useState<number | null>(null);
   const [content, setContent] = React.useState("");
   const [mediaFiles, setMediaFiles] = React.useState<File[]>([]);
@@ -74,9 +74,14 @@ const ReviewForm: React.FC<ReviewFormProps> = ({
         media: mediaFiles.length > 0 ? mediaFiles : undefined,
       };
 
-      await reviewService.createReview(reviewData);
+      const result = await reviewService.createReview(reviewData);
 
-      // Refresh user stats to trigger level up notifications
+      // Check if there are any notifications from the backend (badges earned)
+      if (result.notification) {
+        setNotification(result.notification);
+      }
+
+      // Refresh user stats to update UI
       await fetchUserStats();
 
       // Mostrar mensaje de éxito
