@@ -14,6 +14,7 @@ import Header from "./components/Header";
 import Footer from "./components/Footer";
 import ChatBubble from "./components/ChatBubble";
 import { initAnalytics, trackPageview } from "./utils/analytics";
+import { useUserStats } from "./hooks/useUserStats";
 
 import Login from "./components/Login";
 import Register from "./components/Register";
@@ -102,8 +103,14 @@ function App() {
 
 function NotificationWrapper() {
   // This component will handle global notifications
-  // In a real implementation, this would be connected to a global notification state
-  return null; // Placeholder for now
+  // Connected to the global notification state from useUserStats
+  const { notification, clearNotification } = useUserStats();
+  return (
+    <Notification
+      notification={notification}
+      onClose={clearNotification}
+    />
+  );
 }
 
 export default App;

@@ -115,7 +115,7 @@ const Header: React.FC = () => {
             {auth.isAuthenticated ? (
                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                     <Typography variant="body2" sx={{ color: 'inherit', fontWeight: 600 }}>
-                        {loading ? '...' : (stats ? `Lv.${stats.level} ${stats.levelName}` : 'Lv.0')}
+                        {loading ? '...' : (stats ? `Lv.${stats.level} ${stats.levelName}` : 'Lv.0 Explorador')}
                     </Typography>
                     <IconButton
                         color="inherit"

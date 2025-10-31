@@ -1,5 +1,6 @@
 import React from 'react';
-import type { UserStats as UserStatsType } from '../types/user';
+import type { UserStats as UserStatsType, Badge } from '../types/user';
+import BadgeComponent from './Badge';
 
 interface UserStatsProps {
   stats: UserStatsType;
@@ -52,22 +53,15 @@ const UserStats: React.FC<UserStatsProps> = ({ stats }) => {
         {stats.badges.length > 0 && (
           <div style={{ marginTop: '16px' }}>
             <h4 style={{ marginBottom: '8px' }}>
-              Insignias
+              🏆 Insignias
             </h4>
             <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
               {stats.badges.map((badge, index) => (
-                <span
-                  key={index}
-                  style={{
-                    padding: '4px 8px',
-                    border: '1px solid #1976d2',
-                    borderRadius: '16px',
-                    fontSize: '12px',
-                    color: '#1976d2'
-                  }}
-                >
-                  {badge}
-                </span>
+                <BadgeComponent
+                  key={`${badge.name}-${index}`}
+                  badge={badge}
+                  showShareButton={true}
+                />
               ))}
             </div>
           </div>

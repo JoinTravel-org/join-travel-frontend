@@ -10,6 +10,7 @@ import reviewService from "../services/review.service";
 import type { Review } from "../types/review";
 import { Rating } from '@fluentui/react-rating';
 import MediaCarousel from "./MediaCarousel";
+import LikeButton from "./LikeButton";
 
 interface ReviewListProps {
   placeId: string;
@@ -206,6 +207,14 @@ const ReviewList: React.FC<ReviewListProps> = ({ placeId, refreshTrigger }) => {
                     <MediaCarousel media={review.media} />
                   </Box>
                 )}
+
+                {/* Like button */}
+                <Box sx={{ display: 'flex', justifyContent: 'flex-end', mt: 1 }}>
+                  <LikeButton
+                    reviewId={review.id}
+                    initialLikeCount={review.likeCount || 0}
+                  />
+                </Box>
               </Card>
             ))}
           </Box>
