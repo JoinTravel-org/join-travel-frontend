@@ -20,7 +20,7 @@ import {
     Menu,
     MenuItem,
 } from "@mui/material";
-import { Menu as MenuIcon, Close as CloseIcon, Person as PersonIcon } from "@mui/icons-material";
+import { Menu as MenuIcon, Close as CloseIcon, Person as PersonIcon, Chat as ChatIcon } from "@mui/icons-material";
 import { Link as RouterLink, useLocation, useNavigate } from "react-router-dom";
 import { useTheme as useMuiTheme } from "@mui/material/styles";
 import ThemeToggle from "./ThemeToggle";
@@ -109,6 +109,15 @@ const Header: React.FC = () => {
             </Button>
             {auth.isAuthenticated ? (
                 <>
+                    <IconButton
+                        color="inherit"
+                        component={RouterLink}
+                        to="/chats"
+                        aria-label="Mensajes"
+                        sx={{ ml: 1 }}
+                    >
+                        <ChatIcon />
+                    </IconButton>
                     <IconButton
                         color="inherit"
                         onClick={handleProfileMenuOpen}
@@ -307,6 +316,14 @@ const Header: React.FC = () => {
                         </ListItemButton>
                         {auth.isAuthenticated ? (
                             <>
+                                <ListItemButton
+                                    component={RouterLink}
+                                    to="/chats"
+                                    selected={location.pathname === "/chats"}
+                                    onClick={toggleDrawer(false)}
+                                >
+                                    <ListItemText primary="Mensajes" />
+                                </ListItemButton>
                                 <ListItemButton
                                     component={RouterLink}
                                     to="/profile"

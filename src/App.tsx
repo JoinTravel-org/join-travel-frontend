@@ -23,6 +23,7 @@ import PlaceDetail from "./components/PlaceDetail";
 import CreateItinerary from "./components/CreateItinerary";
 import ItineraryList from "./components/ItineraryList";
 import ItineraryDetail from "./components/ItineraryDetail";
+import ChatView from "./components/ChatView";
 
 function AnalyticsListener() {
   const location = useLocation();
@@ -85,6 +86,7 @@ function App() {
                 <Route path="/itinerary/:id/edit" element={<CreateItinerary />} />
                 <Route path="/create-itinerary" element={<CreateItinerary />} />
                 <Route path="/place/:id" element={<PlaceDetail />} />
+                <Route path="/chats" element={<ChatView />} />
               </Routes>
             </Suspense>
           </main>
