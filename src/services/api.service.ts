@@ -334,25 +334,23 @@ class ApiService {
 
   /**
    * Obtiene las estadísticas del usuario (puntos, nivel, insignias)
-   * @param userId - ID del usuario (opcional, por defecto el usuario autenticado)
+   * @param userId - ID del usuario
    * @returns Promise con las estadísticas del usuario
    */
-  async getUserStats(userId?: string) {
-    const url = userId ? `/users/${userId}/stats` : '/users/temp-id/stats';
-    const response = await this.api.get(url);
+  async getUserStats(userId: string) {
+    const response = await this.api.get(`/users/${userId}/stats`);
     return response.data;
   }
 
   /**
    * Actualiza los puntos del usuario basado en una acción
-   * @param userId - ID del usuario (opcional, por defecto el usuario autenticado)
+   * @param userId - ID del usuario
    * @param action - Tipo de acción realizada
    * @param metadata - Metadatos adicionales de la acción
    * @returns Promise con la respuesta del servidor
    */
-  async awardPoints(userId: string | undefined, action: string, metadata?: any) {
-    const effectiveUserId = userId || 'temp-id';
-    const response = await this.api.post(`/users/${effectiveUserId}/points`, {
+  async awardPoints(userId: string, action: string, metadata?: Record<string, unknown>) {
+    const response = await this.api.post(`/users/${userId}/points`, {
       action,
       metadata
     });

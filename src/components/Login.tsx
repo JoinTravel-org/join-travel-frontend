@@ -103,18 +103,16 @@ const Login: React.FC<LoginProps> = ({ onSwitchToRegister }) => {
       });
 
       if (response.success) {
-        // Use user data if available, otherwise create basic user object
-        const user = response.data?.user || {
-          id: "temp-id",
-          email: trimmedEmail,
-          isEmailConfirmed: true,
-          createdAt: new Date().toISOString(),
-          updatedAt: new Date().toISOString(),
-        };
+        // Ensure user data is available with valid userId
+        if (!response.data?.user?.id) {
+          setError("Error: No se pudo obtener la información del usuario. Inténtalo nuevamente.");
+          return;
+        }
+
         auth.login(
-          user,
-          response.data!.accessToken,
-          response.data!.refreshToken
+          response.data.user,
+          response.data.accessToken,
+          response.data.refreshToken
         );
 
         navigate("/");

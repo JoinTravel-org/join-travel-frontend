@@ -1,5 +1,5 @@
 import apiService from "./api.service";
-import type { UserStatsResponse } from "../types/user";
+import type { UserStatsResponse, MilestonesResponse } from "../types/user";
 
 /**
  * Servicio para manejar estadísticas y niveles de usuario
@@ -35,6 +35,22 @@ class UserService {
       return response.data;
     } catch (error) {
       throw error as UserStatsResponse;
+    }
+  }
+
+  /**
+   * Obtiene los hitos/milestones del usuario para obtener insignias y subir de nivel
+   * @param userId - ID del usuario
+   * @returns Promise con los milestones del usuario
+   */
+  async getUserMilestones(userId: string): Promise<MilestonesResponse> {
+    try {
+      const response = await apiService
+        .getAxiosInstance()
+        .get(`/users/${userId}/milestones`);
+      return response.data;
+    } catch (error) {
+      throw error as MilestonesResponse;
     }
   }
 }
