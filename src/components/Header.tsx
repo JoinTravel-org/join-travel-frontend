@@ -78,6 +78,7 @@ const Header: React.FC = () => {
     const handleProfileClick = () => {
         // Por ahora no hace nada
         handleProfileMenuClose();
+        navigate("/profile")
     };
 
     const handleLogoutClick = async () => {
@@ -327,9 +328,10 @@ const Header: React.FC = () => {
                         {auth.isAuthenticated ? (
                             <>
                                 <ListItemButton
-                                    component={RouterLink}
-                                    to="/profile"
-                                    onClick={toggleDrawer(false)}
+                                    onClick={() => {
+                                        toggleDrawer(false);
+                                        navigate('/profile');
+                                    }}
                                 >
                                     <ListItemText
                                         primary={`Mi perfil ${loading ? '(...)' : (stats ? `(Lv.${stats.level} ${stats.levelName})` : '(Lv.0)')}`}
