@@ -17,7 +17,7 @@ const LikeButton: React.FC<LikeButtonProps> = ({
   onLikeChange
 }) => {
   const { isAuthenticated } = useAuth();
-  const { updatePoints, setNotification, clearNotification } = useUserStats();
+  const { updatePoints } = useUserStats();
   const [liked, setLiked] = useState(false);
   const [likeCount, setLikeCount] = useState(initialLikeCount);
   const [loading, setLoading] = useState(false);
