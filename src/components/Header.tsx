@@ -19,8 +19,9 @@ import {
     CircularProgress,
     Menu,
     MenuItem,
+    Badge,
 } from "@mui/material";
-import { Menu as MenuIcon, Close as CloseIcon, Person as PersonIcon, Notifications as NotificationsIcon, Badge } from "@mui/icons-material";
+import { Menu as MenuIcon, Close as CloseIcon, Person as PersonIcon, Notifications as NotificationsIcon } from "@mui/icons-material";
 import { Link as RouterLink, useLocation, useNavigate } from "react-router-dom";
 import { useTheme as useMuiTheme } from "@mui/material/styles";
 import ThemeToggle from "./ThemeToggle";

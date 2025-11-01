@@ -17,6 +17,7 @@
     "@fluentui/react-rating": "^9.3.8",
     "@googlemaps/js-api-loader": "^2.0.1",
     "@googlemaps/react-wrapper": "^1.2.0",
+    "@hello-pangea/dnd": "^18.0.1",
     "@mui/icons-material": "^7.3.4",
     "@mui/material": "^7.3.4",
     "@mui/system": "^7.3.3",

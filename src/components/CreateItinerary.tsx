@@ -13,11 +13,14 @@ import {
     CircularProgress,
     Stack,
     IconButton,
+    Popover,
 } from '@mui/material';
 import CloseIcon from '@mui/icons-material/Close';
+import EditIcon from '@mui/icons-material/Edit';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth';
 import { useUserStats } from '../hooks/useUserStats';
+import { DragDropContext, Droppable, Draggable } from '@hello-pangea/dnd';
 import type { Place } from '../types/place';
 import type { Itinerary, ItineraryItem, CreateItineraryRequest } from '../types/itinerary';
 import apiService from '../services/api.service';
@@ -129,6 +132,10 @@ const CreateItinerary: React.FC = () => {
     const [error, setError] = useState<string | null>(null);
     const [success, setSuccess] = useState(false);
 
+    // Date editing
+    const [editingDateIndex, setEditingDateIndex] = useState<number | null>(null);
+    const [dateAnchorEl, setDateAnchorEl] = useState<HTMLElement | null>(null);
+
     const handlePlaceSearch = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
         setPlaceSearch(e.target.value);
     }
@@ -147,6 +154,79 @@ const CreateItinerary: React.FC = () => {
     const handleNameChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
         setCurrentItinerary((curr) => ({ ...curr, name: e.target.value }));
     }
+
+    const onDragEnd = (result: any) => {
+        if (!result.destination) {
+            return;
+        }
+
+        const items = Array.from(currentItinerary.items);
+        const [reorderedItem] = items.splice(result.source.index, 1);
+        items.splice(result.destination.index, 0, reorderedItem);
+
+        const newItinerary = {
+            ...currentItinerary,
+            items
+        };
+
+        setCurrentItinerary(newItinerary);
+
+        // Auto-save the new order
+        if (isEditMode && id) {
+            saveItineraryOrder(newItinerary);
+        }
+    };
+
+    const saveItineraryOrder = async (itinerary: Itinerary) => {
+        try {
+            const updateData: CreateItineraryRequest = {
+                name: itinerary.name,
+                items: itinerary.items.map(item => ({
+                    placeId: item.place?.id || '',
+                    date: item.date
+                }))
+            };
+
+            await apiService.updateItinerary(id!, updateData);
+            console.log('Order saved successfully');
+        } catch (error) {
+            console.error('Error saving order:', error);
+            setError('Error al guardar el orden de los lugares.');
+        }
+    };
+
+    const handleEditDate = (event: React.MouseEvent<HTMLElement>, index: number) => {
+        event.stopPropagation();
+        setEditingDateIndex(index);
+        setDateAnchorEl(event.currentTarget);
+    };
+
+    const handleDateChange = (index: number, newDate: string) => {
+        setCurrentItinerary(prev => ({
+            ...prev,
+            items: prev.items.map((item, i) => 
+                i === index ? { ...item, date: newDate } : item
+            )
+        }));
+        setDateAnchorEl(null);
+        setEditingDateIndex(null);
+
+        // Auto-save the date change
+        if (isEditMode && id) {
+            const updatedItinerary = {
+                ...currentItinerary,
+                items: currentItinerary.items.map((item, i) => 
+                    i === index ? { ...item, date: newDate } : item
+                )
+            };
+            saveItineraryOrder(updatedItinerary);
+        }
+    };
+
+    const handleCloseDatePicker = () => {
+        setDateAnchorEl(null);
+        setEditingDateIndex(null);
+    };
 
     // Debounced search for places
     useEffect(() => {
@@ -258,7 +338,40 @@ const CreateItinerary: React.FC = () => {
     };
 
     return (
-        <Container maxWidth="md" sx={{ py: 4 }}>
+        <>
+            {/* Date Picker Popover */}
+            <Popover
+                open={Boolean(dateAnchorEl)}
+                anchorEl={dateAnchorEl}
+                onClose={handleCloseDatePicker}
+                anchorOrigin={{
+                    vertical: 'bottom',
+                    horizontal: 'center',
+                }}
+                transformOrigin={{
+                    vertical: 'top',
+                    horizontal: 'center',
+                }}
+            >
+                <Box sx={{ p: 2 }}>
+                    <TextField
+                        type="date"
+                        label="Seleccionar fecha"
+                        value={editingDateIndex !== null ? currentItinerary.items[editingDateIndex]?.date || '' : ''}
+                        onChange={(e) => {
+                            if (editingDateIndex !== null) {
+                                handleDateChange(editingDateIndex, e.target.value);
+                            }
+                        }}
+                        InputLabelProps={{
+                            shrink: true,
+                        }}
+                        sx={{ minWidth: 200 }}
+                    />
+                </Box>
+            </Popover>
+
+            <Container maxWidth="md" sx={{ py: 4 }}>
             <Typography variant="h4" component="h1" gutterBottom>
                 {isEditMode ? 'Editar Itinerario' : 'Crear Nuevo Itinerario'}
             </Typography>
@@ -327,7 +440,18 @@ const CreateItinerary: React.FC = () => {
                         <Typography variant="body2" sx={{ mb: 1, color: 'text.secondary' }}>
                             Lista de lugares:
                         </Typography>
-                        <ItineraryPlaceThumbnail itinerary={currentItinerary} onRemovePlace={handleRemovePlace} />
+                        {currentItinerary.items.length < 2 && currentItinerary.items.length > 0 && (
+                            <Typography variant="body2" sx={{ mb: 2, color: 'text.secondary', fontStyle: 'italic' }}>
+                                Agrega más lugares para ordenar.
+                            </Typography>
+                        )}
+                        <DragDropContext onDragEnd={onDragEnd}>
+                            <ItineraryPlaceThumbnail 
+                                itinerary={currentItinerary} 
+                                onRemovePlace={handleRemovePlace}
+                                onEditDate={handleEditDate}
+                            />
+                        </DragDropContext>
                     </Box>
                 </Box>
 
@@ -366,107 +490,146 @@ const CreateItinerary: React.FC = () => {
                 </Stack>
             </Paper>
         </Container>
+        </>
     );
 };
 
-function ItineraryPlaceThumbnail({ itinerary, onRemovePlace }: { itinerary: Itinerary; onRemovePlace: (placeId: string) => void }) {
+function ItineraryPlaceThumbnail({ 
+    itinerary, 
+    onRemovePlace, 
+    onEditDate 
+}: { 
+    itinerary: Itinerary; 
+    onRemovePlace: (placeId: string) => void;
+    onEditDate: (event: React.MouseEvent<HTMLElement>, index: number) => void;
+}) {
     return (
-        <Box
-            sx={{
-                mt: 2,
-                display: 'grid',
-                gap: { xs: 3, md: 4 },
-                gridTemplateColumns: { xs: '1fr', sm: 'repeat(2, 1fr)', md: 'repeat(3, 1fr)', lg: 'repeat(4, 1fr)' },
-            }}
-        >
-            {itinerary.items.map((item) => (
-                <Card
-                    key={item.place?.id}
-                    elevation={0}
+        <Droppable droppableId="itinerary-places">
+            {(provided) => (
+                <Box
+                    {...provided.droppableProps}
+                    ref={provided.innerRef}
                     sx={{
-                        height: '100%',
-                        display: 'flex',
-                        flexDirection: 'column',
-                        border: '2px solid #000',
-                        borderRadius: 2,
-                        backgroundColor: '#fff',
-                        boxShadow: '6px 6px 4px 0px rgba(0,0,0,0.7)',
-                        transition: 'all 0.3s ease',
-                        '&:hover': {
-                            transform: 'translate(-2px, -2px)',
-                            boxShadow: '8px 8px 6px 0px rgba(0,0,0,0.7)',
-                            borderColor: '#333',
-                        },
-                        position: 'relative',
+                        mt: 2,
+                        display: 'grid',
+                        gap: { xs: 3, md: 4 },
+                        gridTemplateColumns: { xs: '1fr', sm: 'repeat(2, 1fr)', md: 'repeat(3, 1fr)', lg: 'repeat(4, 1fr)' },
                     }}
                 >
-                    <Box
-                        sx={{
-                            height: 200,
-                            backgroundImage: `url(${item.place?.image || '/placeholder-image.jpg'})`,
-                            backgroundSize: 'cover',
-                            backgroundPosition: 'center',
-                            backgroundColor: '#f0f0f0',
-                            borderBottom: '2px solid #000',
-                            position: 'relative',
-                        }}
-                        onError={(e: any) => {
-                            const target = e.target as HTMLDivElement;
-                            target.style.backgroundImage = 'url(/placeholder-image.jpg)';
-                        }}
-                    >
-                        <IconButton
-                            onClick={(e) => {
-                                e.stopPropagation();
-                                onRemovePlace(item.place?.id || '');
-                            }}
-                            sx={{
-                                position: 'absolute',
-                                top: 8,
-                                right: 8,
-                                backgroundColor: 'rgba(255, 255, 255, 0.8)',
-                                '&:hover': {
-                                    backgroundColor: 'rgba(255, 255, 255, 1)',
-                                },
-                            }}
-                            size="small"
-                        >
-                            <CloseIcon fontSize="small" />
-                        </IconButton>
-                    </Box>
-                    <CardContent
-                        sx={{ flexGrow: 1, p: 3, backgroundColor: '#fff', cursor: 'pointer' }}
-                        onClick={() => window.open(`/place/${item.place?.id}`, '_blank')}
-                    >
-                        <Typography
-                            variant="h6"
-                            component="h3"
-                            sx={{
-                                fontWeight: 700,
-                                mb: 2,
-                                fontSize: '1.25rem',
-                                letterSpacing: '0.02em',
-                                color: '#000'
-                            }}
-                        >
-                            {item.place?.name}
-                        </Typography>
-                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                            <Typography
-                                variant="body2"
-                                sx={{
-                                    fontWeight: 700,
-                                    fontSize: '0.7rem',
-                                    color: '#000'
-                                }}
-                            >
-                                {item.date}
-                            </Typography>
-                        </Box>
-                    </CardContent>
-                </Card>
-            ))}
-        </Box>
+                    {itinerary.items.map((item, index) => (
+                        <Draggable key={item.place?.id} draggableId={item.place?.id || `item-${index}`} index={index}>
+                            {(provided, snapshot) => (
+                                <Card
+                                    ref={provided.innerRef}
+                                    {...provided.draggableProps}
+                                    {...provided.dragHandleProps}
+                                    elevation={0}
+                                    sx={{
+                                        height: '100%',
+                                        display: 'flex',
+                                        flexDirection: 'column',
+                                        border: '2px solid #000',
+                                        borderRadius: 2,
+                                        backgroundColor: '#fff',
+                                        boxShadow: snapshot.isDragging 
+                                            ? '12px 12px 8px 0px rgba(0,0,0,0.9)' 
+                                            : '6px 6px 4px 0px rgba(0,0,0,0.7)',
+                                        transition: 'all 0.3s ease',
+                                        '&:hover': {
+                                            transform: snapshot.isDragging ? 'none' : 'translate(-2px, -2px)',
+                                            boxShadow: snapshot.isDragging 
+                                                ? '12px 12px 8px 0px rgba(0,0,0,0.9)' 
+                                                : '8px 8px 6px 0px rgba(0,0,0,0.7)',
+                                            borderColor: '#333',
+                                        },
+                                        position: 'relative',
+                                        opacity: snapshot.isDragging ? 0.8 : 1,
+                                    }}
+                                >
+                                    <Box
+                                        sx={{
+                                            height: 200,
+                                            backgroundImage: `url(${item.place?.image || '/placeholder-image.jpg'})`,
+                                            backgroundSize: 'cover',
+                                            backgroundPosition: 'center',
+                                            backgroundColor: '#f0f0f0',
+                                            borderBottom: '2px solid #000',
+                                            position: 'relative',
+                                        }}
+                                        onError={(e: any) => {
+                                            const target = e.target as HTMLDivElement;
+                                            target.style.backgroundImage = 'url(/placeholder-image.jpg)';
+                                        }}
+                                    >
+                                        <IconButton
+                                            onClick={(e) => {
+                                                e.stopPropagation();
+                                                onRemovePlace(item.place?.id || '');
+                                            }}
+                                            sx={{
+                                                position: 'absolute',
+                                                top: 8,
+                                                right: 8,
+                                                backgroundColor: 'rgba(255, 255, 255, 0.8)',
+                                                '&:hover': {
+                                                    backgroundColor: 'rgba(255, 255, 255, 1)',
+                                                },
+                                            }}
+                                            size="small"
+                                        >
+                                            <CloseIcon fontSize="small" />
+                                        </IconButton>
+                                    </Box>
+                                    <CardContent
+                                        sx={{ flexGrow: 1, p: 3, backgroundColor: '#fff', cursor: 'pointer' }}
+                                        onClick={() => window.open(`/place/${item.place?.id}`, '_blank')}
+                                    >
+                                        <Typography
+                                            variant="h6"
+                                            component="h3"
+                                            sx={{
+                                                fontWeight: 700,
+                                                mb: 2,
+                                                fontSize: '1.25rem',
+                                                letterSpacing: '0.02em',
+                                                color: '#000'
+                                            }}
+                                        >
+                                            {item.place?.name}
+                                        </Typography>
+                                        <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                                            <Typography
+                                                variant="body2"
+                                                sx={{
+                                                    fontWeight: 700,
+                                                    fontSize: '0.7rem',
+                                                    color: '#000'
+                                                }}
+                                            >
+                                                {item.date}
+                                            </Typography>
+                                            <IconButton
+                                                size="small"
+                                                onClick={(e) => onEditDate(e, index)}
+                                                sx={{
+                                                    color: '#666',
+                                                    '&:hover': {
+                                                        color: '#000',
+                                                    },
+                                                }}
+                                            >
+                                                <EditIcon fontSize="small" />
+                                            </IconButton>
+                                        </Box>
+                                    </CardContent>
+                                </Card>
+                            )}
+                        </Draggable>
+                    ))}
+                    {provided.placeholder}
+                </Box>
+            )}
+        </Droppable>
     )
 }
 

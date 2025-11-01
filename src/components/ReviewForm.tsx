@@ -26,7 +26,7 @@ const ReviewForm: React.FC<ReviewFormProps> = ({
   placeId,
   onReviewCreated,
 }) => {
-  const { isAuthenticated, user } = useAuth();
+  const { isAuthenticated } = useAuth();
   const navigate = useNavigate();
   const { fetchUserStats, notification, clearNotification, setNotification } = useUserStats();
   const [rating, setRating] = React.useState<number | null>(null);

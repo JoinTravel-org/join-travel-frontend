@@ -8,6 +8,8 @@ import {
     Typography,
     CircularProgress,
     Alert,
+    Chip,
+    Stack,
 } from '@mui/material';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth';
@@ -144,21 +146,59 @@ interface ItineraryPlacesGridProps {
 }
 
 function ItineraryPlacesGrid({ items }: ItineraryPlacesGridProps) {
+    const [selectedDay, setSelectedDay] = useState<string | null>(null);
+
     // Sort items by date
     const sortedItems = [...items].sort((a, b) => {
         return new Date(a.date).getTime() - new Date(b.date).getTime();
     });
 
+    // Get unique dates and create day chips
+    const uniqueDates = Array.from(new Set(sortedItems.map(item => item.date))).sort();
+    
+    const dayChips = uniqueDates.map((date, index) => ({
+        date,
+        label: `Día ${index + 1}`,
+        displayDate: new Date(date).toLocaleDateString('es-ES', { day: '2-digit', month: '2-digit', year: '2-digit' })
+    }));
+
+    // Filter items by selected day
+    const filteredItems = selectedDay 
+        ? sortedItems.filter(item => item.date === selectedDay)
+        : sortedItems;
+
     return (
-        <Box
-            sx={{
-                mt: 2,
-                display: 'grid',
-                gap: { xs: 3, md: 4 },
-                gridTemplateColumns: { xs: '1fr', sm: 'repeat(2, 1fr)', md: 'repeat(3, 1fr)', lg: 'repeat(4, 1fr)' },
-            }}
-        >
-            {sortedItems.map((item) => (
+        <>
+            {/* Day filter chips */}
+            <Stack direction="row" spacing={1} sx={{ mb: 3, flexWrap: 'wrap', gap: 1 }}>
+                <Chip
+                    label="Todos"
+                    onClick={() => setSelectedDay(null)}
+                    color={selectedDay === null ? 'primary' : 'default'}
+                    variant={selectedDay === null ? 'filled' : 'outlined'}
+                    sx={{ fontWeight: selectedDay === null ? 700 : 400 }}
+                />
+                {dayChips.map((chip) => (
+                    <Chip
+                        key={chip.date}
+                        label={`${chip.label} ${chip.displayDate}`}
+                        onClick={() => setSelectedDay(chip.date)}
+                        color={selectedDay === chip.date ? 'primary' : 'default'}
+                        variant={selectedDay === chip.date ? 'filled' : 'outlined'}
+                        sx={{ fontWeight: selectedDay === chip.date ? 700 : 400 }}
+                    />
+                ))}
+            </Stack>
+
+            <Box
+                sx={{
+                    mt: 2,
+                    display: 'grid',
+                    gap: { xs: 3, md: 4 },
+                    gridTemplateColumns: { xs: '1fr', sm: 'repeat(2, 1fr)', md: 'repeat(3, 1fr)', lg: 'repeat(4, 1fr)' },
+                }}
+            >
+                {filteredItems.map((item) => (
                 <Card
                     key={item.id}
                     onClick={() => window.open(`/place/${item.place?.id}`, '_blank')}
@@ -223,7 +263,8 @@ function ItineraryPlacesGrid({ items }: ItineraryPlacesGridProps) {
                     </CardContent>
                 </Card>
             ))}
-        </Box>
+            </Box>
+        </>
     );
 }
 
