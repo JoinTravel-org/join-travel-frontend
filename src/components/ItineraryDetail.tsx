@@ -10,6 +10,11 @@ import {
     Alert,
     Chip,
     Stack,
+    Dialog,
+    DialogTitle,
+    DialogContent,
+    DialogContentText,
+    DialogActions,
 } from '@mui/material';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth';
@@ -41,6 +46,8 @@ const ItineraryDetail: React.FC = () => {
     const [itinerary, setItinerary] = useState<ItineraryDetail | null>(null);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
+    const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+    const [deleting, setDeleting] = useState(false);
 
     useEffect(() => {
         if (!hasCheckedAuth.current) {
@@ -88,9 +95,69 @@ const ItineraryDetail: React.FC = () => {
         });
     };
 
+    const handleDeleteClick = () => {
+        setDeleteDialogOpen(true);
+    };
+
+    const handleDeleteCancel = () => {
+        setDeleteDialogOpen(false);
+    };
+
+    const handleDeleteConfirm = async () => {
+        if (!id) return;
+
+        setDeleting(true);
+        setError(null);
+
+        try {
+            await apiService.deleteItinerary(id);
+            setDeleteDialogOpen(false);
+            navigate('/itineraries');
+        } catch (err: unknown) {
+            const errorMessage = err instanceof Error ? err.message : 'Error desconocido al eliminar el itinerario';
+            setError(`Error al eliminar el itinerario: ${errorMessage}`);
+            console.error('Error deleting itinerary:', err);
+            setDeleteDialogOpen(false);
+        } finally {
+            setDeleting(false);
+        }
+    };
+
     return (
-        <Container maxWidth="lg" sx={{ py: 4 }}>
-            <Box sx={{ display: 'flex', gap: 2, mb: 3 }}>
+        <>
+            {/* Delete Confirmation Dialog */}
+            <Dialog
+                open={deleteDialogOpen}
+                onClose={handleDeleteCancel}
+                aria-labelledby="delete-dialog-title"
+                aria-describedby="delete-dialog-description"
+            >
+                <DialogTitle id="delete-dialog-title">
+                    ¿Eliminar itinerario?
+                </DialogTitle>
+                <DialogContent>
+                    <DialogContentText id="delete-dialog-description">
+                        ¿Estás seguro de que deseas eliminar este itinerario? Esta acción no se puede deshacer.
+                    </DialogContentText>
+                </DialogContent>
+                <DialogActions>
+                    <Button onClick={handleDeleteCancel} disabled={deleting}>
+                        Cancelar
+                    </Button>
+                    <Button 
+                        onClick={handleDeleteConfirm} 
+                        color="error" 
+                        variant="contained"
+                        disabled={deleting}
+                        autoFocus
+                    >
+                        {deleting ? <CircularProgress size={20} /> : 'Eliminar'}
+                    </Button>
+                </DialogActions>
+            </Dialog>
+
+            <Container maxWidth="lg" sx={{ py: 4 }}>
+            <Box sx={{ display: 'flex', gap: 2, mb: 3, justifyContent: 'space-between', alignItems: 'center' }}>
                 <Button
                     variant="outlined"
                     onClick={() => navigate('/itineraries')}
@@ -98,12 +165,21 @@ const ItineraryDetail: React.FC = () => {
                     ← Volver a Itinerarios
                 </Button>
                 {!loading && !error && itinerary && (
-                    <Button
-                        variant="contained"
-                        onClick={() => navigate(`/itinerary/${id}/edit`)}
-                    >
-                        Editar Itinerario
-                    </Button>
+                    <Box sx={{ display: 'flex', gap: 2 }}>
+                        <Button
+                            variant="contained"
+                            onClick={() => navigate(`/itinerary/${id}/edit`)}
+                        >
+                            Editar Itinerario
+                        </Button>
+                        <Button
+                            variant="contained"
+                            color="error"
+                            onClick={handleDeleteClick}
+                        >
+                            Eliminar
+                        </Button>
+                    </Box>
                 )}
             </Box>
 
@@ -138,6 +214,7 @@ const ItineraryDetail: React.FC = () => {
                 </>
             )}
         </Container>
+        </>
     );
 };
 
@@ -159,7 +236,12 @@ function ItineraryPlacesGrid({ items }: ItineraryPlacesGridProps) {
     const dayChips = uniqueDates.map((date, index) => ({
         date,
         label: `Día ${index + 1}`,
-        displayDate: new Date(date).toLocaleDateString('es-ES', { day: '2-digit', month: '2-digit', year: '2-digit' })
+        displayDate: new Date(date).toLocaleDateString('es-ES', { 
+            day: '2-digit', 
+            month: '2-digit', 
+            year: '2-digit',
+            timeZone: 'UTC'
+        })
     }));
 
     // Filter items by selected day
