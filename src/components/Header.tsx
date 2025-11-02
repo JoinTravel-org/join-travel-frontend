@@ -20,14 +20,22 @@ import {
     Menu,
     MenuItem,
     Badge,
+    TextField,
+    InputAdornment,
+    Popover,
+    List as MuiList,
+    ListItem,
 } from "@mui/material";
-import { Menu as MenuIcon, Close as CloseIcon, Person as PersonIcon, Notifications as NotificationsIcon } from "@mui/icons-material";
+import { Menu as MenuIcon, Close as CloseIcon, Person as PersonIcon, Notifications as NotificationsIcon, Search as SearchIcon } from "@mui/icons-material";
 import { Link as RouterLink, useLocation, useNavigate } from "react-router-dom";
 import { useTheme as useMuiTheme } from "@mui/material/styles";
 import ThemeToggle from "./ThemeToggle";
 import { useAuth } from "../hooks/useAuth";
 import { useUserStats } from "../hooks/useUserStats";
 import Notification from "./Notification";
+import UserCard from "./UserCard";
+import userService from "../services/user.service";
+import type { User } from "../types/user";
 
 /**
  * Accessible, responsive site header:
@@ -48,6 +56,13 @@ const Header: React.FC = () => {
     const [isLoggingOut, setIsLoggingOut] = React.useState(false);
     const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
     const { clearNotification } = useUserStats();
+
+    // Search states
+    const [searchQuery, setSearchQuery] = React.useState("");
+    const [searchResults, setSearchResults] = React.useState<User[]>([]);
+    const [searchLoading, setSearchLoading] = React.useState(false);
+    const [searchAnchorEl, setSearchAnchorEl] = React.useState<null | HTMLElement>(null);
+    const searchTimeoutRef = React.useRef<number | null>(null);
 
     const navId = "primary-navigation";
 
@@ -85,6 +100,48 @@ const Header: React.FC = () => {
         handleProfileMenuClose();
         await handleLogout();
         navigate('/');
+    };
+
+    // Search handlers
+    const handleSearchChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+        const query = event.target.value;
+        setSearchQuery(query);
+
+        if (searchTimeoutRef.current) {
+            clearTimeout(searchTimeoutRef.current);
+        }
+
+        if (query.trim().length >= 3) {
+            searchTimeoutRef.current = setTimeout(async () => {
+                setSearchLoading(true);
+                try {
+                    const response = await userService.searchUsers(query.trim());
+                    if (response.success && response.data) {
+                        setSearchResults(response.data);
+                        setSearchAnchorEl(event.target as HTMLElement);
+                    }
+                } catch (error) {
+                    console.error('Search error:', error);
+                } finally {
+                    setSearchLoading(false);
+                }
+            }, 300);
+        } else {
+            setSearchResults([]);
+            setSearchAnchorEl(null);
+        }
+    };
+
+    const handleSearchClose = () => {
+        setSearchAnchorEl(null);
+        setSearchResults([]);
+        setSearchQuery("");
+    };
+
+    const handleUserClick = () => {
+        // For now, just navigate to profile or do nothing
+        // TODO: Implement user profile navigation
+        handleSearchClose();
     };
 
 
@@ -222,6 +279,43 @@ const Header: React.FC = () => {
                             JoinTravel
                         </Typography>
                     </Box>
+                </Box>
+
+                {/* Search Bar */}
+                <Box sx={{ display: "flex", alignItems: "center", mr: 2 }}>
+                    <TextField
+                        placeholder="Buscar usuarios por email..."
+                        value={searchQuery}
+                        onChange={handleSearchChange}
+                        size="small"
+                        sx={{
+                            width: 300,
+                            "& .MuiOutlinedInput-root": {
+                                backgroundColor: "rgba(255, 255, 255, 0.1)",
+                                color: "inherit",
+                                "& fieldset": {
+                                    borderColor: "rgba(255, 255, 255, 0.3)",
+                                },
+                                "&:hover fieldset": {
+                                    borderColor: "rgba(255, 255, 255, 0.5)",
+                                },
+                                "&.Mui-focused fieldset": {
+                                    borderColor: "rgba(255, 255, 255, 0.7)",
+                                },
+                            },
+                            "& .MuiInputBase-input::placeholder": {
+                                color: "rgba(255, 255, 255, 0.7)",
+                                opacity: 1,
+                            },
+                        }}
+                        InputProps={{
+                            startAdornment: (
+                                <InputAdornment position="start">
+                                    <SearchIcon sx={{ color: "rgba(255, 255, 255, 0.7)" }} />
+                                </InputAdornment>
+                            ),
+                        }}
+                    />
                 </Box>
 
 
@@ -412,6 +506,51 @@ const Header: React.FC = () => {
             >
                 <CircularProgress color="inherit" />
             </Backdrop>
+
+            {/* Search Results Popover */}
+            <Popover
+                open={Boolean(searchAnchorEl)}
+                anchorEl={searchAnchorEl}
+                onClose={handleSearchClose}
+                anchorOrigin={{
+                    vertical: 'bottom',
+                    horizontal: 'left',
+                }}
+                transformOrigin={{
+                    vertical: 'top',
+                    horizontal: 'left',
+                }}
+                PaperProps={{
+                    sx: {
+                        width: 400,
+                        maxHeight: 400,
+                        overflow: 'auto',
+                    },
+                }}
+            >
+                <Box sx={{ p: 1 }}>
+                    {searchLoading ? (
+                        <Box sx={{ display: 'flex', justifyContent: 'center', p: 2 }}>
+                            <CircularProgress size={24} />
+                        </Box>
+                    ) : searchResults.length > 0 ? (
+                        <MuiList>
+                            {searchResults.map((user) => (
+                                <ListItem key={user.id} sx={{ px: 0 }}>
+                                    <UserCard
+                                        user={user}
+                                        onClick={handleUserClick}
+                                    />
+                                </ListItem>
+                            ))}
+                        </MuiList>
+                    ) : searchQuery.length >= 3 ? (
+                        <Typography variant="body2" sx={{ p: 2, textAlign: 'center', color: 'text.secondary' }}>
+                            No se encontraron usuarios con ese email
+                        </Typography>
+                    ) : null}
+                </Box>
+            </Popover>
 
             {/* Global Level Up Notification */}
             <Notification

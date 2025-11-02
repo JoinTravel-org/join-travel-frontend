@@ -1,5 +1,5 @@
 import apiService from "./api.service";
-import type { UserStatsResponse, MilestonesResponse } from "../types/user";
+import type { UserStatsResponse, MilestonesResponse, User } from "../types/user";
 
 /**
  * Servicio para manejar estadísticas y niveles de usuario
@@ -51,6 +51,22 @@ class UserService {
       return response.data;
     } catch (error) {
       throw error as MilestonesResponse;
+    }
+  }
+
+  /**
+   * Busca usuarios por email
+   * @param email - Email a buscar
+   * @returns Promise con la lista de usuarios encontrados
+   */
+  async searchUsers(email: string): Promise<{ success: boolean; data?: User[]; message?: string }> {
+    try {
+      const response = await apiService
+        .getAxiosInstance()
+        .get(`/users/search`, { params: { email } });
+      return response.data;
+    } catch (error) {
+      throw error;
     }
   }
 }
