@@ -11,13 +11,14 @@ import {
   Paper,
 } from "@mui/material";
 import { Search as SearchIcon, Clear as ClearIcon } from "@mui/icons-material";
-import { useSearchParams } from "react-router-dom";
+import { useSearchParams, useNavigate } from "react-router-dom";
 import UserCard from "./UserCard";
 import userService from "../services/user.service";
 import type { User } from "../types/user";
 
 const SearchResults: React.FC = () => {
   const [searchParams, setSearchParams] = useSearchParams();
+  const navigate = useNavigate();
   const [users, setUsers] = useState<User[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -77,8 +78,7 @@ const SearchResults: React.FC = () => {
   };
 
   const handleUserClick = (user: User) => {
-    // TODO: Navigate to user profile page
-    console.log("Navigate to user profile:", user.id);
+    navigate(`/user/${user.id}`);
   };
 
   return (
