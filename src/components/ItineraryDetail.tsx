@@ -8,11 +8,14 @@ import {
     Typography,
     CircularProgress,
     Alert,
+    Tabs,
+    Tab,
 } from '@mui/material';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth';
 import apiService from '../services/api.service';
 import type { Place } from '../types/place';
+import ItineraryMap from './ItineraryMap';
 
 interface ItineraryItem {
     id: string;
@@ -39,6 +42,7 @@ const ItineraryDetail: React.FC = () => {
     const [itinerary, setItinerary] = useState<ItineraryDetail | null>(null);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
+    const [activeTab, setActiveTab] = useState(0);
 
     useEffect(() => {
         if (!hasCheckedAuth.current) {
@@ -131,7 +135,16 @@ const ItineraryDetail: React.FC = () => {
                         <Typography variant="h6" gutterBottom>
                             Lugares del Itinerario
                         </Typography>
-                        <ItineraryPlacesGrid items={itinerary.items} />
+
+                        <Box sx={{ borderBottom: 1, borderColor: 'divider', mb: 3 }}>
+                            <Tabs value={activeTab} onChange={(_: React.SyntheticEvent, newValue: number) => setActiveTab(newValue)}>
+                                <Tab label="Vista de Lista" />
+                                <Tab label="Vista de Mapa" />
+                            </Tabs>
+                        </Box>
+
+                        {activeTab === 0 && <ItineraryPlacesGrid items={itinerary.items} />}
+                        {activeTab === 1 && <ItineraryMap items={itinerary.items} />}
                     </Box>
                 </>
             )}
