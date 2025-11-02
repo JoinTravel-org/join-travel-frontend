@@ -3,7 +3,6 @@ import { IconButton, Typography, Box, Alert } from '@mui/material';
 import { Favorite, FavoriteBorder } from '@mui/icons-material';
 import { useAuth } from '../hooks/useAuth';
 import reviewService from '../services/review.service';
-import { useUserStats } from '../hooks/useUserStats';
 
 interface LikeButtonProps {
   reviewId: string;
@@ -17,7 +16,6 @@ const LikeButton: React.FC<LikeButtonProps> = ({
   onLikeChange
 }) => {
   const { isAuthenticated } = useAuth();
-  const { updatePoints } = useUserStats();
   const [liked, setLiked] = useState(false);
   const [likeCount, setLikeCount] = useState(initialLikeCount);
   const [loading, setLoading] = useState(false);
