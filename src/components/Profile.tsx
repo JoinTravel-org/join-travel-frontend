@@ -139,28 +139,31 @@ const Profile: React.FC = () => {
                   No tienes lugares favoritos aún. ¡Explora y marca algunos como favoritos!
                 </Typography>
               ) : (
-                <Box sx={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: 2 }}>
+                <Box sx={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(250px, 1fr))', gap: 1.5 }}>
                   {favorites.map((place) => (
                     <Card
                       key={place.id}
                       sx={{
-                        height: '100%',
                         cursor: 'pointer',
-                        '&:hover': { boxShadow: 3 }
+                        '&:hover': { boxShadow: 2 },
+                        transition: 'box-shadow 0.2s ease'
                       }}
                       onClick={() => navigate(`/place/${place.id}`)}
                     >
-                      <CardMedia
-                        component="img"
-                        height="140"
-                        image={place.image || '/placeholder-image.jpg'}
-                        alt={place.name}
-                      />
-                      <CardContent>
-                        <Typography variant="h6" component="h3" gutterBottom>
+                      <Box sx={{ position: 'relative' }}>
+                        <CardMedia
+                          component="img"
+                          height="100"
+                          image={place.image || '/placeholder-image.jpg'}
+                          alt={place.name}
+                          sx={{ objectFit: 'cover' }}
+                        />
+                      </Box>
+                      <CardContent sx={{ py: 1.5, px: 2, '&:last-child': { pb: 1.5 } }}>
+                        <Typography variant="subtitle1" component="h3" sx={{ fontSize: '0.95rem', fontWeight: 600, mb: 0.5 }}>
                           {place.name}
                         </Typography>
-                        <Typography variant="body2" color="text.secondary">
+                        <Typography variant="body2" color="text.secondary" sx={{ fontSize: '0.8rem' }}>
                           {place.city || 'Ciudad no especificada'}
                         </Typography>
                       </CardContent>
