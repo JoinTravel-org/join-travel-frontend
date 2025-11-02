@@ -376,6 +376,26 @@ class ApiService {
   }
 
   /**
+   * Alterna el estado de favorito de un lugar
+   * @param placeId - ID del lugar
+   * @returns Promise con el estado actualizado
+   */
+  async toggleFavorite(placeId: string) {
+    const response = await this.api.post(`/places/${placeId}/favorite`);
+    return response.data;
+  }
+
+  /**
+   * Obtiene el estado de favorito de un lugar
+   * @param placeId - ID del lugar
+   * @returns Promise con el estado de favorito
+   */
+  async getFavoriteStatus(placeId: string) {
+    const response = await this.api.get(`/places/${placeId}/favorite`);
+    return response.data;
+  }
+
+  /**
      * Obtiene la instancia de axios para peticiones personalizadas
      * @returns Instancia de axios
      */
