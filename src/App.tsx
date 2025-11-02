@@ -14,6 +14,8 @@ import Header from "./components/Header";
 import Footer from "./components/Footer";
 import ChatBubble from "./components/ChatBubble";
 import { initAnalytics, trackPageview } from "./utils/analytics";
+import { useUserStats } from "./hooks/useUserStats";
+import { useAnalytics } from "./hooks/useAnalytics";
 
 import Login from "./components/Login";
 import Register from "./components/Register";
@@ -23,6 +25,10 @@ import PlaceDetail from "./components/PlaceDetail";
 import CreateItinerary from "./components/CreateItinerary";
 import ItineraryList from "./components/ItineraryList";
 import ItineraryDetail from "./components/ItineraryDetail";
+import Profile from "./components/Profile";
+import Notification from "./components/Notification";
+import SearchResults from "./components/SearchResults";
+import UserProfile from "./components/UserProfile";
 
 function AnalyticsListener() {
   const location = useLocation();
@@ -40,6 +46,8 @@ function ConditionalFooter() {
 }
 
 function App() {
+  useAnalytics()
+
   return (
     <AppThemeProvider>
       <AuthProvider>
@@ -85,14 +93,30 @@ function App() {
                 <Route path="/itinerary/:id/edit" element={<CreateItinerary />} />
                 <Route path="/create-itinerary" element={<CreateItinerary />} />
                 <Route path="/place/:id" element={<PlaceDetail />} />
+                <Route path="/profile" element={<Profile />} />
+                <Route path="/user/:userId" element={<UserProfile />} />
+                <Route path="/search" element={<SearchResults />} />
               </Routes>
             </Suspense>
           </main>
           <ConditionalFooter />
           <ChatBubble />
+          <NotificationWrapper />
         </Router>
       </AuthProvider>
     </AppThemeProvider>
+  );
+}
+
+function NotificationWrapper() {
+  // This component will handle global notifications
+  // Connected to the global notification state from useUserStats
+  const { notification, clearNotification } = useUserStats();
+  return (
+    <Notification
+      notification={notification}
+      onClose={clearNotification}
+    />
   );
 }
 

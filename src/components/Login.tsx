@@ -103,18 +103,16 @@ const Login: React.FC<LoginProps> = ({ onSwitchToRegister }) => {
       });
 
       if (response.success) {
-        // Use user data if available, otherwise create basic user object
-        const user = response.data?.user || {
-          id: "temp-id",
-          email: trimmedEmail,
-          isEmailConfirmed: true,
-          createdAt: new Date().toISOString(),
-          updatedAt: new Date().toISOString(),
-        };
+        // Ensure user data is available with valid userId
+        if (!response.data?.user?.id) {
+          setError("Error: No se pudo obtener la información del usuario. Inténtalo nuevamente.");
+          return;
+        }
+
         auth.login(
-          user,
-          response.data!.accessToken,
-          response.data!.refreshToken
+          response.data.user,
+          response.data.accessToken,
+          response.data.refreshToken
         );
 
         navigate("/");
@@ -124,7 +122,13 @@ const Login: React.FC<LoginProps> = ({ onSwitchToRegister }) => {
         );
       }
     } catch (err) {
-      setError(getErrorMessage(err));
+      const errorMessage = getErrorMessage(err);
+      // Provide more specific error messages for login
+      if (errorMessage.includes("Error de conexión") || errorMessage.includes("Error interno")) {
+        setError("Error al iniciar sesión. Verifica tu conexión a internet e intenta nuevamente.");
+      } else {
+        setError(errorMessage);
+      }
     } finally {
       setLoading(false);
     }

@@ -77,12 +77,12 @@ class ApiService {
           if (error.code === "ECONNABORTED") {
             throw {
               success: false,
-              message: "Error al guardar la reseña",
+              message: "Error de conexión: La solicitud tardó demasiado tiempo.",
             };
           } else {
             throw {
               success: false,
-              message: "Error al guardar la reseña",
+              message: "Error de conexión: No se pudo conectar al servidor.",
             };
           }
         } else {
@@ -93,7 +93,7 @@ class ApiService {
           );
           throw {
             success: false,
-            message: "Error al guardar la reseña",
+            message: "Error interno: Problema al configurar la solicitud.",
           };
         }
       }
@@ -161,7 +161,6 @@ class ApiService {
       ...(place.city && { city: place.city }),
       ...(place.description && { description: place.description }),
     };
-    Logger.getInstance().info(JSON.stringify(placeData))
     const response = await this.api.post("/places", placeData);
     return response.data;
   }
@@ -334,9 +333,81 @@ class ApiService {
   }
 
   /**
-    * Obtiene la instancia de axios para peticiones personalizadas
-    * @returns Instancia de axios
-    */
+   * Obtiene las estadísticas del usuario (puntos, nivel, insignias)
+   * @param userId - ID del usuario
+   * @returns Promise con las estadísticas del usuario
+   */
+  async getUserStats(userId: string) {
+    const response = await this.api.get(`/users/${userId}/stats`);
+    return response.data;
+  }
+
+  /**
+   * Actualiza los puntos del usuario basado en una acción
+   * @param userId - ID del usuario
+   * @param action - Tipo de acción realizada
+   * @param metadata - Metadatos adicionales de la acción
+   * @returns Promise con la respuesta del servidor
+   */
+  async awardPoints(userId: string, action: string, metadata?: Record<string, unknown>) {
+    const response = await this.api.post(`/users/${userId}/points`, {
+      action,
+      metadata
+    });
+    return response.data;
+  }
+
+  /**
+   * Obtiene todas las insignias disponibles
+   * @returns Promise con la lista de insignias
+   */
+  async getAllBadges() {
+    const response = await this.api.get('/badges');
+    return response.data;
+  }
+
+  /**
+   * Obtiene todos los niveles disponibles
+   * @returns Promise con la lista de niveles
+   */
+  async getAllLevels() {
+    const response = await this.api.get('/levels');
+    return response.data;
+  }
+
+  /**
+   * Alterna el estado de favorito de un lugar
+   * @param placeId - ID del lugar
+   * @returns Promise con el estado actualizado
+   */
+  async toggleFavorite(placeId: string) {
+    const response = await this.api.post(`/places/${placeId}/favorite`);
+    return response.data;
+  }
+
+  /**
+   * Obtiene el estado de favorito de un lugar
+   * @param placeId - ID del lugar
+   * @returns Promise con el estado de favorito
+   */
+  async getFavoriteStatus(placeId: string) {
+    const response = await this.api.get(`/places/${placeId}/favorite`);
+    return response.data;
+  }
+
+  /**
+   * Obtiene los lugares favoritos del usuario autenticado
+   * @returns Promise con la lista de lugares favoritos
+   */
+  async getUserFavorites() {
+    const response = await this.api.get("/places/favorites");
+    return response.data;
+  }
+
+  /**
+     * Obtiene la instancia de axios para peticiones personalizadas
+     * @returns Instancia de axios
+     */
   getAxiosInstance() {
     return this.api;
   }

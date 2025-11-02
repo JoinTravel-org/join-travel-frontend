@@ -1,5 +1,6 @@
 import React from "react";
 import { Box, Container, Divider, Link as MUILink, Stack, Typography } from "@mui/material";
+import { Email, GitHub } from "@mui/icons-material";
 
 /**
  * Site Footer with semantic & accessible structure.
@@ -56,8 +57,12 @@ const Footer: React.FC = () => {
                 boxShadow: "0 0 0 3px var(--focus-ring-color)",
                 borderRadius: "var(--radius-sm)",
               },
+              display: "flex",
+              alignItems: "center",
+              gap: 0.5,
             }}
           >
+            <Email fontSize="small" />
             Contacto
           </MUILink>
           <MUILink
@@ -73,9 +78,13 @@ const Footer: React.FC = () => {
                 boxShadow: "0 0 0 3px var(--focus-ring-color)",
                 borderRadius: "var(--radius-sm)",
               },
+              display: "flex",
+              alignItems: "center",
+              gap: 0.5,
             }}
             aria-label="Código fuente en GitHub (se abre en una nueva pestaña)"
           >
+            <GitHub fontSize="small" />
             Código
           </MUILink>
         </Stack>

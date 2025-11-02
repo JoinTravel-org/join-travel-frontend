@@ -15,6 +15,7 @@ import { useNavigate } from "react-router-dom";
 import { trackEvent } from "../utils/analytics";
 import apiService from "../services/api.service";
 import { useAuth } from "../hooks/useAuth";
+import { useUserStats } from "../hooks/useUserStats";
 
 const MapComponent: React.FC<{
   onPlaceSelect: (place: {
@@ -137,6 +138,7 @@ const MapComponent: React.FC<{
 const AddPlace: React.FC = () => {
   const navigate = useNavigate();
   const auth = useAuth();
+  const { updatePoints } = useUserStats();
   const hasCheckedAuth = React.useRef(false);
 
   useEffect(() => {
@@ -222,6 +224,14 @@ const AddPlace: React.FC = () => {
         city: selectedPlace.city,
         description: selectedPlace.description,
       });
+
+      // Award points for adding a place and handle badge notifications
+      try {
+        await updatePoints('place_added');
+      } catch (pointsError) {
+        console.log('No points awarded for place addition (this is normal)');
+      }
+
       setSuccess(true);
       trackEvent("place_added", { place_name: selectedPlace.name });
 

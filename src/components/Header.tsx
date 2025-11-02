@@ -19,12 +19,17 @@ import {
     CircularProgress,
     Menu,
     MenuItem,
+    Badge,
+    TextField,
+    InputAdornment,
 } from "@mui/material";
-import { Menu as MenuIcon, Close as CloseIcon, Person as PersonIcon } from "@mui/icons-material";
+import { Menu as MenuIcon, Close as CloseIcon, Person as PersonIcon, Notifications as NotificationsIcon, Search as SearchIcon } from "@mui/icons-material";
 import { Link as RouterLink, useLocation, useNavigate } from "react-router-dom";
 import { useTheme as useMuiTheme } from "@mui/material/styles";
 import ThemeToggle from "./ThemeToggle";
 import { useAuth } from "../hooks/useAuth";
+import { useUserStats } from "../hooks/useUserStats";
+import Notification from "./Notification";
 
 /**
  * Accessible, responsive site header:
@@ -39,10 +44,15 @@ const Header: React.FC = () => {
     const location = useLocation();
     const navigate = useNavigate();
     const auth = useAuth();
+    const { stats, loading, notification } = useUserStats();
 
     const [logoutSnackbarOpen, setLogoutSnackbarOpen] = React.useState(false);
     const [isLoggingOut, setIsLoggingOut] = React.useState(false);
     const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
+    const { clearNotification } = useUserStats();
+
+    // Search states
+    const [searchQuery, setSearchQuery] = React.useState("");
 
     const navId = "primary-navigation";
 
@@ -73,6 +83,7 @@ const Header: React.FC = () => {
     const handleProfileClick = () => {
         // Por ahora no hace nada
         handleProfileMenuClose();
+        navigate("/profile")
     };
 
     const handleLogoutClick = async () => {
@@ -80,6 +91,24 @@ const Header: React.FC = () => {
         await handleLogout();
         navigate('/');
     };
+
+    // Search handlers
+    const handleSearchChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+        setSearchQuery(event.target.value);
+    };
+
+    const handleSearchKeyPress = (event: React.KeyboardEvent<HTMLInputElement>) => {
+        if (event.key === 'Enter' && searchQuery.trim()) {
+            navigate(`/search?q=${encodeURIComponent(searchQuery.trim())}`);
+        }
+    };
+
+    const handleSearchClick = () => {
+        if (searchQuery.trim()) {
+            navigate(`/search?q=${encodeURIComponent(searchQuery.trim())}`);
+        }
+    };
+
 
     const NavItems = (
         <>
@@ -108,16 +137,29 @@ const Header: React.FC = () => {
                 Itinerarios
             </Button>
             {auth.isAuthenticated ? (
-                <>
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                    <Typography variant="body2" sx={{ color: 'inherit', fontWeight: 600 }}>
+                        {loading ? '...' : (stats ? `Lv.${stats.level} ${stats.levelName}` : 'Lv.0 Explorador')}
+                    </Typography>
+                    <IconButton
+                        color="inherit"
+                        onClick={() => clearNotification()}
+                        aria-label="Notificaciones"
+                        sx={{ ml: 0 }}
+                    >
+                        <Badge color="error" variant="dot" invisible={notification === null}>
+                            <NotificationsIcon />
+                        </Badge>
+                    </IconButton>
                     <IconButton
                         color="inherit"
                         onClick={handleProfileMenuOpen}
                         aria-label="Perfil"
-                        sx={{ ml: 1 }}
+                        sx={{ ml: 0 }}
                     >
                         <PersonIcon />
                     </IconButton>
-                </>
+                </Box>
             ) : (
                 <>
                     <Button
@@ -202,6 +244,55 @@ const Header: React.FC = () => {
                             JoinTravel
                         </Typography>
                     </Box>
+                </Box>
+
+                {/* Search Bar */}
+                <Box sx={{ display: "flex", alignItems: "center", mr: 2 }}>
+                    <TextField
+                        placeholder="Buscar usuarios por email..."
+                        value={searchQuery}
+                        onChange={handleSearchChange}
+                        onKeyPress={handleSearchKeyPress}
+                        size="small"
+                        sx={{
+                            width: 300,
+                            "& .MuiOutlinedInput-root": {
+                                backgroundColor: "rgba(255, 255, 255, 0.1)",
+                                color: "inherit",
+                                "& fieldset": {
+                                    borderColor: "rgba(255, 255, 255, 0.3)",
+                                },
+                                "&:hover fieldset": {
+                                    borderColor: "rgba(255, 255, 255, 0.5)",
+                                },
+                                "&.Mui-focused fieldset": {
+                                    borderColor: "rgba(255, 255, 255, 0.7)",
+                                },
+                            },
+                            "& .MuiInputBase-input::placeholder": {
+                                color: "rgba(255, 255, 255, 0.7)",
+                                opacity: 1,
+                            },
+                        }}
+                        InputProps={{
+                            startAdornment: (
+                                <InputAdornment position="start">
+                                    <SearchIcon sx={{ color: "rgba(255, 255, 255, 0.7)" }} />
+                                </InputAdornment>
+                            ),
+                            endAdornment: searchQuery.trim() ? (
+                                <InputAdornment position="end">
+                                    <IconButton
+                                        size="small"
+                                        onClick={handleSearchClick}
+                                        sx={{ color: "rgba(255, 255, 255, 0.7)" }}
+                                    >
+                                        <SearchIcon />
+                                    </IconButton>
+                                </InputAdornment>
+                            ) : null,
+                        }}
+                    />
                 </Box>
 
 
@@ -308,11 +399,14 @@ const Header: React.FC = () => {
                         {auth.isAuthenticated ? (
                             <>
                                 <ListItemButton
-                                    component={RouterLink}
-                                    to="/profile"
-                                    onClick={toggleDrawer(false)}
+                                    onClick={() => {
+                                        toggleDrawer(false);
+                                        navigate('/profile');
+                                    }}
                                 >
-                                    <ListItemText primary="Mi perfil" />
+                                    <ListItemText
+                                        primary={`Mi perfil ${loading ? '(...)' : (stats ? `(Lv.${stats.level} ${stats.levelName})` : '(Lv.0)')}`}
+                                    />
                                 </ListItemButton>
                                 <ListItemButton
                                     onClick={() => {
@@ -369,6 +463,7 @@ const Header: React.FC = () => {
                 <MenuItem onClick={handleLogoutClick}>Cerrar sesión</MenuItem>
             </Menu>
 
+
             <Snackbar
                 open={logoutSnackbarOpen}
                 autoHideDuration={4000}
@@ -388,6 +483,14 @@ const Header: React.FC = () => {
             >
                 <CircularProgress color="inherit" />
             </Backdrop>
+
+
+            {/* Global Level Up Notification */}
+            <Notification
+                notification={notification}
+                onClose={clearNotification}
+                autoHideDuration={30000} // 30 seconds
+            />
         </AppBar>
     );
 };

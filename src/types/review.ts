@@ -19,6 +19,7 @@ export interface Review {
   updatedAt: string;
   placeName?: string;
   media?: ReviewMedia[];
+  likeCount?: number;
 }
 
 export interface CreateReviewData {
@@ -32,6 +33,7 @@ export interface ReviewResponse {
   success: boolean;
   message: string;
   data?: Review;
+  notification?: any; // For gamification notifications
 }
 
 export interface ReviewListResponse {
