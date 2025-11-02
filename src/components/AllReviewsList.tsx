@@ -11,6 +11,7 @@ import reviewService from "../services/review.service";
 import type { Review } from "../types/review";
 import { Rating } from "@fluentui/react-rating";
 import { useNavigate } from "react-router-dom";
+import LikeButton from "./LikeButton";
 
 const PAGE_SIZE = 20;
 
@@ -282,6 +283,14 @@ const AllReviewsList: React.FC = () => {
                       )}
                     </Box>
                   )}
+
+                  {/* Like button */}
+                  <Box sx={{ display: 'flex', justifyContent: 'flex-end', mt: 1 }}>
+                    <LikeButton
+                      reviewId={review.id}
+                      initialLikeCount={review.likeCount || 0}
+                    />
+                  </Box>
                 </Card>
               ))}
             </Box>

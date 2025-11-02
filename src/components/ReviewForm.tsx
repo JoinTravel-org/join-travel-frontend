@@ -14,6 +14,8 @@ import { useNavigate } from "react-router-dom";
 import reviewService from "../services/review.service";
 import type { CreateReviewData } from "../types/review";
 import MediaUploader from "./MediaUploader";
+import { useUserStats } from "../hooks/useUserStats";
+import Notification from "./Notification";
 
 interface ReviewFormProps {
   placeId: string;
@@ -26,6 +28,7 @@ const ReviewForm: React.FC<ReviewFormProps> = ({
 }) => {
   const { isAuthenticated } = useAuth();
   const navigate = useNavigate();
+  const { fetchUserStats, notification, clearNotification, setNotification } = useUserStats();
   const [rating, setRating] = React.useState<number | null>(null);
   const [content, setContent] = React.useState("");
   const [mediaFiles, setMediaFiles] = React.useState<File[]>([]);
@@ -71,7 +74,15 @@ const ReviewForm: React.FC<ReviewFormProps> = ({
         media: mediaFiles.length > 0 ? mediaFiles : undefined,
       };
 
-      await reviewService.createReview(reviewData);
+      const result = await reviewService.createReview(reviewData);
+
+      // Check if there are any notifications from the backend (badges earned)
+      if (result.notification) {
+        setNotification(result.notification);
+      }
+
+      // Refresh user stats to update UI
+      await fetchUserStats();
 
       // Mostrar mensaje de éxito
       setSuccess(true);
@@ -126,6 +137,12 @@ const ReviewForm: React.FC<ReviewFormProps> = ({
       <Typography variant="h6" fontWeight={700}>
         Escribir una Reseña
       </Typography>
+
+      {/* Mostrar notificaciones */}
+      <Notification
+        notification={notification}
+        onClose={clearNotification}
+      />
 
       {/* Mostrar alertas */}
       {error && (

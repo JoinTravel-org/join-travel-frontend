@@ -13,8 +13,11 @@ import {
   Stack,
   Snackbar,
   Slide,
+  IconButton,
 } from "@mui/material";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
+import FavoriteIcon from "@mui/icons-material/Favorite";
+import FavoriteBorderIcon from "@mui/icons-material/FavoriteBorder";
 import api from "../services/api.service";
 import type { Place } from "../types/place";
 import { useAuth } from "../hooks/useAuth";
@@ -22,6 +25,7 @@ import ReviewForm from "./ReviewForm";
 import ReviewList from "./ReviewList";
 import reviewService from "../services/review.service";
 import { Rating } from '@fluentui/react-rating';
+import PlaceMap from "./PlaceMap";
 
 const PlaceDetail: React.FC = () => {
   const INFO_NOT_AVAILABLE = "Información no disponible temporalmente";
@@ -41,6 +45,9 @@ const PlaceDetail: React.FC = () => {
     averageRating: 0,
     totalReviews: 0,
   });
+  const [isFavorite, setIsFavorite] = useState(false);
+  const [favoriteLoading, setFavoriteLoading] = useState(false);
+  const [favoriteError, setFavoriteError] = useState<string | null>(null);
 
   useEffect (() => {
     const fetchReviewStats = async () => {
@@ -73,6 +80,19 @@ const PlaceDetail: React.FC = () => {
     };
     fetchPlace();
   }, [id]);
+
+  useEffect(() => {
+    const fetchFavoriteStatus = async () => {
+      if (!id || !auth.isAuthenticated) return;
+      try {
+        const status = await api.getFavoriteStatus(id);
+        setIsFavorite(status.isFavorite);
+      } catch (error) {
+        console.error("Error fetching favorite status:", error);
+      }
+    };
+    fetchFavoriteStatus();
+  }, [id, auth.isAuthenticated]);
 
   if (loading)
     return (
@@ -152,6 +172,29 @@ const PlaceDetail: React.FC = () => {
     setSnackbarOpen(false);
   };
 
+  const handleToggleFavorite = async () => {
+    if (!auth.isAuthenticated) {
+      navigate("/login");
+      return;
+    }
+
+    const previousState = isFavorite;
+    setIsFavorite(!isFavorite); // Optimistic update
+    setFavoriteLoading(true);
+    setFavoriteError(null);
+
+    try {
+      await api.toggleFavorite(place!.id);
+      // Keep the optimistic state since it succeeded
+    } catch (error: unknown) {
+      console.error("Error toggling favorite:", error);
+      setIsFavorite(previousState); // Revert on error
+      setFavoriteError("Error al marcar favorito.");
+    } finally {
+      setFavoriteLoading(false);
+    }
+  };
+
   return (
     <Container maxWidth="lg" sx={{ py: 5 }}>
       {/* ===== Main Two-Column Layout ===== */}
@@ -185,14 +228,30 @@ const PlaceDetail: React.FC = () => {
             }}
           />
           <CardContent sx={{ textAlign: "left" }}>
-            <Typography
-              variant="h4"
-              component="h1"
-              fontWeight={700}
-              gutterBottom
-            >
-              {place.name}
-            </Typography>
+            <Box sx={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+              <Typography
+                variant="h4"
+                component="h1"
+                fontWeight={700}
+                gutterBottom
+              >
+                {place.name}
+              </Typography>
+              <IconButton
+                onClick={handleToggleFavorite}
+                disabled={favoriteLoading}
+                sx={{
+                  color: isFavorite ? 'error.main' : 'text.secondary',
+                  '&:hover': {
+                    color: isFavorite ? 'error.dark' : 'error.main',
+                  },
+                  transition: 'color 0.2s ease',
+                }}
+                aria-label={isFavorite ? 'Quitar de favoritos' : 'Agregar a favoritos'}
+              >
+                {isFavorite ? <FavoriteIcon /> : <FavoriteBorderIcon />}
+              </IconButton>
+            </Box>
             <Typography variant="h6" color="text.secondary" fontWeight={300}>
               {place.city || INFO_NOT_AVAILABLE}
             </Typography>
@@ -278,7 +337,7 @@ const PlaceDetail: React.FC = () => {
           </CardContent>
         </Card>
 
-        {/* ===== RIGHT COLUMN: Add Review + Reviews ===== */}
+        {/* ===== RIGHT COLUMN: Map + Add Review + Reviews ===== */}
         <Box
           sx={{
             flex: { xs: "1 1 100%", md: "1 1 55%" },
@@ -287,6 +346,14 @@ const PlaceDetail: React.FC = () => {
             gap: 3,
           }}
         >
+          {/* --- Interactive Map --- */}
+          <Box>
+            <Typography variant="h6" fontWeight={700} gutterBottom>
+              Ubicación
+            </Typography>
+            <PlaceMap place={place} />
+          </Box>
+
           {/* --- Add Review Form --- */}
           <ReviewForm
             placeId={place.id}
@@ -315,6 +382,23 @@ const PlaceDetail: React.FC = () => {
           sx={{ width: "100%" }}
         >
           ¡Descripción guardada exitosamente!
+        </Alert>
+      </Snackbar>
+
+      <Snackbar
+        open={!!favoriteError}
+        autoHideDuration={3000}
+        onClose={() => setFavoriteError(null)}
+        anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
+        TransitionComponent={(props) => <Slide {...props} direction="up" />}
+        transitionDuration={500}
+      >
+        <Alert
+          onClose={() => setFavoriteError(null)}
+          severity="error"
+          sx={{ width: "100%" }}
+        >
+          {favoriteError}
         </Alert>
       </Snackbar>
     </Container>
