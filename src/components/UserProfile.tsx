@@ -36,25 +36,13 @@ const UserProfile: React.FC = () => {
       setError(null);
 
       try {
-        // First try to get user stats, which should include basic user info
-        const statsResponse = await userService.getUserStats(userId);
+        // Get user basic info
+        const userResponse = await userService.getUserById(userId);
 
-        if (statsResponse.success && statsResponse.data) {
-          // Create a user object from the stats response
-          // Note: This assumes the stats endpoint returns user info along with stats
-          // You might need to adjust this based on your actual API response
-          const userData: User = {
-            id: userId,
-            email: '', // This might not be available in stats, you may need a separate endpoint
-            isEmailConfirmed: true, // Default assumption
-            createdAt: new Date().toISOString(), // This should come from API
-            updatedAt: new Date().toISOString(), // This should come from API
-            stats: statsResponse.data,
-          };
-
-          setUser(userData);
+        if (userResponse.success && userResponse.data) {
+          setUser(userResponse.data);
         } else {
-          setError(statsResponse.message || 'Usuario no encontrado');
+          setError(userResponse.message || 'Usuario no encontrado');
         }
       } catch (err) {
         console.error('Error fetching user profile:', err);
@@ -127,56 +115,13 @@ const UserProfile: React.FC = () => {
         </div>
 
         {user.stats && (
-          <div style={{ maxWidth: '600px', margin: '16px auto', padding: '16px', border: '1px solid #ccc', borderRadius: '8px' }}>
-            <div>
-              <h2 style={{ marginBottom: '16px' }}>
-                Estadísticas de Usuario
-              </h2>
-
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
-                <div>
-                  <div style={{ display: 'flex', alignItems: 'center', marginBottom: '8px' }}>
-                    <span style={{ marginRight: '8px' }}>⭐</span>
-                    <h3 style={{ margin: 0 }}>
-                      Nivel {user.stats.level}: {user.stats.levelName}
-                    </h3>
-                  </div>
-                  <p style={{ color: '#666', margin: 0 }}>
-                    {user.stats.points} puntos acumulados
-                  </p>
-                </div>
-
-                <div>
-                  <div style={{ display: 'flex', alignItems: 'center', marginBottom: '8px' }}>
-                    <span style={{ marginRight: '8px' }}>📈</span>
-                    <p style={{ margin: 0 }}>
-                      Progreso al siguiente nivel
-                    </p>
-                  </div>
-                  <div style={{ width: '100%', height: '8px', backgroundColor: '#e0e0e0', borderRadius: '4px', overflow: 'hidden' }}>
-                    <div
-                      style={{
-                        width: `${user.stats.progressToNext}%`,
-                        height: '100%',
-                        backgroundColor: '#1976d2',
-                        transition: 'width 0.3s ease'
-                      }}
-                    />
-                  </div>
-                  <p style={{ fontSize: '12px', color: '#666', margin: '4px 0 0 0' }}>
-                    {user.stats.progressToNext}% completado
-                  </p>
-                </div>
-              </div>
-
+          <div style={{ padding: '12px', backgroundColor: '#f9f9f9', borderRadius: '6px' }}>
+            <p style={{ margin: '0 0 8px 0', fontSize: '0.9rem', color: '#666' }}>
+              Nivel {user.stats.level} • {user.stats.points} puntos
               {user.stats.badges && user.stats.badges.length > 0 && (
-                <div style={{ marginTop: '16px' }}>
-                  <h4 style={{ marginBottom: '8px' }}>
-                    🏆 {user.stats.badges.length} Insignia{user.stats.badges.length !== 1 ? 's' : ''} Obtenida{user.stats.badges.length !== 1 ? 's' : ''}
-                  </h4>
-                </div>
+                <span> • {user.stats.badges.length} insignia{user.stats.badges.length !== 1 ? 's' : ''}</span>
               )}
-            </div>
+            </p>
           </div>
         )}
       </div>

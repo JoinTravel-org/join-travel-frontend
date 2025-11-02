@@ -69,6 +69,22 @@ class UserService {
       throw error;
     }
   }
+
+  /**
+   * Obtiene información básica de un usuario por ID
+   * @param userId - ID del usuario
+   * @returns Promise con la información del usuario
+   */
+  async getUserById(userId: string): Promise<{ success: boolean; data?: User; message?: string }> {
+    try {
+      const response = await apiService
+        .getAxiosInstance()
+        .get(`/users/${userId}`);
+      return response.data;
+    } catch (error) {
+      throw error;
+    }
+  }
 }
 
 export default new UserService();
