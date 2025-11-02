@@ -11,7 +11,7 @@ const UserStats: React.FC<UserStatsProps> = ({ stats }) => {
     <div style={{ maxWidth: '600px', margin: '16px auto', padding: '16px', border: '1px solid #ccc', borderRadius: '8px' }}>
       <div>
         <h2 style={{ marginBottom: '16px' }}>
-          🏆 Estadísticas de Usuario
+          Estadísticas de Usuario
         </h2>
 
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>

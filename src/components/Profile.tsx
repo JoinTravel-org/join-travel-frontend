@@ -40,30 +40,50 @@ const Profile: React.FC = () => {
   }
 
   return (
-    <div style={{ padding: '20px' }}>
-      <h1>Perfil de Usuario</h1>
-      <p>Bienvenido, {user.email}</p>
-
-      {stats && <UserStats stats={stats} />}
-
-      {milestonesLoading ? (
-        <div style={{ textAlign: 'center', padding: '20px' }}>
-          Cargando hitos...
+    <div style={{ padding: '20px', display: 'flex', gap: '20px', flexWrap: 'wrap' }}>
+      {/* Left Sidebar - User Stats */}
+      <div style={{
+        flex: '0 0 300px',
+        minWidth: '250px',
+        display: 'flex',
+        flexDirection: 'column',
+        gap: '20px'
+      }}>
+        <div>
+          <h1 style={{ marginBottom: '8px' }}>Perfil de Usuario</h1>
+          <p style={{ margin: 0, color: '#666' }}>Bienvenido, {user.email}</p>
         </div>
-      ) : (
-        <>
-          {/* Levels Section */}
-          <Milestones milestones={milestones.filter(m => m.category === 'level')} />
 
-          {/* Badges Section */}
-          <Milestones milestones={milestones.filter(m => m.category === 'badge')} />
-        </>
-      )}
+        {stats && <UserStats stats={stats} />}
 
-      <Notification
-        notification={notification}
-        onClose={clearNotification}
-      />
+        <Notification
+          notification={notification}
+          onClose={clearNotification}
+        />
+      </div>
+
+      {/* Main Content - Milestones */}
+      <div style={{
+        flex: '2',
+        minWidth: '600px',
+        display: 'flex',
+        flexDirection: 'column',
+        gap: '20px'
+      }}>
+        {milestonesLoading ? (
+          <div style={{ textAlign: 'center', padding: '40px' }}>
+            Cargando hitos...
+          </div>
+        ) : (
+          <>
+            {/* Levels Section */}
+            <Milestones milestones={milestones.filter(m => m.category === 'level')} />
+
+            {/* Badges Section */}
+            <Milestones milestones={milestones.filter(m => m.category === 'badge')} />
+          </>
+        )}
+      </div>
     </div>
   );
 };

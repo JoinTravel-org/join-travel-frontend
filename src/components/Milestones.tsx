@@ -8,10 +8,10 @@ interface MilestonesProps {
 const Milestones: React.FC<MilestonesProps> = ({ milestones }) => {
   const [hoveredMilestone, setHoveredMilestone] = useState<Milestone | null>(null);
   const category = milestones.length > 0 ? milestones[0].category : 'general';
-  const title = category === 'level' ? '⭐ Hitos de Niveles' : category === 'badge' ? '🏆 Hitos de Insignias' : '🎯 Hitos para Progresar';
+  const title = category === 'level' ? 'Niveles' : category === 'badge' ? 'Insignias' : '🎯 Hitos para Progresar';
 
   return (
-    <div style={{ maxWidth: '800px', margin: '16px auto', padding: '16px', border: '1px solid #ccc', borderRadius: '8px' }}>
+    <div style={{ width: '100%', margin: '16px 0', padding: '16px', border: '1px solid #ccc', borderRadius: '8px' }}>
       <h3 style={{ marginBottom: '16px' }}>
         {title}
       </h3>
@@ -21,21 +21,21 @@ const Milestones: React.FC<MilestonesProps> = ({ milestones }) => {
           No hay hitos disponibles en este momento.
         </p>
       ) : (
-        <div style={{ position: 'relative', padding: '20px 0' }}>
+        <div style={{ position: 'relative', padding: '40px 20px', minHeight: '120px' }}>
           {/* Timeline line */}
           <div style={{
             position: 'absolute',
             top: '50%',
-            left: '10%',
-            right: '10%',
-            height: '2px',
+            left: '5%',
+            right: '5%',
+            height: '3px',
             backgroundColor: '#e0e0e0',
             zIndex: 1
           }} />
 
           {/* Milestones dots */}
           {milestones.map((milestone, index) => {
-            const position = milestones.length > 1 ? (index / (milestones.length - 1)) * 80 + 10 : 50; // 10% to 90%
+            const position = milestones.length > 1 ? (index / (milestones.length - 1)) * 90 + 5 : 50; // 5% to 95%
             return (
               <div
                 key={milestone.id}
@@ -43,7 +43,7 @@ const Milestones: React.FC<MilestonesProps> = ({ milestones }) => {
                   position: 'absolute',
                   left: `${position}%`,
                   top: '50%',
-                  transform: 'translate(-50%, -50%)',
+                  transform: 'translate(-50%, -25px)',
                   zIndex: 2
                 }}
                 onMouseEnter={() => setHoveredMilestone(milestone)}
@@ -52,25 +52,26 @@ const Milestones: React.FC<MilestonesProps> = ({ milestones }) => {
                 <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
                   <div
                     style={{
-                      width: '40px',
-                      height: '40px',
+                      width: '50px',
+                      height: '50px',
                       borderRadius: '50%',
                       backgroundColor: milestone.isCompleted ? '#4caf50' : '#ccc',
                       cursor: 'pointer',
-                      border: '2px solid white',
-                      boxShadow: '0 2px 4px rgba(0,0,0,0.2)'
+                      border: '3px solid white',
+                      boxShadow: '0 3px 6px rgba(0,0,0,0.3)'
                     }}
                     title={milestone.title}
                   />
                   <div style={{
-                    marginTop: '8px',
-                    fontSize: '12px',
+                    marginTop: '10px',
+                    fontSize: '13px',
                     color: '#666',
                     textAlign: 'center',
-                    maxWidth: '80px',
-                    wordWrap: 'break-word'
+                    maxWidth: '100px',
+                    wordWrap: 'break-word',
+                    lineHeight: '1.2'
                   }}>
-                    {milestone.title.length > 15 ? milestone.title.substring(0, 15) + '...' : milestone.title}
+                    {milestone.title.length > 18 ? milestone.title.substring(0, 18) + '...' : milestone.title}
                   </div>
                 </div>
               </div>
@@ -80,18 +81,19 @@ const Milestones: React.FC<MilestonesProps> = ({ milestones }) => {
           {/* Tooltip */}
           {hoveredMilestone && (
             <div style={{
-              position: 'absolute',
-              bottom: '70px',
+              position: 'fixed',
+              top: '50%',
               left: '50%',
-              transform: 'translateX(-50%)',
+              transform: 'translate(-50%, -50%)',
               backgroundColor: 'white',
               border: '1px solid #ccc',
               borderRadius: '8px',
               padding: '16px',
               boxShadow: '0 4px 8px rgba(0,0,0,0.1)',
-              zIndex: 3,
+              zIndex: 1000,
               maxWidth: '300px',
-              fontSize: '14px'
+              fontSize: '14px',
+              pointerEvents: 'none'
             }}>
               <h4 style={{ margin: '0 0 8px 0' }}>{hoveredMilestone.title}</h4>
               <p style={{ margin: '0 0 8px 0', color: '#666' }}>{hoveredMilestone.description}</p>
