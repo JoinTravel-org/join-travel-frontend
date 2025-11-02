@@ -9,9 +9,13 @@ WORKDIR /app
 
 # Accept build argument for VITE_BACKEND_URL
 ARG VITE_BACKEND_URL
+ARG VITE_UMAMI_URL
+ARG VITE_UMAMI_WEBSITE_ID
 
 # Set the environment variable for Vite
 ENV VITE_BACKEND_URL=$VITE_BACKEND_URL
+ENV VITE_UMAMI_URL=$VITE_UMAMI_URL
+ENV VITE_UMAMI_WEBSITE_ID=$VITE_UMAMI_WEBSITE_ID
 
 # Enable corepack and prepare the latest version of pnpm for package management
 RUN corepack enable && corepack prepare pnpm@latest --activate

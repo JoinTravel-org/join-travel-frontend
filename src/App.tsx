@@ -15,6 +15,7 @@ import Footer from "./components/Footer";
 import ChatBubble from "./components/ChatBubble";
 import { initAnalytics, trackPageview } from "./utils/analytics";
 import { useUserStats } from "./hooks/useUserStats";
+import { useAnalytics } from "./hooks/useAnalytics";
 
 import Login from "./components/Login";
 import Register from "./components/Register";
@@ -43,6 +44,8 @@ function ConditionalFooter() {
 }
 
 function App() {
+  useAnalytics()
+
   return (
     <AppThemeProvider>
       <AuthProvider>
