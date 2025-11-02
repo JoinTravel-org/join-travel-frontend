@@ -15,6 +15,7 @@ import Footer from "./components/Footer";
 import ChatBubble from "./components/ChatBubble";
 import { initAnalytics, trackPageview } from "./utils/analytics";
 import { useUserStats } from "./hooks/useUserStats";
+import { useAnalytics } from "./hooks/useAnalytics";
 
 import Login from "./components/Login";
 import Register from "./components/Register";
@@ -26,6 +27,8 @@ import ItineraryList from "./components/ItineraryList";
 import ItineraryDetail from "./components/ItineraryDetail";
 import Profile from "./components/Profile";
 import Notification from "./components/Notification";
+import SearchResults from "./components/SearchResults";
+import UserProfile from "./components/UserProfile";
 
 function AnalyticsListener() {
   const location = useLocation();
@@ -43,6 +46,8 @@ function ConditionalFooter() {
 }
 
 function App() {
+  useAnalytics()
+
   return (
     <AppThemeProvider>
       <AuthProvider>
@@ -89,6 +94,8 @@ function App() {
                 <Route path="/create-itinerary" element={<CreateItinerary />} />
                 <Route path="/place/:id" element={<PlaceDetail />} />
                 <Route path="/profile" element={<Profile />} />
+                <Route path="/user/:userId" element={<UserProfile />} />
+                <Route path="/search" element={<SearchResults />} />
               </Routes>
             </Suspense>
           </main>

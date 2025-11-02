@@ -20,8 +20,10 @@ import {
     Menu,
     MenuItem,
     Badge,
+    TextField,
+    InputAdornment,
 } from "@mui/material";
-import { Menu as MenuIcon, Close as CloseIcon, Person as PersonIcon, Notifications as NotificationsIcon } from "@mui/icons-material";
+import { Menu as MenuIcon, Close as CloseIcon, Person as PersonIcon, Notifications as NotificationsIcon, Search as SearchIcon } from "@mui/icons-material";
 import { Link as RouterLink, useLocation, useNavigate } from "react-router-dom";
 import { useTheme as useMuiTheme } from "@mui/material/styles";
 import ThemeToggle from "./ThemeToggle";
@@ -48,6 +50,9 @@ const Header: React.FC = () => {
     const [isLoggingOut, setIsLoggingOut] = React.useState(false);
     const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
     const { clearNotification } = useUserStats();
+
+    // Search states
+    const [searchQuery, setSearchQuery] = React.useState("");
 
     const navId = "primary-navigation";
 
@@ -78,12 +83,30 @@ const Header: React.FC = () => {
     const handleProfileClick = () => {
         // Por ahora no hace nada
         handleProfileMenuClose();
+        navigate("/profile")
     };
 
     const handleLogoutClick = async () => {
         handleProfileMenuClose();
         await handleLogout();
         navigate('/');
+    };
+
+    // Search handlers
+    const handleSearchChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+        setSearchQuery(event.target.value);
+    };
+
+    const handleSearchKeyPress = (event: React.KeyboardEvent<HTMLInputElement>) => {
+        if (event.key === 'Enter' && searchQuery.trim()) {
+            navigate(`/search?q=${encodeURIComponent(searchQuery.trim())}`);
+        }
+    };
+
+    const handleSearchClick = () => {
+        if (searchQuery.trim()) {
+            navigate(`/search?q=${encodeURIComponent(searchQuery.trim())}`);
+        }
     };
 
 
@@ -223,6 +246,55 @@ const Header: React.FC = () => {
                     </Box>
                 </Box>
 
+                {/* Search Bar */}
+                <Box sx={{ display: "flex", alignItems: "center", mr: 2 }}>
+                    <TextField
+                        placeholder="Buscar usuarios por email..."
+                        value={searchQuery}
+                        onChange={handleSearchChange}
+                        onKeyPress={handleSearchKeyPress}
+                        size="small"
+                        sx={{
+                            width: 300,
+                            "& .MuiOutlinedInput-root": {
+                                backgroundColor: "rgba(255, 255, 255, 0.1)",
+                                color: "inherit",
+                                "& fieldset": {
+                                    borderColor: "rgba(255, 255, 255, 0.3)",
+                                },
+                                "&:hover fieldset": {
+                                    borderColor: "rgba(255, 255, 255, 0.5)",
+                                },
+                                "&.Mui-focused fieldset": {
+                                    borderColor: "rgba(255, 255, 255, 0.7)",
+                                },
+                            },
+                            "& .MuiInputBase-input::placeholder": {
+                                color: "rgba(255, 255, 255, 0.7)",
+                                opacity: 1,
+                            },
+                        }}
+                        InputProps={{
+                            startAdornment: (
+                                <InputAdornment position="start">
+                                    <SearchIcon sx={{ color: "rgba(255, 255, 255, 0.7)" }} />
+                                </InputAdornment>
+                            ),
+                            endAdornment: searchQuery.trim() ? (
+                                <InputAdornment position="end">
+                                    <IconButton
+                                        size="small"
+                                        onClick={handleSearchClick}
+                                        sx={{ color: "rgba(255, 255, 255, 0.7)" }}
+                                    >
+                                        <SearchIcon />
+                                    </IconButton>
+                                </InputAdornment>
+                            ) : null,
+                        }}
+                    />
+                </Box>
+
 
                 {/* Desktop nav */}
                 {!isMobile && (
@@ -327,9 +399,10 @@ const Header: React.FC = () => {
                         {auth.isAuthenticated ? (
                             <>
                                 <ListItemButton
-                                    component={RouterLink}
-                                    to="/profile"
-                                    onClick={toggleDrawer(false)}
+                                    onClick={() => {
+                                        toggleDrawer(false);
+                                        navigate('/profile');
+                                    }}
                                 >
                                     <ListItemText
                                         primary={`Mi perfil ${loading ? '(...)' : (stats ? `(Lv.${stats.level} ${stats.levelName})` : '(Lv.0)')}`}
@@ -410,6 +483,7 @@ const Header: React.FC = () => {
             >
                 <CircularProgress color="inherit" />
             </Backdrop>
+
 
             {/* Global Level Up Notification */}
             <Notification

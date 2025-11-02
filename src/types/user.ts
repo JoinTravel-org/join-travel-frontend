@@ -29,6 +29,25 @@ export interface LevelUpNotification {
   newBadges?: string[];
 }
 
+export interface Milestone {
+  id: string;
+  title: string;
+  description: string;
+  progress: number; // Current progress (e.g., 0-100 or count)
+  target: number; // Target to complete (e.g., 100 or 5)
+  isCompleted: boolean;
+  category: 'badge' | 'level'; // What it leads to
+  badgeName?: string; // If category is badge
+  levelRequired?: number; // If category is level
+  instructions: string[]; // Step-by-step instructions
+}
+
+export interface MilestonesResponse {
+  success: boolean;
+  data?: Milestone[];
+  message?: string;
+}
+
 export interface UserStatsResponse {
   success: boolean;
   data?: UserStats;
