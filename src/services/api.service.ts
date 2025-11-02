@@ -396,6 +396,15 @@ class ApiService {
   }
 
   /**
+   * Obtiene los lugares favoritos del usuario autenticado
+   * @returns Promise con la lista de lugares favoritos
+   */
+  async getUserFavorites() {
+    const response = await this.api.get("/places/favorites");
+    return response.data;
+  }
+
+  /**
      * Obtiene la instancia de axios para peticiones personalizadas
      * @returns Instancia de axios
      */

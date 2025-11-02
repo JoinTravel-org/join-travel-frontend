@@ -5,13 +5,29 @@ import UserStats from './UserStats';
 import Notification from './Notification';
 import Milestones from './Milestones';
 import userService from '../services/user.service';
+import api from '../services/api.service';
 import type { Milestone } from '../types/user';
+import type { Place } from '../types/place';
+import {
+  Card,
+  CardContent,
+  Typography,
+  Box,
+  CircularProgress,
+  Alert,
+  CardMedia,
+} from '@mui/material';
+import { useNavigate } from 'react-router-dom';
 
 const Profile: React.FC = () => {
   const { user } = useAuth();
   const { stats, notification, clearNotification } = useUserStats();
   const [milestones, setMilestones] = useState<Milestone[]>([]);
   const [milestonesLoading, setMilestonesLoading] = useState(false);
+  const [favorites, setFavorites] = useState<Place[]>([]);
+  const [favoritesLoading, setFavoritesLoading] = useState(false);
+  const [favoritesError, setFavoritesError] = useState<string | null>(null);
+  const navigate = useNavigate();
 
   console.log('[DEBUG] Profile component rendering, user:', user, 'stats:', stats, 'notification:', notification);
 
@@ -33,6 +49,28 @@ const Profile: React.FC = () => {
     };
 
     fetchMilestones();
+  }, [user?.id]);
+
+  useEffect(() => {
+    const fetchFavorites = async () => {
+      if (!user?.id) return;
+
+      setFavoritesLoading(true);
+      setFavoritesError(null);
+      try {
+        const response = await api.getUserFavorites();
+        if (response.success && response.data) {
+          setFavorites(response.data);
+        }
+      } catch (error) {
+        console.error('Error fetching favorites:', error);
+        setFavoritesError('Error al cargar lugares favoritos');
+      } finally {
+        setFavoritesLoading(false);
+      }
+    };
+
+    fetchFavorites();
   }, [user?.id]);
 
   if (!user) {
@@ -81,6 +119,56 @@ const Profile: React.FC = () => {
 
             {/* Badges Section */}
             <Milestones milestones={milestones.filter(m => m.category === 'badge')} />
+
+            {/* Favorite Places Section */}
+            <Box sx={{ mt: 4 }}>
+              <Typography variant="h5" component="h2" gutterBottom>
+                Lugares Favoritos
+              </Typography>
+
+              {favoritesLoading ? (
+                <Box sx={{ display: 'flex', justifyContent: 'center', py: 4 }}>
+                  <CircularProgress />
+                </Box>
+              ) : favoritesError ? (
+                <Alert severity="error" sx={{ mb: 2 }}>
+                  {favoritesError}
+                </Alert>
+              ) : favorites.length === 0 ? (
+                <Typography variant="body1" color="text.secondary">
+                  No tienes lugares favoritos aún. ¡Explora y marca algunos como favoritos!
+                </Typography>
+              ) : (
+                <Box sx={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: 2 }}>
+                  {favorites.map((place) => (
+                    <Card
+                      key={place.id}
+                      sx={{
+                        height: '100%',
+                        cursor: 'pointer',
+                        '&:hover': { boxShadow: 3 }
+                      }}
+                      onClick={() => navigate(`/place/${place.id}`)}
+                    >
+                      <CardMedia
+                        component="img"
+                        height="140"
+                        image={place.image || '/placeholder-image.jpg'}
+                        alt={place.name}
+                      />
+                      <CardContent>
+                        <Typography variant="h6" component="h3" gutterBottom>
+                          {place.name}
+                        </Typography>
+                        <Typography variant="body2" color="text.secondary">
+                          {place.city || 'Ciudad no especificada'}
+                        </Typography>
+                      </CardContent>
+                    </Card>
+                  ))}
+                </Box>
+              )}
+            </Box>
           </>
         )}
       </div>
