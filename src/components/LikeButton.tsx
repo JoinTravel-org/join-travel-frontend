@@ -56,7 +56,8 @@ const LikeButton: React.FC<LikeButtonProps> = ({
 
       // Update points for like action and handle badge notifications
       try {
-        await updatePoints('like');
+        // Disabled because action like does not exist
+        // await updatePoints('like');
       } catch (pointsError) {
         console.error('Error updating points for like:', pointsError);
         // Don't show error to user for points update failure
