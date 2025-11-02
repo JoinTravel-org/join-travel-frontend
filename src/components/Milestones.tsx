@@ -100,12 +100,17 @@ const Milestones: React.FC<MilestonesProps> = ({ milestones }) => {
               <div style={{ marginBottom: '8px' }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '4px' }}>
                   <span>Progreso: {hoveredMilestone.progress} / {hoveredMilestone.target}</span>
-                  <span>{Math.round((hoveredMilestone.progress / hoveredMilestone.target) * 100)}%</span>
+                  {(() => {
+                    const percentage = hoveredMilestone.target > 0 ? Math.round((hoveredMilestone.progress / hoveredMilestone.target) * 100) : NaN;
+                    return !isNaN(percentage) ? (
+                      <span>{percentage}%</span>
+                    ) : null;
+                  })()}
                 </div>
                 <div style={{ width: '100%', height: '8px', backgroundColor: '#e0e0e0', borderRadius: '4px', overflow: 'hidden' }}>
                   <div
                     style={{
-                      width: `${Math.min((hoveredMilestone.progress / hoveredMilestone.target) * 100, 100)}%`,
+                      width: `${hoveredMilestone.target > 0 ? Math.min((hoveredMilestone.progress / hoveredMilestone.target) * 100, 100) : 0}%`,
                       height: '100%',
                       backgroundColor: hoveredMilestone.isCompleted ? '#4caf50' : '#1976d2',
                       transition: 'width 0.3s ease'
