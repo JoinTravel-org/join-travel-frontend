@@ -22,9 +22,6 @@ import {
     Badge,
     TextField,
     InputAdornment,
-    Popover,
-    List as MuiList,
-    ListItem,
 } from "@mui/material";
 import { Menu as MenuIcon, Close as CloseIcon, Person as PersonIcon, Notifications as NotificationsIcon, Search as SearchIcon } from "@mui/icons-material";
 import { Link as RouterLink, useLocation, useNavigate } from "react-router-dom";
@@ -33,9 +30,6 @@ import ThemeToggle from "./ThemeToggle";
 import { useAuth } from "../hooks/useAuth";
 import { useUserStats } from "../hooks/useUserStats";
 import Notification from "./Notification";
-import UserCard from "./UserCard";
-import userService from "../services/user.service";
-import type { User } from "../types/user";
 
 /**
  * Accessible, responsive site header:
@@ -59,10 +53,6 @@ const Header: React.FC = () => {
 
     // Search states
     const [searchQuery, setSearchQuery] = React.useState("");
-    const [searchResults, setSearchResults] = React.useState<User[]>([]);
-    const [searchLoading, setSearchLoading] = React.useState(false);
-    const [searchAnchorEl, setSearchAnchorEl] = React.useState<null | HTMLElement>(null);
-    const searchTimeoutRef = React.useRef<number | null>(null);
 
     const navId = "primary-navigation";
 
@@ -104,51 +94,19 @@ const Header: React.FC = () => {
 
     // Search handlers
     const handleSearchChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-        const query = event.target.value;
-        setSearchQuery(query);
-
-        if (searchTimeoutRef.current) {
-            clearTimeout(searchTimeoutRef.current);
-        }
-
-        if (query.trim().length >= 3) {
-            searchTimeoutRef.current = setTimeout(async () => {
-                setSearchLoading(true);
-                try {
-                    const response = await userService.searchUsers(query.trim());
-                    if (response.success && response.data) {
-                        setSearchResults(response.data);
-                        setSearchAnchorEl(event.target as HTMLElement);
-                    }
-                } catch (error) {
-                    console.error('Search error:', error);
-                } finally {
-                    setSearchLoading(false);
-                }
-            }, 300);
-        } else {
-            setSearchResults([]);
-            setSearchAnchorEl(null);
-        }
+        setSearchQuery(event.target.value);
     };
 
     const handleSearchKeyPress = (event: React.KeyboardEvent<HTMLInputElement>) => {
         if (event.key === 'Enter' && searchQuery.trim()) {
             navigate(`/search?q=${encodeURIComponent(searchQuery.trim())}`);
-            handleSearchClose();
         }
     };
 
-    const handleSearchClose = () => {
-        setSearchAnchorEl(null);
-        setSearchResults([]);
-        setSearchQuery("");
-    };
-
-    const handleUserClick = () => {
-        // For now, just navigate to profile or do nothing
-        // TODO: Implement user profile navigation
-        handleSearchClose();
+    const handleSearchClick = () => {
+        if (searchQuery.trim()) {
+            navigate(`/search?q=${encodeURIComponent(searchQuery.trim())}`);
+        }
     };
 
 
@@ -326,12 +284,7 @@ const Header: React.FC = () => {
                                 <InputAdornment position="end">
                                     <IconButton
                                         size="small"
-                                        onClick={() => {
-                                            if (searchQuery.trim()) {
-                                                navigate(`/search?q=${encodeURIComponent(searchQuery.trim())}`);
-                                                handleSearchClose();
-                                            }
-                                        }}
+                                        onClick={handleSearchClick}
                                         sx={{ color: "rgba(255, 255, 255, 0.7)" }}
                                     >
                                         <SearchIcon />
@@ -531,50 +484,6 @@ const Header: React.FC = () => {
                 <CircularProgress color="inherit" />
             </Backdrop>
 
-            {/* Search Results Popover */}
-            <Popover
-                open={Boolean(searchAnchorEl)}
-                anchorEl={searchAnchorEl}
-                onClose={handleSearchClose}
-                anchorOrigin={{
-                    vertical: 'bottom',
-                    horizontal: 'left',
-                }}
-                transformOrigin={{
-                    vertical: 'top',
-                    horizontal: 'left',
-                }}
-                PaperProps={{
-                    sx: {
-                        width: 400,
-                        maxHeight: 400,
-                        overflow: 'auto',
-                    },
-                }}
-            >
-                <Box sx={{ p: 1 }}>
-                    {searchLoading ? (
-                        <Box sx={{ display: 'flex', justifyContent: 'center', p: 2 }}>
-                            <CircularProgress size={24} />
-                        </Box>
-                    ) : searchResults.length > 0 ? (
-                        <MuiList>
-                            {searchResults.map((user) => (
-                                <ListItem key={user.id} sx={{ px: 0 }}>
-                                    <UserCard
-                                        user={user}
-                                        onClick={handleUserClick}
-                                    />
-                                </ListItem>
-                            ))}
-                        </MuiList>
-                    ) : searchQuery.length >= 3 ? (
-                        <Typography variant="body2" sx={{ p: 2, textAlign: 'center', color: 'text.secondary' }}>
-                            No se encontraron usuarios con ese email
-                        </Typography>
-                    ) : null}
-                </Box>
-            </Popover>
 
             {/* Global Level Up Notification */}
             <Notification
