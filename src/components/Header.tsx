@@ -132,6 +132,13 @@ const Header: React.FC = () => {
         }
     };
 
+    const handleSearchKeyPress = (event: React.KeyboardEvent<HTMLInputElement>) => {
+        if (event.key === 'Enter' && searchQuery.trim()) {
+            navigate(`/search?q=${encodeURIComponent(searchQuery.trim())}`);
+            handleSearchClose();
+        }
+    };
+
     const handleSearchClose = () => {
         setSearchAnchorEl(null);
         setSearchResults([]);
@@ -287,6 +294,7 @@ const Header: React.FC = () => {
                         placeholder="Buscar usuarios por email..."
                         value={searchQuery}
                         onChange={handleSearchChange}
+                        onKeyPress={handleSearchKeyPress}
                         size="small"
                         sx={{
                             width: 300,
@@ -314,6 +322,22 @@ const Header: React.FC = () => {
                                     <SearchIcon sx={{ color: "rgba(255, 255, 255, 0.7)" }} />
                                 </InputAdornment>
                             ),
+                            endAdornment: searchQuery.trim() ? (
+                                <InputAdornment position="end">
+                                    <IconButton
+                                        size="small"
+                                        onClick={() => {
+                                            if (searchQuery.trim()) {
+                                                navigate(`/search?q=${encodeURIComponent(searchQuery.trim())}`);
+                                                handleSearchClose();
+                                            }
+                                        }}
+                                        sx={{ color: "rgba(255, 255, 255, 0.7)" }}
+                                    >
+                                        <SearchIcon />
+                                    </IconButton>
+                                </InputAdornment>
+                            ) : null,
                         }}
                     />
                 </Box>
