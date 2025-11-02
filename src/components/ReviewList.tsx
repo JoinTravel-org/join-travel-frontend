@@ -208,11 +208,12 @@ const ReviewList: React.FC<ReviewListProps> = ({ placeId, refreshTrigger }) => {
                   </Box>
                 )}
 
-                {/* Like button */}
+                {/* Like/Dislike buttons */}
                 <Box sx={{ display: 'flex', justifyContent: 'flex-end', mt: 1 }}>
                   <LikeButton
                     reviewId={review.id}
                     initialLikeCount={review.likeCount || 0}
+                    initialDislikeCount={review.dislikeCount || 0}
                   />
                 </Box>
               </Card>
