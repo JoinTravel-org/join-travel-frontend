@@ -27,6 +27,8 @@ import ItineraryList from "./components/ItineraryList";
 import ItineraryDetail from "./components/ItineraryDetail";
 import Profile from "./components/Profile";
 import Notification from "./components/Notification";
+import SearchResults from "./components/SearchResults";
+import UserProfile from "./components/UserProfile";
 
 function AnalyticsListener() {
   const location = useLocation();
@@ -92,6 +94,8 @@ function App() {
                 <Route path="/create-itinerary" element={<CreateItinerary />} />
                 <Route path="/place/:id" element={<PlaceDetail />} />
                 <Route path="/profile" element={<Profile />} />
+                <Route path="/user/:userId" element={<UserProfile />} />
+                <Route path="/search" element={<SearchResults />} />
               </Routes>
             </Suspense>
           </main>
