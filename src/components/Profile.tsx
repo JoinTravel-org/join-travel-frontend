@@ -51,7 +51,13 @@ const Profile: React.FC = () => {
           Cargando hitos...
         </div>
       ) : (
-        <Milestones milestones={milestones} />
+        <>
+          {/* Levels Section */}
+          <Milestones milestones={milestones.filter(m => m.category === 'level')} />
+
+          {/* Badges Section */}
+          <Milestones milestones={milestones.filter(m => m.category === 'badge')} />
+        </>
       )}
 
       <Notification
