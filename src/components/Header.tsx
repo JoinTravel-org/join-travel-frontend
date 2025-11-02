@@ -111,77 +111,102 @@ const Header: React.FC = () => {
 
 
     const NavItems = (
-        <>
+      <>
+        <Button
+          color="inherit"
+          component={RouterLink}
+          to="/"
+          aria-current={location.pathname === "/" ? "page" : undefined}
+        >
+          Inicio
+        </Button>
+        <Button
+          color="inherit"
+          component={RouterLink}
+          to="/add-place"
+          aria-current={location.pathname === "/add-place" ? "page" : undefined}
+        >
+          Agregar Lugar
+        </Button>
+        <Button
+          color="inherit"
+          component={RouterLink}
+          to="/itineraries"
+          aria-current={
+            location.pathname === "/itineraries" ? "page" : undefined
+          }
+        >
+          Itinerarios
+        </Button>
+        {auth.isAuthenticated ? (
+          <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
             <Button
-                color="inherit"
-                component={RouterLink}
-                to="/"
-                aria-current={location.pathname === "/" ? "page" : undefined}
+              color="inherit"
+              component={RouterLink}
+              to="/groups"
+              aria-current={
+                location.pathname === "/groups" ? "page" : undefined
+              }
             >
-                Inicio
+              Grupos
+            </Button>
+            <Typography
+              variant="body2"
+              sx={{ color: "inherit", fontWeight: 600 }}
+            >
+              {loading
+                ? "..."
+                : stats
+                ? `Lv.${stats.level} ${stats.levelName}`
+                : "Lv.0 Explorador"}
+            </Typography>
+            <IconButton
+              color="inherit"
+              onClick={() => clearNotification()}
+              aria-label="Notificaciones"
+              sx={{ ml: 0 }}
+            >
+              <Badge
+                color="error"
+                variant="dot"
+                invisible={notification === null}
+              >
+                <NotificationsIcon />
+              </Badge>
+            </IconButton>
+            <IconButton
+              color="inherit"
+              onClick={handleProfileMenuOpen}
+              aria-label="Perfil"
+              sx={{ ml: 0 }}
+            >
+              <PersonIcon />
+            </IconButton>
+          </Box>
+        ) : (
+          <>
+            <Button
+              color="inherit"
+              component={RouterLink}
+              to="/login"
+              aria-current={location.pathname === "/login" ? "page" : undefined}
+            >
+              Iniciar Sesión
             </Button>
             <Button
-                color="inherit"
-                component={RouterLink}
-                to="/add-place"
-                aria-current={location.pathname === "/add-place" ? "page" : undefined}
+              color="inherit"
+              component={RouterLink}
+              to="/register"
+              aria-current={
+                location.pathname === "/register" ? "page" : undefined
+              }
             >
-                Agregar Lugar
+              Registrarse
             </Button>
-            <Button
-                color="inherit"
-                component={RouterLink}
-                to="/itineraries"
-                aria-current={location.pathname === "/itineraries" ? "page" : undefined}
-            >
-                Itinerarios
-            </Button>
-            {auth.isAuthenticated ? (
-                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                    <Typography variant="body2" sx={{ color: 'inherit', fontWeight: 600 }}>
-                        {loading ? '...' : (stats ? `Lv.${stats.level} ${stats.levelName}` : 'Lv.0 Explorador')}
-                    </Typography>
-                    <IconButton
-                        color="inherit"
-                        onClick={() => clearNotification()}
-                        aria-label="Notificaciones"
-                        sx={{ ml: 0 }}
-                    >
-                        <Badge color="error" variant="dot" invisible={notification === null}>
-                            <NotificationsIcon />
-                        </Badge>
-                    </IconButton>
-                    <IconButton
-                        color="inherit"
-                        onClick={handleProfileMenuOpen}
-                        aria-label="Perfil"
-                        sx={{ ml: 0 }}
-                    >
-                        <PersonIcon />
-                    </IconButton>
-                </Box>
-            ) : (
-                <>
-                    <Button
-                        color="inherit"
-                        component={RouterLink}
-                        to="/login"
-                        aria-current={location.pathname === "/login" ? "page" : undefined}
-                    >
-                        Iniciar Sesión
-                    </Button>
-                    <Button
-                        color="inherit"
-                        component={RouterLink}
-                        to="/register"
-                        aria-current={location.pathname === "/register" ? "page" : undefined}
-                    >
-                        Registrarse
-                    </Button>
-                </>
-            )}
-            <ThemeToggle />
-        </>
+          </>
+        )}
+        <ThemeToggle />
+      </>
     );
 
     return (

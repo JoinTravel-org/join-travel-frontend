@@ -29,6 +29,7 @@ import Profile from "./components/Profile";
 import Notification from "./components/Notification";
 import SearchResults from "./components/SearchResults";
 import UserProfile from "./components/UserProfile";
+import GroupPage from "./components/Groups";
 
 function AnalyticsListener() {
   const location = useLocation();
@@ -90,12 +91,16 @@ function App() {
                 <Route path="/add-place" element={<AddPlace />} />
                 <Route path="/itineraries" element={<ItineraryList />} />
                 <Route path="/itinerary/:id" element={<ItineraryDetail />} />
-                <Route path="/itinerary/:id/edit" element={<CreateItinerary />} />
+                <Route
+                  path="/itinerary/:id/edit"
+                  element={<CreateItinerary />}
+                />
                 <Route path="/create-itinerary" element={<CreateItinerary />} />
                 <Route path="/place/:id" element={<PlaceDetail />} />
                 <Route path="/profile" element={<Profile />} />
                 <Route path="/user/:userId" element={<UserProfile />} />
                 <Route path="/search" element={<SearchResults />} />
+                <Route path="/groups" element={<GroupPage />} />
               </Routes>
             </Suspense>
           </main>
