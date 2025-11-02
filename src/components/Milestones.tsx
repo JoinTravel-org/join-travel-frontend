@@ -49,26 +49,29 @@ const Milestones: React.FC<MilestonesProps> = ({ milestones }) => {
                 onMouseEnter={() => setHoveredMilestone(milestone)}
                 onMouseLeave={() => setHoveredMilestone(null)}
               >
-                <div
-                  style={{
-                    width: '40px',
-                    height: '40px',
-                    borderRadius: '50%',
-                    backgroundColor: milestone.isCompleted ? '#4caf50' : '#ccc',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    color: 'white',
-                    fontSize: '10px',
-                    fontWeight: 'bold',
+                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+                  <div
+                    style={{
+                      width: '40px',
+                      height: '40px',
+                      borderRadius: '50%',
+                      backgroundColor: milestone.isCompleted ? '#4caf50' : '#ccc',
+                      cursor: 'pointer',
+                      border: '2px solid white',
+                      boxShadow: '0 2px 4px rgba(0,0,0,0.2)'
+                    }}
+                    title={milestone.title}
+                  />
+                  <div style={{
+                    marginTop: '8px',
+                    fontSize: '12px',
+                    color: '#666',
                     textAlign: 'center',
-                    cursor: 'pointer',
-                    border: '2px solid white',
-                    boxShadow: '0 2px 4px rgba(0,0,0,0.2)'
-                  }}
-                  title={milestone.title}
-                >
-                  {milestone.title.length > 10 ? milestone.title.substring(0, 10) + '...' : milestone.title}
+                    maxWidth: '80px',
+                    wordWrap: 'break-word'
+                  }}>
+                    {milestone.title.length > 15 ? milestone.title.substring(0, 15) + '...' : milestone.title}
+                  </div>
                 </div>
               </div>
             );
