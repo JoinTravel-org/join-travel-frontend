@@ -22,9 +22,15 @@ const MapComponent: React.FC<{ place: Place }> = ({ place }) => {
   useEffect(() => {
     if (!mapRef.current || !window.google) return;
 
+    // Parse coordinates to ensure they're numbers
+    const position = {
+      lat: parseFloat(place.latitude.toString()),
+      lng: parseFloat(place.longitude.toString())
+    };
+
     // Initialize map centered on the place
     const map = new google.maps.Map(mapRef.current, {
-      center: { lat: place.latitude, lng: place.longitude },
+      center: position,
       zoom: 15,
       mapTypeControl: false,
       streetViewControl: false,
@@ -35,7 +41,7 @@ const MapComponent: React.FC<{ place: Place }> = ({ place }) => {
 
     // Create marker for the place
     const marker = new google.maps.Marker({
-      position: { lat: place.latitude, lng: place.longitude },
+      position,
       map,
       title: place.name,
       icon: {
@@ -208,7 +214,7 @@ const PlaceMap: React.FC<PlaceMapProps> = ({ place }) => {
   return (
     <Wrapper
       apiKey={apiKey}
-      libraries={['geometry', 'places']}
+      libraries={['places']}
       render={render}
       callback={(status: Status) => {
         if (status === Status.FAILURE) {
