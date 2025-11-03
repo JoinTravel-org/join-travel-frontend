@@ -33,6 +33,7 @@ const ChatBubble: React.FC = () => {
   const chatRef = useRef<HTMLDivElement>(null);
   const fabRef = useRef<HTMLButtonElement>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const messageInputRef = useRef<HTMLInputElement>(null);
 
   // Welcome message
   const welcomeMessage: Message = {
@@ -203,6 +204,10 @@ const ChatBubble: React.FC = () => {
       setMessages(prev => [...prev, errorMessage]);
     } finally {
       setIsLoading(false);
+      // Mantener el foco en el input después de enviar
+      requestAnimationFrame(() => {
+        messageInputRef.current?.focus();
+      });
     }
   };
 
@@ -324,6 +329,7 @@ const ChatBubble: React.FC = () => {
                 onChange={(e) => setInputMessage(e.target.value)}
                 onKeyPress={handleKeyPress}
                 size="small"
+                inputRef={messageInputRef}
               />
               <Button
                 variant="contained"
