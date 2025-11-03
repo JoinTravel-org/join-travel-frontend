@@ -29,6 +29,7 @@ import {
   Person as PersonIcon,
   Notifications as NotificationsIcon,
   Search as SearchIcon,
+  Chat as ChatIcon,
 } from "@mui/icons-material";
 import { Link as RouterLink, useLocation, useNavigate } from "react-router-dom";
 import { useTheme as useMuiTheme } from "@mui/material/styles";
