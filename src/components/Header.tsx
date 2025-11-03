@@ -148,6 +148,16 @@ const Header: React.FC = () => {
       </Button>
       {auth.isAuthenticated ? (
         <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+          <Button
+            color="inherit"
+            component={RouterLink}
+            to="/groups"
+            aria-current={
+              location.pathname === "/groups" ? "page" : undefined
+            }
+          >
+            Grupos
+          </Button>
           <Typography
             variant="body2"
             sx={{ color: "inherit", fontWeight: 600 }}

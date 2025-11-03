@@ -31,6 +31,7 @@ import Profile from "./components/Profile";
 import Notification from "./components/Notification";
 import SearchResults from "./components/SearchResults";
 import UserProfile from "./components/UserProfile";
+import GroupPage from "./components/Groups";
 
 function AnalyticsListener() {
   const location = useLocation();
@@ -103,6 +104,7 @@ function App() {
                 <Route path="/profile" element={<Profile />} />
                 <Route path="/user/:userId" element={<UserProfile />} />
                 <Route path="/search" element={<SearchResults />} />
+                <Route path="/groups" element={<GroupPage />} />
               </Routes>
             </Suspense>
           </main>
