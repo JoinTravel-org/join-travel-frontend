@@ -137,24 +137,6 @@ export default function GroupPage() {
     }
   };
 
-  const handleDeleteGroup = async () => {
-    if (!groupToDelete?.id) return;
-
-    setDeleteLoading(true);
-    setDeleteError(null);
-
-    try {
-      await groupService.deleteGroup(groupToDelete.id);
-      setDeleteDialogOpen(false);
-      setGroupToDelete(null);
-      await fetchGroups(); // Refresh group list after deletion
-    } catch (err: any) {
-      setDeleteError(err.message || "No se pudo eliminar el grupo.");
-    } finally {
-      setDeleteLoading(false);
-    }
-  };
-
   return (
     <Container
       maxWidth="lg"
