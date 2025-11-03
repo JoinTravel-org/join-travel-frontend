@@ -36,6 +36,7 @@ import { useTheme as useMuiTheme } from "@mui/material/styles";
 import ThemeToggle from "./ThemeToggle";
 import { useAuth } from "../hooks/useAuth";
 import { useUserStats } from "../hooks/useUserStats";
+import { useChatNotifications } from "../hooks/useChatNotifications";
 import Notification from "./Notification";
 
 /**
@@ -52,6 +53,7 @@ const Header: React.FC = () => {
   const navigate = useNavigate();
   const auth = useAuth();
   const { stats, loading, notification } = useUserStats();
+  const { hasUnreadMessages } = useChatNotifications();
 
   const [logoutSnackbarOpen, setLogoutSnackbarOpen] = React.useState(false);
   const [isLoggingOut, setIsLoggingOut] = React.useState(false);
@@ -177,7 +179,13 @@ const Header: React.FC = () => {
             aria-label="Mensajes"
             sx={{ ml: 1 }}
           >
-            <ChatIcon />
+            <Badge
+              color="error"
+              variant="dot"
+              invisible={!hasUnreadMessages}
+            >
+              <ChatIcon />
+            </Badge>
           </IconButton>
           <IconButton
             color="inherit"
