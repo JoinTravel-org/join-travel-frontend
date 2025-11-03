@@ -26,6 +26,7 @@ import CreateItinerary from "./components/CreateItinerary";
 import ItineraryList from "./components/ItineraryList";
 import ItineraryDetail from "./components/ItineraryDetail";
 import ChatView from "./components/ChatView";
+import Chats from "./components/Chats";
 import Profile from "./components/Profile";
 import Notification from "./components/Notification";
 import SearchResults from "./components/SearchResults";
@@ -97,7 +98,8 @@ function App() {
                 />
                 <Route path="/create-itinerary" element={<CreateItinerary />} />
                 <Route path="/place/:id" element={<PlaceDetail />} />
-                <Route path="/chats" element={<ChatView />} />
+                <Route path="/chats" element={<Chats />} />
+                <Route path="/ai-chat" element={<ChatView />} />
                 <Route path="/profile" element={<Profile />} />
                 <Route path="/user/:userId" element={<UserProfile />} />
                 <Route path="/search" element={<SearchResults />} />
