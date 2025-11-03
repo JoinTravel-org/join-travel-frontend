@@ -1,3 +1,5 @@
+import type { User } from "./user";
+
 export interface CreateGroupRequest {
   name: string;
   description?: string;
@@ -8,12 +10,10 @@ export interface Group {
   name: string;
   description: string | null;
   adminId: string;
+  admin?: User; // Full user object for admin if populated
   createdAt: string;
   updatedAt: string;
-  members?: Array<{
-    id: string;
-    email: string;
-  }>;
+  members?: User[]; // Array of full user objects
 }
 
 export interface GroupResponse {
