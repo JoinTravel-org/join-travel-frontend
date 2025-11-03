@@ -95,6 +95,7 @@ const ChatView: React.FC = () => {
   const [shouldScrollToBottom, setShouldScrollToBottom] = useState(false);
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const messageInputRef = useRef<HTMLInputElement>(null);
 
   // Redirigir si no está autenticado
   useEffect(() => {
@@ -180,10 +181,7 @@ const ChatView: React.FC = () => {
     };
 
     setMessages((prev) => [...prev, newMessage]);
-    setInputMessage('');
-    // Hacer scroll cuando el usuario envía un mensaje
-    setShouldScrollToBottom(true);
-
+    
     // Actualizar última conversación
     setConversations((prev) =>
       prev.map((conv) =>
@@ -192,6 +190,16 @@ const ChatView: React.FC = () => {
           : conv
       )
     );
+
+    // Limpiar el input y mantener el foco
+    setInputMessage('');
+    // Hacer scroll cuando el usuario envía un mensaje
+    setShouldScrollToBottom(true);
+    
+    // Usar requestAnimationFrame para asegurar que el foco se aplique después de que React actualice el DOM
+    requestAnimationFrame(() => {
+      messageInputRef.current?.focus();
+    });
   };
 
   const handleKeyPress = (e: React.KeyboardEvent) => {
@@ -517,6 +525,7 @@ const ChatView: React.FC = () => {
                   onKeyPress={handleKeyPress}
                   variant="outlined"
                   size="small"
+                  inputRef={messageInputRef}
                   sx={{
                     '& .MuiOutlinedInput-root': {
                       borderRadius: 2,

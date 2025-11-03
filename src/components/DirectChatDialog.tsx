@@ -38,6 +38,7 @@ export const DirectChatDialog: React.FC<DirectChatDialogProps> = ({
   const [loading, setLoading] = useState(false);
   const [sending, setSending] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const messageInputRef = useRef<HTMLInputElement>(null);
 
   // Obtener el ID del usuario actual del contexto de autenticación
   const currentUserId = authContext?.user?.id || null;
@@ -78,20 +79,29 @@ export const DirectChatDialog: React.FC<DirectChatDialogProps> = ({
     if (!newMessage.trim() || sending) return;
 
     setSending(true);
+    const messageToSend = newMessage;
+    setNewMessage('');
+    
     try {
       const response = await directMessageService.sendMessage(
         otherUserId,
-        newMessage
+        messageToSend
       );
       if (response.success && response.data) {
         setMessages((prev) => [...prev, response.data!]);
-        setNewMessage("");
       }
     } catch (error) {
       console.error("Error sending message:", error);
+      // Restaurar el mensaje en caso de error
+      setNewMessage(messageToSend);
     } finally {
       setSending(false);
     }
+
+    // Mantener el foco en el input después de enviar
+    requestAnimationFrame(() => {
+      messageInputRef.current?.focus();
+    });
   };
 
   const handleKeyPress = (e: React.KeyboardEvent) => {
@@ -289,6 +299,7 @@ export const DirectChatDialog: React.FC<DirectChatDialogProps> = ({
           onKeyPress={handleKeyPress}
           disabled={sending}
           size="small"
+          inputRef={messageInputRef}
         />
         <Button
           variant="contained"
