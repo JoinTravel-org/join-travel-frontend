@@ -20,6 +20,7 @@ export interface Review {
   placeName?: string;
   media?: ReviewMedia[];
   likeCount?: number;
+  dislikeCount?: number;
 }
 
 export interface CreateReviewData {

@@ -94,36 +94,37 @@ class ReviewService {
   }
 
   /**
-   * Toggle like on a review
-   * @param reviewId - Review ID
-   * @returns Promise with like status
-   */
-  async toggleLike(reviewId: string): Promise<{ liked: boolean; likeCount: number; reviewId: string }> {
-    try {
-      const response = await apiService
-        .getAxiosInstance()
-        .post(`/places/reviews/${reviewId}/like`);
-      return response.data.data;
-    } catch (error) {
-      throw error;
-    }
-  }
+    * Toggle reaction on a review (like/dislike)
+    * @param reviewId - Review ID
+    * @param type - Type of reaction ('like' or 'dislike')
+    * @returns Promise with reaction status
+    */
+   async toggleReaction(reviewId: string, type: 'like' | 'dislike'): Promise<{ reacted: boolean; reactionType: 'like' | 'dislike' | null; likeCount: number; dislikeCount: number; reviewId: string }> {
+     try {
+       const response = await apiService
+         .getAxiosInstance()
+         .post(`/places/reviews/${reviewId}/reaction`, { type });
+       return response.data.data;
+     } catch (error) {
+       throw error;
+     }
+   }
 
-  /**
-   * Get like status for a review
-   * @param reviewId - Review ID
-   * @returns Promise with like status
-   */
-  async getLikeStatus(reviewId: string): Promise<{ liked: boolean; likeCount: number; reviewId: string }> {
-    try {
-      const response = await apiService
-        .getAxiosInstance()
-        .get(`/places/reviews/${reviewId}/like`);
-      return response.data.data;
-    } catch (error) {
-      throw error;
-    }
-  }
+   /**
+    * Get reaction status for a review
+    * @param reviewId - Review ID
+    * @returns Promise with reaction status
+    */
+   async getReactionStatus(reviewId: string): Promise<{ reactionType: 'like' | 'dislike' | null; likeCount: number; dislikeCount: number; reviewId: string }> {
+     try {
+       const response = await apiService
+         .getAxiosInstance()
+         .get(`/places/reviews/${reviewId}/reaction`);
+       return response.data.data;
+     } catch (error) {
+       throw error;
+     }
+   }
 }
 
 export default new ReviewService();

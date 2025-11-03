@@ -261,6 +261,16 @@ class ApiService {
   }
 
   /**
+   * Elimina un itinerario
+   * @param id - ID del itinerario a eliminar
+   * @returns Promise con la respuesta del servidor
+   */
+  async deleteItinerary(id: string) {
+    const response = await this.api.delete(`/itineraries/${id}`);
+    return response.data;
+  }
+
+  /**
    * Envía un mensaje de chat
    * @param messageData - Datos del mensaje
    * @returns Promise con la respuesta del servidor
