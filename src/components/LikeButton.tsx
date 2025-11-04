@@ -44,12 +44,47 @@ const LikeButton: React.FC<LikeButtonProps> = ({
 
   const handleReactionToggle = async (type: 'like' | 'dislike') => {
     if (!isAuthenticated) {
-      // Could show a login prompt here
+      setError('Debe iniciar sesión para calificar.');
       return;
     }
 
     setLoading(true);
     setError(null);
+
+    // Store previous state for rollback
+    const previousReactionType = reactionType;
+    const previousLikeCount = likeCount;
+    const previousDislikeCount = dislikeCount;
+
+    // Optimistically update UI
+    if (previousReactionType === type) {
+      // Remove reaction
+      setReactionType(null);
+      if (type === 'like') {
+        setLikeCount(prev => prev - 1);
+      } else {
+        setDislikeCount(prev => prev - 1);
+      }
+    } else if (previousReactionType === null) {
+      // Add new reaction
+      setReactionType(type);
+      if (type === 'like') {
+        setLikeCount(prev => prev + 1);
+      } else {
+        setDislikeCount(prev => prev + 1);
+      }
+    } else {
+      // Change reaction type
+      setReactionType(type);
+      if (type === 'like') {
+        setLikeCount(prev => prev + 1);
+        setDislikeCount(prev => prev - 1);
+      } else {
+        setDislikeCount(prev => prev + 1);
+        setLikeCount(prev => prev - 1);
+      }
+    }
+
     try {
       const result = await reviewService.toggleReaction(reviewId, type);
       setReactionType(result.reactionType);
@@ -67,9 +102,16 @@ const LikeButton: React.FC<LikeButtonProps> = ({
       }
     } catch (error: any) {
       console.error('Error toggling reaction:', error);
+      // Rollback optimistic update
+      setReactionType(previousReactionType);
+      setLikeCount(previousLikeCount);
+      setDislikeCount(previousDislikeCount);
+
       // Show user-friendly error message
       if (error.response?.data?.message) {
         setError(error.response.data.message);
+      } else if (error.message === 'Network Error') {
+        setError('No se pudo enviar voto.');
       } else {
         setError('Error al procesar la reacción. Inténtalo de nuevo.');
       }
