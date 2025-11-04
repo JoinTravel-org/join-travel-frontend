@@ -51,7 +51,7 @@ const ChatBubble: React.FC = () => {
     }
   }, [isOpen, authContext?.user]);
 
-  // Periodic refresh mechanism
+  // Periodic polling for new messages when chat is open
   useEffect(() => {
     if (isOpen && authContext?.user) {
       const pollForNewMessages = async () => {
@@ -102,8 +102,8 @@ const ChatBubble: React.FC = () => {
         }
       };
 
-      // Start polling
-      pollingIntervalRef.current = window.setInterval(pollForNewMessages, 500);
+      // Start polling every 1.5 seconds
+      pollingIntervalRef.current = window.setInterval(pollForNewMessages, 1500);
 
       // Cleanup on unmount or when chat closes
       return () => {
