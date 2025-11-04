@@ -34,6 +34,8 @@ const ChatBubble: React.FC = () => {
   const fabRef = useRef<HTMLButtonElement>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const messageInputRef = useRef<HTMLInputElement>(null);
+  const lastTimestampRef = useRef<number>(0);
+  const pollingIntervalRef = useRef<number | null>(null);
 
   // Welcome message
   const welcomeMessage: Message = {
@@ -46,6 +48,76 @@ const ChatBubble: React.FC = () => {
   useEffect(() => {
     if (isOpen && authContext?.user) {
       loadChatHistory();
+    }
+  }, [isOpen, authContext?.user]);
+
+  // Periodic refresh mechanism
+  useEffect(() => {
+    if (isOpen && authContext?.user) {
+      const pollForNewMessages = async () => {
+        try {
+          const response = await apiService.getChatHistory({ limit: 50 });
+          if (response.success && response.messages) {
+            const newMessages: Message[] = [];
+            response.messages.forEach((msg: ChatMessage) => {
+              // Only add messages newer than our last timestamp
+              if (new Date(msg.createdAt).getTime() > lastTimestampRef.current) {
+                // Add user message
+                newMessages.push({
+                  id: msg.id + '_user',
+                  text: msg.message,
+                  sender: 'user',
+                  timestamp: new Date(msg.createdAt).getTime(),
+                });
+                // Add AI response if exists
+                if (msg.response) {
+                  newMessages.push({
+                    id: msg.id + '_ai',
+                    text: msg.response,
+                    sender: 'ai',
+                    timestamp: new Date(msg.createdAt).getTime() + 1000,
+                  });
+                }
+              }
+            });
+
+            if (newMessages.length > 0) {
+              setMessages(prev => {
+                const combined = [...prev, ...newMessages];
+                // Remove duplicates and sort
+                const unique = combined.filter((msg, index, self) =>
+                  index === self.findIndex(m => m.id === msg.id)
+                );
+                unique.sort((a, b) => a.timestamp - b.timestamp);
+                // Update last timestamp
+                if (unique.length > 0) {
+                  lastTimestampRef.current = unique[unique.length - 1].timestamp;
+                }
+                return unique;
+              });
+            }
+          }
+        } catch (error) {
+          console.error('Failed to poll for new messages:', error);
+        }
+      };
+
+      // Start polling
+      pollingIntervalRef.current = window.setInterval(pollForNewMessages, 500);
+
+      // Cleanup on unmount or when chat closes
+      return () => {
+        if (pollingIntervalRef.current) {
+          clearInterval(pollingIntervalRef.current);
+          pollingIntervalRef.current = null;
+        }
+      };
+    } else {
+      // Clear polling when chat is closed or user not authenticated
+      if (pollingIntervalRef.current) {
+        clearInterval(pollingIntervalRef.current);
+        pollingIntervalRef.current = null;
+      }
     }
   }, [isOpen, authContext?.user]);
 
@@ -110,6 +182,10 @@ const ChatBubble: React.FC = () => {
         // Sort messages by timestamp (oldest first)
         formattedMessages.sort((a, b) => a.timestamp - b.timestamp);
         setMessages(formattedMessages);
+        // Update last timestamp for polling
+        if (formattedMessages.length > 0) {
+          lastTimestampRef.current = formattedMessages[formattedMessages.length - 1].timestamp;
+        }
         // Set conversation ID from the first message if available
         if (response.messages.length > 0 && response.messages[0].conversationId) {
           setConversationId(response.messages[0].conversationId);
@@ -130,6 +206,7 @@ const ChatBubble: React.FC = () => {
     // Clear messages when closing chat
     if (isOpen) {
       setMessages([]);
+      lastTimestampRef.current = 0;
     }
   };
 
@@ -141,12 +218,14 @@ const ChatBubble: React.FC = () => {
       setMessages([welcomeMessage]);
       setConversationId(null);
       setInputMessage('');
+      lastTimestampRef.current = 0;
     } catch (error) {
       console.error('Failed to start new chat:', error);
       // On error, still show welcome message
       setMessages([welcomeMessage]);
       setConversationId(null);
       setInputMessage('');
+      lastTimestampRef.current = 0;
     }
   };
 
@@ -189,7 +268,12 @@ const ChatBubble: React.FC = () => {
             sender: 'ai',
             timestamp: new Date(response.message.createdAt).getTime() + 1000,
           };
-          setMessages(prev => [...prev, aiMessage]);
+          setMessages(prev => {
+            const updated = [...prev, aiMessage];
+            // Update last timestamp
+            lastTimestampRef.current = aiMessage.timestamp;
+            return updated;
+          });
         }
       }
     } catch (error) {
@@ -201,7 +285,12 @@ const ChatBubble: React.FC = () => {
         sender: 'ai',
         timestamp: timestamp + 1000,
       };
-      setMessages(prev => [...prev, errorMessage]);
+      setMessages(prev => {
+        const updated = [...prev, errorMessage];
+        // Update last timestamp
+        lastTimestampRef.current = errorMessage.timestamp;
+        return updated;
+      });
     } finally {
       setIsLoading(false);
       // Mantener el foco en el input después de enviar
@@ -326,7 +415,7 @@ const ChatBubble: React.FC = () => {
                 variant="outlined"
                 placeholder="Type your message..."
                 value={inputMessage}
-                onChange={(e) => setInputMessage(e.target.value)}
+                onChange={(e: React.ChangeEvent<HTMLInputElement>) => setInputMessage(e.target.value)}
                 onKeyPress={handleKeyPress}
                 size="small"
                 inputRef={messageInputRef}
