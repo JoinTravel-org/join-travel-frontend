@@ -1,7 +1,8 @@
-import React, { createContext, useState, useEffect } from 'react';
-import type { ReactNode } from 'react';
-import authService from '../services/auth.service';
-import type { User, UserStats } from '../types/user';
+import React, { createContext, useState, useEffect } from "react";
+import type { ReactNode } from "react";
+import authService from "../services/auth.service";
+import socketService from "../services/socket.service";
+import type { User, UserStats } from "../types/user";
 
 interface AuthContextType {
   user: User | null;
@@ -24,48 +25,61 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
   useEffect(() => {
     // Check for stored tokens on app load
-    const storedAccessToken = localStorage.getItem('accessToken');
-    const storedUser = localStorage.getItem('user');
+    const storedAccessToken = localStorage.getItem("accessToken");
+    const storedUser = localStorage.getItem("user");
 
     if (storedAccessToken && storedUser) {
       setAccessToken(storedAccessToken);
       setUser(JSON.parse(storedUser));
+
+      // Conectar socket con el token
+      socketService.connect(storedAccessToken);
     }
   }, []);
 
-  const login = (userData: User, accessTokenValue: string, refreshTokenValue: string) => {
+  const login = (
+    userData: User,
+    accessTokenValue: string,
+    refreshTokenValue: string
+  ) => {
     setUser(userData);
     setAccessToken(accessTokenValue);
-    localStorage.setItem('accessToken', accessTokenValue);
-    localStorage.setItem('refreshToken', refreshTokenValue);
-    localStorage.setItem('user', JSON.stringify(userData));
+    localStorage.setItem("accessToken", accessTokenValue);
+    localStorage.setItem("refreshToken", refreshTokenValue);
+    localStorage.setItem("user", JSON.stringify(userData));
+
+    // Conectar socket con el token
+    socketService.connect(accessTokenValue);
   };
 
   const logout = async () => {
     try {
       await authService.logout();
     } catch (error) {
-      console.error('Logout failed:', error);
+      console.error("Logout failed:", error);
     } finally {
       // Always clear local state regardless of API call success
       setUser(null);
       setAccessToken(null);
-      localStorage.removeItem('accessToken');
-      localStorage.removeItem('refreshToken');
-      localStorage.removeItem('user');
+      localStorage.removeItem("accessToken");
+      localStorage.removeItem("refreshToken");
+      localStorage.removeItem("user");
+
+      // Desconectar socket
+      socketService.disconnect();
     }
   };
 
   const updateUserStats = (stats: UserStats) => {
-    console.log('[DEBUG] AuthContext updateUserStats called with:', stats);
+    console.log("[DEBUG] AuthContext updateUserStats called with:", stats);
     if (user) {
       const updatedUser = { ...user, stats };
-      console.log('[DEBUG] Updated user object:', updatedUser);
+      console.log("[DEBUG] Updated user object:", updatedUser);
       setUser(updatedUser);
-      localStorage.setItem('user', JSON.stringify(updatedUser));
-      console.log('[DEBUG] User stats updated in context and localStorage');
+      localStorage.setItem("user", JSON.stringify(updatedUser));
+      console.log("[DEBUG] User stats updated in context and localStorage");
     } else {
-      console.log('[DEBUG] No user found in context, cannot update stats');
+      console.log("[DEBUG] No user found in context, cannot update stats");
     }
   };
 
