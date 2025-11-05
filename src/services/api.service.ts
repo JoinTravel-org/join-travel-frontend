@@ -1,6 +1,9 @@
 import axios, { AxiosError } from "axios";
 import Logger from "../logger";
-import type { CreateItineraryRequest, CreateItineraryResponse } from "../types/itinerary";
+import type {
+  CreateItineraryRequest,
+  CreateItineraryResponse,
+} from "../types/itinerary";
 
 /**
  * Configuración del cliente API con axios
@@ -9,7 +12,7 @@ class ApiService {
   private api;
 
   constructor() {
-    const baseURL = import.meta.env.VITE_BACKEND_URL || "http://localhost:8080";
+    const baseURL = import.meta.env.VITE_BACKEND_URL;
 
     this.api = axios.create({
       baseURL: `${baseURL}/api`,
@@ -77,7 +80,8 @@ class ApiService {
           if (error.code === "ECONNABORTED") {
             throw {
               success: false,
-              message: "Error de conexión: La solicitud tardó demasiado tiempo.",
+              message:
+                "Error de conexión: La solicitud tardó demasiado tiempo.",
             };
           } else {
             throw {
@@ -225,7 +229,9 @@ class ApiService {
    * @param itinerary - Información del itinerario
    * @returns Promise con la respuesta del servidor
    */
-  async createItinerary(itinerary: CreateItineraryRequest): Promise<CreateItineraryResponse> {
+  async createItinerary(
+    itinerary: CreateItineraryRequest
+  ): Promise<CreateItineraryResponse> {
     const response = await this.api.post("/itineraries", itinerary);
     return response.data;
   }
@@ -295,11 +301,14 @@ class ApiService {
     conversationId?: string;
   }) {
     const params = new URLSearchParams();
-    if (options?.limit) params.append('limit', options.limit.toString());
-    if (options?.offset) params.append('offset', options.offset.toString());
-    if (options?.conversationId) params.append('conversationId', options.conversationId);
+    if (options?.limit) params.append("limit", options.limit.toString());
+    if (options?.offset) params.append("offset", options.offset.toString());
+    if (options?.conversationId)
+      params.append("conversationId", options.conversationId);
 
-    const response = await this.api.get(`/chat/messages/me?${params.toString()}`);
+    const response = await this.api.get(
+      `/chat/messages/me?${params.toString()}`
+    );
     return response.data;
   }
 
@@ -317,26 +326,27 @@ class ApiService {
    * @param conversationData - Datos de la conversación
    * @returns Promise con la conversación creada
    */
-  async createConversation(conversationData?: {
-    title?: string;
-  }) {
-    const response = await this.api.post("/chat/conversations", conversationData || {});
+  async createConversation(conversationData?: { title?: string }) {
+    const response = await this.api.post(
+      "/chat/conversations",
+      conversationData || {}
+    );
     return response.data;
   }
 
   /**
-    * Elimina la conversación actual del usuario autenticado
-    * @returns Promise con la respuesta del servidor
-    */
+   * Elimina la conversación actual del usuario autenticado
+   * @returns Promise con la respuesta del servidor
+   */
   async deleteCurrentConversation() {
     const response = await this.api.delete("/chat/conversations/current");
     return response.data;
   }
 
   /**
-    * Elimina todo el historial de chat del usuario autenticado
-    * @returns Promise con la respuesta del servidor
-    */
+   * Elimina todo el historial de chat del usuario autenticado
+   * @returns Promise con la respuesta del servidor
+   */
   async deleteAllChatHistory() {
     const response = await this.api.delete("/chat/messages");
     return response.data;
@@ -359,10 +369,14 @@ class ApiService {
    * @param metadata - Metadatos adicionales de la acción
    * @returns Promise con la respuesta del servidor
    */
-  async awardPoints(userId: string, action: string, metadata?: Record<string, unknown>) {
+  async awardPoints(
+    userId: string,
+    action: string,
+    metadata?: Record<string, unknown>
+  ) {
     const response = await this.api.post(`/users/${userId}/points`, {
       action,
-      metadata
+      metadata,
     });
     return response.data;
   }
@@ -372,7 +386,7 @@ class ApiService {
    * @returns Promise con la lista de insignias
    */
   async getAllBadges() {
-    const response = await this.api.get('/badges');
+    const response = await this.api.get("/badges");
     return response.data;
   }
 
@@ -381,7 +395,7 @@ class ApiService {
    * @returns Promise con la lista de niveles
    */
   async getAllLevels() {
-    const response = await this.api.get('/levels');
+    const response = await this.api.get("/levels");
     return response.data;
   }
 
@@ -415,9 +429,9 @@ class ApiService {
   }
 
   /**
-     * Obtiene la instancia de axios para peticiones personalizadas
-     * @returns Instancia de axios
-     */
+   * Obtiene la instancia de axios para peticiones personalizadas
+   * @returns Instancia de axios
+   */
   getAxiosInstance() {
     return this.api;
   }
