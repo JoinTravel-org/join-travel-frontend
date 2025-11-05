@@ -25,10 +25,13 @@ import PlaceDetail from "./components/PlaceDetail";
 import CreateItinerary from "./components/CreateItinerary";
 import ItineraryList from "./components/ItineraryList";
 import ItineraryDetail from "./components/ItineraryDetail";
+import ChatView from "./components/ChatView";
+import Chats from "./components/Chats";
 import Profile from "./components/Profile";
 import Notification from "./components/Notification";
 import SearchResults from "./components/SearchResults";
 import UserProfile from "./components/UserProfile";
+import GroupPage from "./components/Groups";
 
 function AnalyticsListener() {
   const location = useLocation();
@@ -46,7 +49,7 @@ function ConditionalFooter() {
 }
 
 function App() {
-  useAnalytics()
+  useAnalytics();
 
   return (
     <AppThemeProvider>
@@ -90,12 +93,18 @@ function App() {
                 <Route path="/add-place" element={<AddPlace />} />
                 <Route path="/itineraries" element={<ItineraryList />} />
                 <Route path="/itinerary/:id" element={<ItineraryDetail />} />
-                <Route path="/itinerary/:id/edit" element={<CreateItinerary />} />
+                <Route
+                  path="/itinerary/:id/edit"
+                  element={<CreateItinerary />}
+                />
                 <Route path="/create-itinerary" element={<CreateItinerary />} />
                 <Route path="/place/:id" element={<PlaceDetail />} />
+                <Route path="/chats" element={<Chats />} />
+                <Route path="/ai-chat" element={<ChatView />} />
                 <Route path="/profile" element={<Profile />} />
                 <Route path="/user/:userId" element={<UserProfile />} />
                 <Route path="/search" element={<SearchResults />} />
+                <Route path="/groups" element={<GroupPage />} />
               </Routes>
             </Suspense>
           </main>
@@ -113,10 +122,7 @@ function NotificationWrapper() {
   // Connected to the global notification state from useUserStats
   const { notification, clearNotification } = useUserStats();
   return (
-    <Notification
-      notification={notification}
-      onClose={clearNotification}
-    />
+    <Notification notification={notification} onClose={clearNotification} />
   );
 }
 

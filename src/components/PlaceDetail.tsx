@@ -25,6 +25,7 @@ import ReviewForm from "./ReviewForm";
 import ReviewList from "./ReviewList";
 import reviewService from "../services/review.service";
 import { Rating } from '@fluentui/react-rating';
+import PlaceMap from "./PlaceMap";
 
 const PlaceDetail: React.FC = () => {
   const INFO_NOT_AVAILABLE = "Información no disponible temporalmente";
@@ -336,7 +337,7 @@ const PlaceDetail: React.FC = () => {
           </CardContent>
         </Card>
 
-        {/* ===== RIGHT COLUMN: Add Review + Reviews ===== */}
+        {/* ===== RIGHT COLUMN: Map + Add Review + Reviews ===== */}
         <Box
           sx={{
             flex: { xs: "1 1 100%", md: "1 1 55%" },
@@ -345,6 +346,14 @@ const PlaceDetail: React.FC = () => {
             gap: 3,
           }}
         >
+          {/* --- Interactive Map --- */}
+          <Box>
+            <Typography variant="h6" fontWeight={700} gutterBottom>
+              Ubicación
+            </Typography>
+            <PlaceMap place={place} />
+          </Box>
+
           {/* --- Add Review Form --- */}
           <ReviewForm
             placeId={place.id}
