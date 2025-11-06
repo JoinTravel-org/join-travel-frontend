@@ -18,6 +18,7 @@ import { AuthContext } from "../contexts/AuthContext";
 import directMessageService, {
   type DirectMessage,
 } from "../services/directMessage.service";
+import socketService from "../services/socket.service";
 
 interface DirectChatDialogProps {
   open: boolean;
@@ -71,6 +72,57 @@ export const DirectChatDialog: React.FC<DirectChatDialogProps> = ({
     scrollToBottom();
   }, [messages]);
 
+  // Suscribirse a eventos de WebSocket
+  useEffect(() => {
+    if (!open) return;
+
+    const unsubscribeNewMessage = socketService.onNewMessage((message) => {
+      // Solo agregar mensajes de esta conversación
+      if (
+        message.senderId === otherUserId ||
+        message.receiverId === otherUserId
+      ) {
+        setMessages((prev) => {
+          // Evitar duplicados
+          const exists = prev.some((m) => m.id === message.id);
+          if (exists) return prev;
+          return [...prev, message];
+        });
+
+        // Marcar como leído si el mensaje es del otro usuario
+        if (message.senderId === otherUserId) {
+          socketService.markAsRead(otherUserId);
+        }
+      }
+    });
+
+    const unsubscribeMessageSent = socketService.onMessageSent((message) => {
+      // Agregar el mensaje confirmado
+      setMessages((prev) => {
+        const exists = prev.some((m) => m.id === message.id);
+        if (exists) return prev;
+        return [...prev, message];
+      });
+    });
+
+    const unsubscribeMessagesRead = socketService.onMessagesRead((data) => {
+      // Actualizar estado de lectura si es del otro usuario
+      if (data.userId === otherUserId) {
+        setMessages((prev) =>
+          prev.map((msg) =>
+            msg.senderId === currentUserId ? { ...msg, isRead: true } : msg
+          )
+        );
+      }
+    });
+
+    return () => {
+      unsubscribeNewMessage();
+      unsubscribeMessageSent();
+      unsubscribeMessagesRead();
+    };
+  }, [open, otherUserId, currentUserId]);
+
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   };
@@ -80,16 +132,11 @@ export const DirectChatDialog: React.FC<DirectChatDialogProps> = ({
 
     setSending(true);
     const messageToSend = newMessage;
-    setNewMessage('');
-    
+    setNewMessage("");
+
     try {
-      const response = await directMessageService.sendMessage(
-        otherUserId,
-        messageToSend
-      );
-      if (response.success && response.data) {
-        setMessages((prev) => [...prev, response.data!]);
-      }
+      // Enviar mensaje por WebSocket (ahora es async)
+      await socketService.sendMessage(otherUserId, messageToSend);
     } catch (error) {
       console.error("Error sending message:", error);
       // Restaurar el mensaje en caso de error
