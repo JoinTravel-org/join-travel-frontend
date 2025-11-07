@@ -18,10 +18,10 @@ interface Props {
 
 export const AppThemeProvider: React.FC<Props> = ({ children }) => {
   const getInitialMode = (): Mode => {
-    const savedMode = localStorage.getItem('themeMode');
-    if (savedMode === 'light' || savedMode === 'dark') return savedMode;
-    const prefersDark = typeof window !== 'undefined' && window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
-    return prefersDark ? 'dark' : 'light';
+    // Disable darkMode
+    // const savedMode = localStorage.getItem('themeMode');
+    // if (savedMode === 'light' || savedMode === 'dark') return savedMode;
+    return 'light';
   };
 
   const [mode, setMode] = useState<Mode>(getInitialMode);
@@ -50,24 +50,7 @@ export const AppThemeProvider: React.FC<Props> = ({ children }) => {
     const hasUserPreference = savedMode === 'light' || savedMode === 'dark';
     if (hasUserPreference || !window.matchMedia) return;
 
-    const media = window.matchMedia('(prefers-color-scheme: dark)');
-    const handler = (e: MediaQueryListEvent) => {
-      setMode(e.matches ? 'dark' : 'light');
-    };
-
-   if (media.addEventListener) {
-     media.addEventListener('change', handler);
-   } else {
-     media.addListener(handler);
-   }
-
-   return () => {
-     if (media.removeEventListener) {
-       media.removeEventListener('change', handler);
-     } else {
-       media.removeListener(handler);
-     }
-   };
+    // Do not change to dark mode based on system preference, keep light
   }, []);
 
   const value = {
