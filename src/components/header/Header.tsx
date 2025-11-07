@@ -22,6 +22,9 @@ import {
   Badge,
   TextField,
   InputAdornment,
+  Dialog,
+  DialogTitle,
+  DialogActions,
 } from "@mui/material";
 import {
   Menu as MenuIcon,
@@ -57,6 +60,7 @@ const Header: React.FC = () => {
   const [logoutSnackbarOpen, setLogoutSnackbarOpen] = React.useState(false);
   const [isLoggingOut, setIsLoggingOut] = React.useState(false);
   const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
+  const [noNotificationsDialogOpen, setNoNotificationsDialogOpen] = React.useState(false);
   const { clearNotification } = useUserStats();
 
   // Search states
@@ -110,12 +114,18 @@ const Header: React.FC = () => {
   ) => {
     if (event.key === "Enter" && searchQuery.trim()) {
       navigate(`/search?q=${encodeURIComponent(searchQuery.trim())}`);
+      if (isMobile) {
+        setOpen(false);
+      }
     }
   };
 
   const handleSearchClick = () => {
     if (searchQuery.trim()) {
       navigate(`/search?q=${encodeURIComponent(searchQuery.trim())}`);
+      if (isMobile) {
+        setOpen(false);
+      }
     }
   };
 
@@ -157,19 +167,15 @@ const Header: React.FC = () => {
           >
             Grupos
           </Button>
-          <Typography
-            variant="body2"
-            sx={{ color: "inherit", fontWeight: 600 }}
-          >
-            {loading
-              ? "..."
-              : stats
-              ? `Lv.${stats.level} ${stats.levelName}`
-              : "Lv.0 Explorador"}
-          </Typography>
           <IconButton
             color="inherit"
-            onClick={() => clearNotification()}
+            onClick={() => {
+              if (notification === null) {
+                setNoNotificationsDialogOpen(true);
+              } else {
+                clearNotification();
+              }
+            }}
             aria-label="Notificaciones"
             sx={{ ml: 0 }}
           >
@@ -292,54 +298,56 @@ const Header: React.FC = () => {
           </Box>
         </Box>
 
-        {/* Search Bar */}
-        <Box sx={{ display: "flex", alignItems: "center", mr: 2 }}>
-          <TextField
-            placeholder="Buscar usuarios por email..."
-            value={searchQuery}
-            onChange={handleSearchChange}
-            onKeyPress={handleSearchKeyPress}
-            size="small"
-            sx={{
-              width: 300,
-              "& .MuiOutlinedInput-root": {
-                backgroundColor: "rgba(255, 255, 255, 0.1)",
-                color: "inherit",
-                "& fieldset": {
-                  borderColor: "rgba(255, 255, 255, 0.3)",
+        {/* Search Bar - Desktop only */}
+        {!isMobile && (
+          <Box sx={{ display: "flex", alignItems: "center", mr: 2 }}>
+            <TextField
+              placeholder="Buscar usuarios por email..."
+              value={searchQuery}
+              onChange={handleSearchChange}
+              onKeyPress={handleSearchKeyPress}
+              size="small"
+              sx={{
+                width: 300,
+                "& .MuiOutlinedInput-root": {
+                  backgroundColor: "rgba(255, 255, 255, 0.1)",
+                  color: "inherit",
+                  "& fieldset": {
+                    borderColor: "rgba(255, 255, 255, 0.3)",
+                  },
+                  "&:hover fieldset": {
+                    borderColor: "rgba(255, 255, 255, 0.5)",
+                  },
+                  "&.Mui-focused fieldset": {
+                    borderColor: "rgba(255, 255, 255, 0.7)",
+                  },
                 },
-                "&:hover fieldset": {
-                  borderColor: "rgba(255, 255, 255, 0.5)",
+                "& .MuiInputBase-input::placeholder": {
+                  color: "rgba(255, 255, 255, 0.7)",
+                  opacity: 1,
                 },
-                "&.Mui-focused fieldset": {
-                  borderColor: "rgba(255, 255, 255, 0.7)",
-                },
-              },
-              "& .MuiInputBase-input::placeholder": {
-                color: "rgba(255, 255, 255, 0.7)",
-                opacity: 1,
-              },
-            }}
-            InputProps={{
-              startAdornment: (
-                <InputAdornment position="start">
-                  <SearchIcon sx={{ color: "rgba(255, 255, 255, 0.7)" }} />
-                </InputAdornment>
-              ),
-              endAdornment: searchQuery.trim() ? (
-                <InputAdornment position="end">
-                  <IconButton
-                    size="small"
-                    onClick={handleSearchClick}
-                    sx={{ color: "rgba(255, 255, 255, 0.7)" }}
-                  >
-                    <SearchIcon />
-                  </IconButton>
-                </InputAdornment>
-              ) : null,
-            }}
-          />
-        </Box>
+              }}
+              InputProps={{
+                startAdornment: (
+                  <InputAdornment position="start">
+                    <SearchIcon sx={{ color: "rgba(255, 255, 255, 0.7)" }} />
+                  </InputAdornment>
+                ),
+                endAdornment: searchQuery.trim() ? (
+                  <InputAdornment position="end">
+                    <IconButton
+                      size="small"
+                      onClick={handleSearchClick}
+                      sx={{ color: "rgba(255, 255, 255, 0.7)" }}
+                    >
+                      <SearchIcon />
+                    </IconButton>
+                  </InputAdornment>
+                ) : null,
+              }}
+            />
+          </Box>
+        )}
 
         {/* Desktop nav */}
         {!isMobile && (
@@ -418,6 +426,54 @@ const Header: React.FC = () => {
           aria-label="Primaria móvil"
           sx={{ display: "block", py: 1 }}
         >
+          {/* Search Bar - Mobile */}
+          <Box sx={{ px: 2, pb: 2 }}>
+            <TextField
+              placeholder="Buscar usuarios por email..."
+              value={searchQuery}
+              onChange={handleSearchChange}
+              onKeyPress={handleSearchKeyPress}
+              size="small"
+              fullWidth
+              sx={{
+                "& .MuiOutlinedInput-root": {
+                  backgroundColor: "rgba(0, 0, 0, 0.04)",
+                  color: "text.primary",
+                  "& fieldset": {
+                    borderColor: "rgba(0, 0, 0, 0.23)",
+                  },
+                  "&:hover fieldset": {
+                    borderColor: "rgba(0, 0, 0, 0.5)",
+                  },
+                  "&.Mui-focused fieldset": {
+                    borderColor: "primary.main",
+                  },
+                },
+                "& .MuiInputBase-input::placeholder": {
+                  color: "text.secondary",
+                  opacity: 1,
+                },
+              }}
+              InputProps={{
+                startAdornment: (
+                  <InputAdornment position="start">
+                    <SearchIcon />
+                  </InputAdornment>
+                ),
+                endAdornment: searchQuery.trim() ? (
+                  <InputAdornment position="end">
+                    <IconButton
+                      size="small"
+                      onClick={handleSearchClick}
+                    >
+                      <SearchIcon />
+                    </IconButton>
+                  </InputAdornment>
+                ) : null,
+              }}
+            />
+          </Box>
+          <Divider />
           <List role="list">
             <ListItemButton
               component={RouterLink}
@@ -461,15 +517,7 @@ const Header: React.FC = () => {
                     navigate("/profile");
                   }}
                 >
-                  <ListItemText
-                    primary={`Mi perfil ${
-                      loading
-                        ? "(...)"
-                        : stats
-                        ? `(Lv.${stats.level} ${stats.levelName})`
-                        : "(Lv.0)"
-                    }`}
-                  />
+                  <ListItemText primary="Mi perfil" />
                 </ListItemButton>
                 <ListItemButton
                   onClick={() => {
@@ -518,6 +566,21 @@ const Header: React.FC = () => {
           horizontal: "center",
         }}
       >
+        <Typography
+          sx={{
+            px: 2,
+            py: 1,
+            fontSize: "0.875rem",
+            color: "text.secondary",
+          }}
+        >
+          {loading
+            ? "(...)"
+            : stats
+            ? `Lv.${stats.level} ${stats.levelName}`
+            : "Lv.0"}
+        </Typography>
+        <Divider />
         <MenuItem onClick={handleProfileClick}>Mi perfil</MenuItem>
         <MenuItem onClick={handleLogoutClick}>Cerrar sesión</MenuItem>
       </Menu>
@@ -552,6 +615,21 @@ const Header: React.FC = () => {
         onClose={clearNotification}
         autoHideDuration={30000} // 30 seconds
       />
+
+      <Dialog
+        open={noNotificationsDialogOpen}
+        onClose={() => setNoNotificationsDialogOpen(false)}
+        maxWidth="sm"
+        fullWidth
+      >
+        <DialogTitle>Notificaciones</DialogTitle>
+        <Box sx={{ px: 3, pb: 2 }}>
+          <Typography>No hay notificaciones nuevas.</Typography>
+        </Box>
+        <DialogActions>
+          <Button onClick={() => setNoNotificationsDialogOpen(false)}>Cerrar</Button>
+        </DialogActions>
+      </Dialog>
     </AppBar>
   );
 };
