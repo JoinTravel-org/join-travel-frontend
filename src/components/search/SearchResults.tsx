@@ -37,6 +37,7 @@ const SearchResults: React.FC = () => {
   const [searchQuery, setSearchQuery] = useState(searchParams.get("q") || "");
   const [activeTab, setActiveTab] = useState(0); // 0 for users, 1 for places
   const [locationFilter, setLocationFilter] = useState("");
+  const [ratingFilter, setRatingFilter] = useState<number | "">("");
   const [userLocation, setUserLocation] = useState<{ latitude: number; longitude: number } | null>(null);
   const [locationError, setLocationError] = useState<string | null>(null);
   const [locationLoading, setLocationLoading] = useState(false);
@@ -166,10 +167,11 @@ const SearchResults: React.FC = () => {
 
   const performSearch = async (query: string) => {
     // For users tab, require query with min 3 chars
-    // For places tab, allow search if query has 3+ chars OR city filter is provided
+    // For places tab, require at least one basic filter (query, city, or location), rating filter can be additional
+    const hasBasicFilter = (query.trim().length >= 3) || locationFilter.trim() || !!userLocation;
     const shouldSearch = activeTab === 0
       ? (query.trim() && query.trim().length >= 3)
-      : (query.trim() && query.trim().length >= 3) || locationFilter.trim() || !!userLocation;
+      : hasBasicFilter;
 
     if (!shouldSearch) {
       setUsers([]);
@@ -194,16 +196,18 @@ const SearchResults: React.FC = () => {
           setError(response.message || "Error al buscar usuarios");
         }
       } else {
-        // Search places - can search by name, city, or both
+        // Search places - requires at least one basic filter, rating is additional
         try {
           const searchQuery = query.trim().length >= 3 ? query.trim() : undefined;
           const cityQuery = locationFilter.trim() || undefined;
+          const minRating = (ratingFilter !== "" && hasBasicFilter) ? Number(ratingFilter) : undefined;
 
           const response = await apiService.searchPlaces(
             searchQuery,
             cityQuery,
             userLocation?.latitude,
-            userLocation?.longitude
+            userLocation?.longitude,
+            minRating
           );
           if (response.success && response.data) {
             setPlaces(response.data);
@@ -258,14 +262,15 @@ const SearchResults: React.FC = () => {
       performSearch(searchQuery);
     }, 300);
     return () => clearTimeout(timer);
-  }, [searchQuery, activeTab, locationFilter, userLocation?.latitude, userLocation?.longitude]);
+  }, [searchQuery, activeTab, locationFilter, ratingFilter, userLocation?.latitude, userLocation?.longitude]);
 
   const handleSearchSubmit = (event: React.FormEvent) => {
     event.preventDefault();
-    // For places tab, allow search even without query if city filter is provided
+    // For places tab, require at least one basic filter (query, city, or location)
+    const hasBasicFilter = searchQuery.trim().length >= 3 || locationFilter.trim() || !!userLocation;
     const shouldSubmit = activeTab === 0
       ? searchQuery.trim()
-      : searchQuery.trim() || locationFilter.trim();
+      : hasBasicFilter;
 
     if (shouldSubmit) {
       setSearchParams({ q: searchQuery.trim() || "" });
@@ -302,6 +307,13 @@ const SearchResults: React.FC = () => {
 
   const handleLocationFilterChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     setLocationFilter(event.target.value);
+  };
+
+  const handleRatingFilterChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const value = event.target.value;
+    if (value === "" || (Number(value) >= 0 && Number(value) <= 5)) {
+      setRatingFilter(value === "" ? "" : Number(value));
+    }
   };
 
   const handleGetLocation = async () => {
@@ -351,37 +363,57 @@ const SearchResults: React.FC = () => {
             sx={{ mb: 2 }}
           />
 
-          {/* Location filter for places */}
+          {/* Filters for places */}
           {activeTab === 1 && (
-            <Box sx={{ display: "flex", gap: 2, mb: 2 }}>
+            <Box sx={{ display: "flex", flexDirection: "column", gap: 2, mb: 2 }}>
+              <Box sx={{ display: "flex", gap: 2 }}>
+                <TextField
+                  fullWidth
+                  placeholder="Filtrar por ciudad (opcional)"
+                  value={locationFilter}
+                  onChange={handleLocationFilterChange}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter') {
+                      e.preventDefault();
+                      handleSearchSubmit(e);
+                    }
+                  }}
+                  InputProps={{
+                    startAdornment: (
+                      <InputAdornment position="start">
+                        <LocationIcon />
+                      </InputAdornment>
+                    ),
+                  }}
+                />
+                <Button
+                  variant="outlined"
+                  startIcon={locationLoading ? <CircularProgress size={20} /> : <MyLocationIcon />}
+                  onClick={handleGetLocation}
+                  disabled={locationLoading || apiKeyLoading}
+                  sx={{ minWidth: "auto" }}
+                >
+                  {locationLoading ? "Obteniendo..." : apiKeyLoading ? "Cargando..." : "Ubicación"}
+                </Button>
+              </Box>
               <TextField
-                fullWidth
-                placeholder="Filtrar por ciudad (opcional)"
-                value={locationFilter}
-                onChange={handleLocationFilterChange}
+                type="number"
+                placeholder="Calificación mínima (0-5, opcional)"
+                value={ratingFilter}
+                onChange={handleRatingFilterChange}
                 onKeyDown={(e) => {
                   if (e.key === 'Enter') {
                     e.preventDefault();
                     handleSearchSubmit(e);
                   }
                 }}
-                InputProps={{
-                  startAdornment: (
-                    <InputAdornment position="start">
-                      <LocationIcon />
-                    </InputAdornment>
-                  ),
+                inputProps={{
+                  min: 0,
+                  max: 5,
+                  step: 0.1,
                 }}
+                sx={{ maxWidth: 300 }}
               />
-              <Button
-                variant="outlined"
-                startIcon={locationLoading ? <CircularProgress size={20} /> : <MyLocationIcon />}
-                onClick={handleGetLocation}
-                disabled={locationLoading || apiKeyLoading}
-                sx={{ minWidth: "auto" }}
-              >
-                {locationLoading ? "Obteniendo..." : apiKeyLoading ? "Cargando..." : "Ubicación"}
-              </Button>
             </Box>
           )}
 
@@ -389,7 +421,7 @@ const SearchResults: React.FC = () => {
             <Typography variant="body2" color="text.secondary">
               {activeTab === 0
                 ? "Busca usuarios escribiendo al menos 3 caracteres de su email"
-                : "Busca lugares por nombre (mínimo 3 caracteres) o filtra por ciudad"
+                : "Busca lugares por nombre (mínimo 3 caracteres) o filtra por ciudad. La calificación mínima se aplica adicionalmente."
               }
             </Typography>
           </Box>

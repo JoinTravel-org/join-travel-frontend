@@ -415,19 +415,21 @@ class ApiService {
   }
 
   /**
-   * Busca lugares por nombre y ciudad
+   * Busca lugares por nombre, ciudad y calificación mínima
    * @param query - Término de búsqueda (opcional, mínimo 3 caracteres)
    * @param city - Ciudad para filtrar (opcional)
    * @param latitude - Latitud para ordenar por proximidad (opcional)
    * @param longitude - Longitud para ordenar por proximidad (opcional)
+   * @param minRating - Calificación mínima para filtrar (opcional)
    * @returns Promise con la respuesta del servidor
    */
-  async searchPlaces(query?: string, city?: string, latitude?: number, longitude?: number) {
+  async searchPlaces(query?: string, city?: string, latitude?: number, longitude?: number, minRating?: number) {
     const params: Record<string, string | number> = {};
     if (query) params.q = query;
     if (city) params.city = city;
     if (latitude !== undefined) params.latitude = latitude;
     if (longitude !== undefined) params.longitude = longitude;
+    if (minRating !== undefined) params.minRating = minRating;
 
     const response = await this.api.get("/places/search", { params });
     return response.data;
