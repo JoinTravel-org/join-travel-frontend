@@ -404,7 +404,7 @@ const SearchResults: React.FC = () => {
                   disabled={locationLoading || apiKeyLoading}
                   sx={{ minWidth: "auto" }}
                 >
-                  {locationLoading ? "Obteniendo..." : apiKeyLoading ? "Cargando..." : "Ubicación"}
+                  {locationLoading ? "Obteniendo..." : apiKeyLoading ? "Cargando..." : "Ubicación actual"}
                 </Button>
               </Box>
               <Box sx={{ display: "flex", flexDirection: { xs: "column", sm: "row" }, alignItems: { xs: "stretch", sm: "center" }, gap: 2 }}>
