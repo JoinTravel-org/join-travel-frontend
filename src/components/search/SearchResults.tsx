@@ -341,8 +341,14 @@ const SearchResults: React.FC = () => {
       {/* Search Form */}
       <Paper sx={{ p: 3, mb: 4 }}>
         <Box component="form" onSubmit={handleSearchSubmit}>
+          {activeTab === 1 && (
+            <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
+              Buscar lugares por nombre, ciudad y calificación mínima
+            </Typography>
+          )}
           <TextField
             fullWidth
+            label={activeTab === 0 ? "Buscar usuarios" : "Nombre del lugar"}
             placeholder={activeTab === 0 ? "Buscar usuarios por email..." : "Buscar lugares por nombre..."}
             value={searchQuery}
             onChange={handleSearchChange}
@@ -366,9 +372,10 @@ const SearchResults: React.FC = () => {
           {/* Filters for places */}
           {activeTab === 1 && (
             <Box sx={{ display: "flex", flexDirection: "column", gap: 2, mb: 2 }}>
-              <Box sx={{ display: "flex", gap: 2 }}>
+              <Box sx={{ display: "flex", gap: 2, alignItems: "center" }}>
                 <TextField
                   fullWidth
+                  label="Ciudad"
                   placeholder="Filtrar por ciudad (opcional)"
                   value={locationFilter}
                   onChange={handleLocationFilterChange}
@@ -386,6 +393,9 @@ const SearchResults: React.FC = () => {
                     ),
                   }}
                 />
+                <Typography variant="body2" color="text.secondary" sx={{ minWidth: "fit-content" }}>
+                  o
+                </Typography>
                 <Button
                   variant="outlined"
                   startIcon={locationLoading ? <CircularProgress size={20} /> : <MyLocationIcon />}
@@ -396,24 +406,30 @@ const SearchResults: React.FC = () => {
                   {locationLoading ? "Obteniendo..." : apiKeyLoading ? "Cargando..." : "Ubicación"}
                 </Button>
               </Box>
-              <TextField
-                type="number"
-                placeholder="Calificación mínima (0-5, opcional)"
-                value={ratingFilter}
-                onChange={handleRatingFilterChange}
-                onKeyDown={(e) => {
-                  if (e.key === 'Enter') {
-                    e.preventDefault();
-                    handleSearchSubmit(e);
-                  }
-                }}
-                inputProps={{
-                  min: 0,
-                  max: 5,
-                  step: 0.1,
-                }}
-                sx={{ maxWidth: 300 }}
-              />
+              <Box sx={{ display: "flex", flexDirection: { xs: "column", sm: "row" }, alignItems: { xs: "stretch", sm: "center" }, gap: 2 }}>
+                <TextField
+                  type="number"
+                  label="Calificación mínima"
+                  placeholder="Calificación mínima (0-5, opcional)"
+                  value={ratingFilter}
+                  onChange={handleRatingFilterChange}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter') {
+                      e.preventDefault();
+                      handleSearchSubmit(e);
+                    }
+                  }}
+                  inputProps={{
+                    min: 0,
+                    max: 5,
+                    step: 0.1,
+                  }}
+                  sx={{ minWidth: { xs: "100%", sm: 300 } }}
+                />
+                <Typography variant="body2" color="text.secondary" sx={{ textAlign: { xs: "center", sm: "left" } }}>
+                  (opcional, filtra lugares con calificación mayor o igual al valor especificado)
+                </Typography>
+              </Box>
             </Box>
           )}
 
