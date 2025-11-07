@@ -39,27 +39,129 @@ const SearchResults: React.FC = () => {
   const [locationFilter, setLocationFilter] = useState("");
   const [userLocation, setUserLocation] = useState<{ latitude: number; longitude: number } | null>(null);
   const [locationError, setLocationError] = useState<string | null>(null);
+  const [locationLoading, setLocationLoading] = useState(false);
   const [cachedPlaces, setCachedPlaces] = useState<Place[]>([]);
+  const [apiKey, setApiKey] = useState<string>("");
+  const [apiKeyLoading, setApiKeyLoading] = useState(true);
+  const [apiKeyError, setApiKeyError] = useState<string | null>(null);
+  const [mapsLoaded, setMapsLoaded] = useState(false);
 
-  const getUserLocation = () => {
+  useEffect(() => {
+    const fetchApiKey = async () => {
+      try {
+        const response = await fetch(
+          `${import.meta.env.VITE_BACKEND_URL}/api/maps/key`
+        );
+        if (response.ok) {
+          const data = await response.json();
+          setApiKey(data.apiKey);
+        } else {
+          setApiKeyError("No se pudo cargar la configuración de mapas");
+        }
+      } catch {
+        setApiKeyError("Error al conectar con el servidor");
+      } finally {
+        setApiKeyLoading(false);
+      }
+    };
+
+    fetchApiKey();
+  }, []);
+
+  useEffect(() => {
+    if (apiKey && !window.google) {
+      const script = document.createElement('script');
+      script.src = `https://maps.googleapis.com/maps/api/js?key=${apiKey}&libraries=geocoding`;
+      script.async = true;
+      script.defer = true;
+      script.onload = () => {
+        console.log('Google Maps script loaded for geocoding');
+        setMapsLoaded(true);
+      };
+      script.onerror = () => {
+        console.error('Failed to load Google Maps script');
+        setApiKeyError("Error al cargar Google Maps para geolocalización");
+      };
+      document.head.appendChild(script);
+    } else if (apiKey) {
+      setMapsLoaded(true);
+    }
+  }, [apiKey]);
+
+  const getUserLocation = async () => {
+    console.log("Starting geolocation request");
     if (!navigator.geolocation) {
+      console.error("Geolocation not supported");
       setLocationError("La geolocalización no está soportada por este navegador");
       return;
     }
 
-    navigator.geolocation.getCurrentPosition(
-      (position) => {
-        setUserLocation({
-          latitude: position.coords.latitude,
-          longitude: position.coords.longitude,
+    try {
+      const position = await new Promise<GeolocationPosition>((resolve, reject) => {
+        navigator.geolocation.getCurrentPosition(
+          (pos) => {
+            console.log("Geolocation success:", pos.coords);
+            resolve(pos);
+          },
+          (err) => {
+            console.error("Geolocation failed:", err);
+            reject(err);
+          },
+          { timeout: 30000, enableHighAccuracy: false, maximumAge: 60000 }
+        );
+      });
+
+      const { latitude, longitude } = position.coords;
+      console.log("Setting user location:", { latitude, longitude });
+      setUserLocation({ latitude, longitude });
+      setLocationError(null);
+
+      // Trigger search with location (nearby places)
+      console.log("Triggering nearby search");
+      performSearch(searchQuery);
+
+      // Reverse geocode using Google Maps API if available
+      if (mapsLoaded && window.google && window.google.maps) {
+        console.log("Starting reverse geocoding with Google Maps");
+        const geocoder = new window.google.maps.Geocoder();
+        const latLng = new window.google.maps.LatLng(latitude, longitude);
+
+        geocoder.geocode({ location: latLng }, (results, status) => {
+          if (status === window.google.maps.GeocoderStatus.OK && results && results[0]) {
+            console.log("Reverse geocoding data:", results[0]);
+            const formattedAddress = results[0].formatted_address;
+            if (formattedAddress) {
+              console.log("Setting city filter with formatted address:", formattedAddress);
+              setLocationFilter(formattedAddress);
+              // Re-trigger search with formatted address as city filter
+              console.log("Triggering search with formatted address");
+              performSearch(searchQuery);
+            } else {
+              console.log("No formatted address found");
+            }
+          } else {
+            console.error("Reverse geocoding failed with status:", status);
+          }
         });
-        setLocationError(null);
-      },
-      (error) => {
-        console.error("Geolocation error:", error);
+      } else {
+        console.log("Google Maps not loaded, skipping reverse geocoding");
+      }
+    } catch (error: unknown) {
+      console.error("Geolocation error:", error);
+      if (error instanceof GeolocationPositionError) {
+        if (error.code === 1) {
+          setLocationError("Permiso de ubicación denegado. Por favor, habilita la ubicación en tu navegador.");
+        } else if (error.code === 2) {
+          setLocationError("No se pudo obtener la ubicación. Verifica tu conexión GPS.");
+        } else if (error.code === 3) {
+          setLocationError("Tiempo de espera agotado. Intenta de nuevo.");
+        } else {
+          setLocationError("Active ubicación para continuar.");
+        }
+      } else {
         setLocationError("Active ubicación para continuar.");
       }
-    );
+    }
   };
 
   const performSearch = async (query: string) => {
@@ -67,7 +169,7 @@ const SearchResults: React.FC = () => {
     // For places tab, allow search if query has 3+ chars OR city filter is provided
     const shouldSearch = activeTab === 0
       ? (query.trim() && query.trim().length >= 3)
-      : (query.trim() && query.trim().length >= 3) || locationFilter.trim();
+      : (query.trim() && query.trim().length >= 3) || locationFilter.trim() || !!userLocation;
 
     if (!shouldSearch) {
       setUsers([]);
@@ -202,8 +304,12 @@ const SearchResults: React.FC = () => {
     setLocationFilter(event.target.value);
   };
 
-  const handleGetLocation = () => {
-    getUserLocation();
+  const handleGetLocation = async () => {
+    console.log("Geolocation button clicked");
+    setLocationLoading(true);
+    setLocationError(null);
+    await getUserLocation();
+    setLocationLoading(false);
   };
 
   return (
@@ -269,11 +375,12 @@ const SearchResults: React.FC = () => {
               />
               <Button
                 variant="outlined"
-                startIcon={<MyLocationIcon />}
+                startIcon={locationLoading ? <CircularProgress size={20} /> : <MyLocationIcon />}
                 onClick={handleGetLocation}
+                disabled={locationLoading || apiKeyLoading}
                 sx={{ minWidth: "auto" }}
               >
-                Ubicación
+                {locationLoading ? "Obteniendo..." : apiKeyLoading ? "Cargando..." : "Ubicación"}
               </Button>
             </Box>
           )}
@@ -288,6 +395,13 @@ const SearchResults: React.FC = () => {
           </Box>
         </Box>
       </Paper>
+
+      {/* API Key Error */}
+      {apiKeyError && activeTab === 1 && (
+        <Alert severity="error" sx={{ mb: 3 }}>
+          {apiKeyError}
+        </Alert>
+      )}
 
       {/* Location Error */}
       {locationError && activeTab === 1 && (

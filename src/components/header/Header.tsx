@@ -535,7 +535,7 @@ const Header: React.FC = () => {
         {!isMobile && (
           <Box sx={{ display: "flex", alignItems: "center", mr: 2 }}>
             <TextField
-              placeholder="Buscar usuarios por email..."
+              placeholder="Buscar usuarios o lugares..."
               value={searchQuery}
               onChange={handleSearchChange}
               onKeyPress={handleSearchKeyPress}
@@ -662,7 +662,7 @@ const Header: React.FC = () => {
           {/* Search Bar - Mobile */}
           <Box sx={{ px: 2, pb: 2 }}>
             <TextField
-              placeholder="Buscar usuarios por email..."
+              placeholder="Buscar usuarios o lugares..."
               value={searchQuery}
               onChange={handleSearchChange}
               onKeyPress={handleSearchKeyPress}
