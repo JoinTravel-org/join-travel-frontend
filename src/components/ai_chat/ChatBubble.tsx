@@ -1,6 +1,7 @@
 import React, { useContext, useState, useEffect, useRef } from 'react';
 import { AuthContext } from '../../contexts/AuthContext';
-import { Box, Fab, Paper, Typography, TextField, Button, List, ListItem, ListItemText, Avatar, CircularProgress, IconButton, Tooltip } from '@mui/material';
+import { Box, Fab, Paper, Typography, TextField, Button, List, ListItem, ListItemText, Avatar, CircularProgress, IconButton, Tooltip, useMediaQuery } from '@mui/material';
+import { useTheme } from '@mui/material/styles';
 import AutoAwesomeIcon from '@mui/icons-material/AutoAwesome';
 import SendIcon from '@mui/icons-material/Send';
 import AddIcon from '@mui/icons-material/Add';
@@ -25,6 +26,8 @@ interface ChatMessage {
 
 const ChatBubble: React.FC = () => {
   const authContext = useContext(AuthContext);
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down('md'));
   const [isOpen, setIsOpen] = useState(false);
   const [messages, setMessages] = useState<Message[]>([]);
   const [inputMessage, setInputMessage] = useState('');
@@ -332,10 +335,11 @@ const ChatBubble: React.FC = () => {
           elevation={8}
           sx={{
             position: 'fixed',
-            bottom: 80,
-            right: 16,
-            width: 400,
-            height: 550,
+            bottom: isMobile ? 16 : 80,
+            right: isMobile ? 16 : 16,
+            left: isMobile ? 16 : 'auto',
+            width: isMobile ? 'auto' : 400,
+            height: isMobile ? 'calc(100vh - 100px)' : 550,
             borderRadius: 2,
             zIndex: 1000,
             display: 'flex',
