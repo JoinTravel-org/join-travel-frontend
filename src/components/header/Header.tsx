@@ -136,6 +136,32 @@ const Header: React.FC = () => {
         component={RouterLink}
         to="/"
         aria-current={location.pathname === "/" ? "page" : undefined}
+        sx={{
+          textDecoration: "none",
+          position: "relative",
+          transition: "all 0.3s ease",
+          opacity: 1,
+          "&:hover": {
+            transform: "translateY(-3px)",
+            opacity: 1,
+          },
+          "&::before": {
+            content: '""',
+            position: "absolute",
+            zIndex: -1,
+            bottom: "-1px",
+            left: 0,
+            right: 0,
+            height: "5px",
+            backgroundColor: "#A6A6A6",
+            transform: "scaleY(0)",
+            transformOrigin: "bottom",
+            transition: "transform 0.3s ease",
+          },
+          "&:hover::before": {
+            transform: "scaleY(1)",
+          },
+        }}
       >
         Inicio
       </Button>
@@ -144,6 +170,32 @@ const Header: React.FC = () => {
         component={RouterLink}
         to="/add-place"
         aria-current={location.pathname === "/add-place" ? "page" : undefined}
+        sx={{
+          textDecoration: "none",
+          position: "relative",
+          transition: "all 0.3s ease",
+          opacity: 1,
+          "&:hover": {
+            transform: "translateY(-3px)",
+            opacity: 1,
+          },
+          "&::before": {
+            content: '""',
+            position: "absolute",
+            zIndex: -1,
+            bottom: "-1px",
+            left: 0,
+            right: 0,
+            height: "5px",
+            backgroundColor: "#A6A6A6",
+            transform: "scaleY(0)",
+            transformOrigin: "bottom",
+            transition: "transform 0.3s ease",
+          },
+          "&:hover::before": {
+            transform: "scaleY(1)",
+          },
+        }}
       >
         Agregar Lugar
       </Button>
@@ -152,6 +204,32 @@ const Header: React.FC = () => {
         component={RouterLink}
         to="/itineraries"
         aria-current={location.pathname === "/itineraries" ? "page" : undefined}
+        sx={{
+          textDecoration: "none",
+          position: "relative",
+          transition: "all 0.3s ease",
+          opacity: 1,
+          "&:hover": {
+            transform: "translateY(-3px)",
+            opacity: 1,
+          },
+          "&::before": {
+            content: '""',
+            position: "absolute",
+            zIndex: -1,
+            bottom: "-1px",
+            left: 0,
+            right: 0,
+            height: "5px",
+            backgroundColor: "#A6A6A6",
+            transform: "scaleY(0)",
+            transformOrigin: "bottom",
+            transition: "transform 0.3s ease",
+          },
+          "&:hover::before": {
+            transform: "scaleY(1)",
+          },
+        }}
       >
         Itinerarios
       </Button>
@@ -164,6 +242,32 @@ const Header: React.FC = () => {
             aria-current={
               location.pathname === "/groups" ? "page" : undefined
             }
+            sx={{
+              textDecoration: "none",
+              position: "relative",
+              transition: "all 0.3s ease",
+              opacity: 1,
+              "&:hover": {
+                transform: "translateY(-3px)",
+                opacity: 1,
+              },
+              "&::before": {
+                content: '""',
+                position: "absolute",
+                zIndex: -1,
+                bottom: "-1px",
+                left: 0,
+                right: 0,
+                height: "5px",
+                backgroundColor: "#A6A6A6",
+                transform: "scaleY(0)",
+                transformOrigin: "bottom",
+                transition: "transform 0.3s ease",
+              },
+              "&:hover::before": {
+                transform: "scaleY(1)",
+              },
+            }}
           >
             Grupos
           </Button>
@@ -177,7 +281,33 @@ const Header: React.FC = () => {
               }
             }}
             aria-label="Notificaciones"
-            sx={{ ml: 0 }}
+            sx={{
+              ml: 0,
+              textDecoration: "none",
+              position: "relative",
+              transition: "all 0.3s ease",
+              opacity: 1,
+              "&:hover": {
+                transform: "translateY(-3px)",
+                opacity: 1,
+              },
+              "&::before": {
+                content: '""',
+                position: "absolute",
+                zIndex: -1,
+                bottom: "-1px",
+                left: 0,
+                right: 0,
+                height: "5px",
+                backgroundColor: "#A6A6A6",
+                transform: "scaleY(0)",
+                transformOrigin: "bottom",
+                transition: "transform 0.3s ease",
+              },
+              "&:hover::before": {
+                transform: "scaleY(1)",
+              },
+            }}
           >
             <Badge
               color="error"
@@ -192,7 +322,33 @@ const Header: React.FC = () => {
             component={RouterLink}
             to="/chats"
             aria-label="Mensajes"
-            sx={{ ml: 1 }}
+            sx={{
+              ml: 1,
+              textDecoration: "none",
+              position: "relative",
+              transition: "all 0.3s ease",
+              opacity: 1,
+              "&:hover": {
+                transform: "translateY(-3px)",
+                opacity: 1,
+              },
+              "&::before": {
+                content: '""',
+                position: "absolute",
+                zIndex: -1,
+                bottom: "-1px",
+                left: 0,
+                right: 0,
+                height: "5px",
+                backgroundColor: "#A6A6A6",
+                transform: "scaleY(0)",
+                transformOrigin: "bottom",
+                transition: "transform 0.3s ease",
+              },
+              "&:hover::before": {
+                transform: "scaleY(1)",
+              },
+            }}
           >
             <Badge
               color="error"
@@ -206,7 +362,33 @@ const Header: React.FC = () => {
             color="inherit"
             onClick={handleProfileMenuOpen}
             aria-label="Perfil"
-            sx={{ ml: 0 }}
+            sx={{
+              ml: 0,
+              textDecoration: "none",
+              position: "relative",
+              transition: "all 0.3s ease",
+              opacity: 1,
+              "&:hover": {
+                transform: "translateY(-3px)",
+                opacity: 1,
+              },
+              "&::before": {
+                content: '""',
+                position: "absolute",
+                zIndex: -1,
+                bottom: "-1px",
+                left: 0,
+                right: 0,
+                height: "5px",
+                backgroundColor: "#A6A6A6",
+                transform: "scaleY(0)",
+                transformOrigin: "bottom",
+                transition: "transform 0.3s ease",
+              },
+              "&:hover::before": {
+                transform: "scaleY(1)",
+              },
+            }}
           >
             <PersonIcon />
           </IconButton>
@@ -218,6 +400,32 @@ const Header: React.FC = () => {
             component={RouterLink}
             to="/login"
             aria-current={location.pathname === "/login" ? "page" : undefined}
+            sx={{
+              textDecoration: "none",
+              position: "relative",
+              transition: "all 0.3s ease",
+              opacity: 1,
+              "&:hover": {
+                transform: "translateY(-3px)",
+                opacity: 1,
+              },
+              "&::before": {
+                content: '""',
+                position: "absolute",
+                zIndex: -1,
+                bottom: "-1px",
+                left: 0,
+                right: 0,
+                height: "5px",
+                backgroundColor: "#A6A6A6",
+                transform: "scaleY(0)",
+                transformOrigin: "bottom",
+                transition: "transform 0.3s ease",
+              },
+              "&:hover::before": {
+                transform: "scaleY(1)",
+              },
+            }}
           >
             Iniciar Sesión
           </Button>
@@ -228,6 +436,32 @@ const Header: React.FC = () => {
             aria-current={
               location.pathname === "/register" ? "page" : undefined
             }
+            sx={{
+              textDecoration: "none",
+              position: "relative",
+              opacity: 1,
+              transition: "all 0.3s ease",
+              "&:hover": {
+                transform: "translateY(-3px)",
+                opacity: 1,
+              },
+              "&::before": {
+                content: '""',
+                position: "absolute",
+                zIndex: -1,
+                bottom: "-1px",
+                left: 0,
+                right: 0,
+                height: "5px",
+                backgroundColor: "#A6A6A6",
+                transform: "scaleY(0)",
+                transformOrigin: "bottom",
+                transition: "transform 0.3s ease",
+              },
+              "&:hover::before": {
+                transform: "scaleY(1)",
+              },
+            }}
           >
             Registrarse
           </Button>
@@ -266,8 +500,7 @@ const Header: React.FC = () => {
               opacity: 1,
               transition: "opacity 0.2s ease",
               "&:hover": {
-                opacity: 0.7,
-                color: "inherit",
+                opacity: 0.85,
               },
               ":focus-visible": {
                 outline: "none",
