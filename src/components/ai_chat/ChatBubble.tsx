@@ -1,7 +1,7 @@
 import React, { useContext, useState, useEffect, useRef } from 'react';
 import { AuthContext } from '../../contexts/AuthContext';
 import { Box, Fab, Paper, Typography, TextField, Button, List, ListItem, ListItemText, Avatar, CircularProgress, IconButton, Tooltip } from '@mui/material';
-import ChatIcon from '@mui/icons-material/Chat';
+import AutoAwesomeIcon from '@mui/icons-material/AutoAwesome';
 import SendIcon from '@mui/icons-material/Send';
 import AddIcon from '@mui/icons-material/Add';
 import apiService from '../../services/api.service';
@@ -322,7 +322,7 @@ const ChatBubble: React.FC = () => {
           zIndex: 1000,
         }}
       >
-        <ChatIcon />
+        <AutoAwesomeIcon />
       </Fab>
 
       {/* Chat Interface */}
