@@ -1,13 +1,13 @@
 import React, { useState, useEffect } from "react";
 import { Typography, Button, Container, Box, Paper, Card, CardContent, Stack } from "@mui/material";
-import { useTheme } from "../hooks/useTheme";
+import { useTheme } from "../../hooks/useTheme";
 import { Group, AddLocation, Star, Explore } from "@mui/icons-material";
 import { useNavigate } from "react-router-dom";
-import { trackEvent } from "../utils/analytics";
-import { useAuth } from "../hooks/useAuth";
-import api from "../services/api.service";
-import PlacesSection from "./PlacesSection";
-import type { Place } from "../types/place";
+import { trackEvent } from "../../utils/analytics";
+import { useAuth } from "../../hooks/useAuth";
+import api from "../../services/api.service";
+import PlacesSection from "../PlacesSection";
+import type { Place } from "../../types/place";
 import AllReviewsList from "./AllReviewsList";
 
 /**

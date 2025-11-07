@@ -9,8 +9,8 @@ import {
 } from "@mui/material";
 import { CheckCircle, Error as ErrorIcon } from "@mui/icons-material";
 import { useSearchParams, useNavigate } from "react-router-dom";
-import authService from "../services/auth.service";
-import { getErrorMessage } from "../utils/validators";
+import authService from "../../services/auth.service";
+import { getErrorMessage } from "../../utils/validators";
 
 /**
  * Estados posibles del proceso de confirmación

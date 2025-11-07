@@ -14,11 +14,11 @@ import {
 } from "@mui/material";
 import SendIcon from "@mui/icons-material/Send";
 import CloseIcon from "@mui/icons-material/Close";
-import { AuthContext } from "../contexts/AuthContext";
+import { AuthContext } from "../../contexts/AuthContext";
 import directMessageService, {
   type DirectMessage,
-} from "../services/directMessage.service";
-import socketService from "../services/socket.service";
+} from "../../services/directMessage.service";
+import socketService from "../../services/socket.service";
 
 interface DirectChatDialogProps {
   open: boolean;

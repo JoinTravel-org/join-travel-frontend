@@ -33,11 +33,11 @@ import {
 } from "@mui/icons-material";
 import { Link as RouterLink, useLocation, useNavigate } from "react-router-dom";
 import { useTheme as useMuiTheme } from "@mui/material/styles";
-import ThemeToggle from "./ThemeToggle";
-import { useAuth } from "../hooks/useAuth";
-import { useUserStats } from "../hooks/useUserStats";
-import { useChatNotifications } from "../hooks/useChatNotifications";
-import Notification from "./Notification";
+import ThemeToggle from "../ThemeToggle";
+import { useAuth } from "../../hooks/useAuth";
+import { useUserStats } from "../../hooks/useUserStats";
+import { useChatNotifications } from "../../hooks/useChatNotifications";
+import Notification from "../Notification";
 
 /**
  * Accessible, responsive site header:

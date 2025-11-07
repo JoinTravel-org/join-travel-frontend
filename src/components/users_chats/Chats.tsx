@@ -18,7 +18,7 @@ import {
 import { Person as PersonIcon } from "@mui/icons-material";
 import directMessageService, {
   type Conversation,
-} from "../services/directMessage.service";
+} from "../../services/directMessage.service";
 import { DirectChatDialog } from "./DirectChatDialog";
 
 const Chats: React.FC = () => {
