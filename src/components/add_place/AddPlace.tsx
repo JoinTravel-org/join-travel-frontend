@@ -12,10 +12,10 @@ import {
 } from "@mui/material";
 import { Wrapper, Status } from "@googlemaps/react-wrapper";
 import { useNavigate } from "react-router-dom";
-import { trackEvent } from "../utils/analytics";
-import apiService from "../services/api.service";
-import { useAuth } from "../hooks/useAuth";
-import { useUserStats } from "../hooks/useUserStats";
+import { trackEvent } from "../../utils/analytics";
+import apiService from "../../services/api.service";
+import { useAuth } from "../../hooks/useAuth";
+import { useUserStats } from "../../hooks/useUserStats";
 
 const MapComponent: React.FC<{
   onPlaceSelect: (place: {

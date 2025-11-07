@@ -20,12 +20,11 @@ import { useAnalytics } from "./hooks/useAnalytics";
 import Login from "./components/auth/Login";
 import Register from "./components/auth/Register";
 import ConfirmEmail from "./components/ConfirmEmail";
-import AddPlace from "./components/AddPlace";
+import AddPlace from "./components/add_place/AddPlace";
 import PlaceDetail from "./components/PlaceDetail";
 import CreateItinerary from "./components/CreateItinerary";
 import ItineraryList from "./components/ItineraryList";
 import ItineraryDetail from "./components/ItineraryDetail";
-import ChatView from "./components/ChatView";
 import Chats from "./components/Chats";
 import Profile from "./components/user_profile/Profile";
 import Notification from "./components/Notification";
@@ -100,7 +99,6 @@ function App() {
                 <Route path="/create-itinerary" element={<CreateItinerary />} />
                 <Route path="/place/:id" element={<PlaceDetail />} />
                 <Route path="/chats" element={<Chats />} />
-                <Route path="/ai-chat" element={<ChatView />} />
                 <Route path="/profile" element={<Profile />} />
                 <Route path="/user/:userId" element={<UserProfile />} />
                 <Route path="/search" element={<SearchResults />} />
