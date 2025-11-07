@@ -11,11 +11,11 @@ import {
   Button,
 } from "@mui/material";
 import MessageIcon from "@mui/icons-material/Message";
-import userService from "../services/user.service";
-import api from "../services/api.service";
-import type { User } from "../types/user";
-import type { Place } from "../types/place";
-import { DirectChatDialog } from "./users_chats/DirectChatDialog";
+import userService from "../../services/user.service";
+import api from "../../services/api.service";
+import type { User } from "../../types/user";
+import type { Place } from "../../types/place";
+import { DirectChatDialog } from "../users_chats/DirectChatDialog";
 
 const UserProfile: React.FC = () => {
   const { userId } = useParams<{ userId: string }>();

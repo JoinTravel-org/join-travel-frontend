@@ -10,7 +10,7 @@ import {
   KeyboardArrowRight,
 } from '@mui/icons-material';
 import MediaViewer from './MediaViewer';
-import type { ReviewMedia } from '../../types/review';
+import type { ReviewMedia } from '../../../types/review';
 
 interface MediaCarouselProps {
   media: ReviewMedia[];

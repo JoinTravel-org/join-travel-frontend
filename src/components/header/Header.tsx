@@ -37,7 +37,7 @@ import ThemeToggle from "../ThemeToggle";
 import { useAuth } from "../../hooks/useAuth";
 import { useUserStats } from "../../hooks/useUserStats";
 import { useChatNotifications } from "../../hooks/useChatNotifications";
-import Notification from "../Notification";
+import Notification from "../user_profile/Notification";
 
 /**
  * Accessible, responsive site header:

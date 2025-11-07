@@ -13,9 +13,9 @@ import { useAuth } from "../../hooks/useAuth";
 import { useNavigate } from "react-router-dom";
 import reviewService from "../../services/review.service";
 import type { CreateReviewData } from "../../types/review";
-import MediaUploader from "./MediaUploader";
+import MediaUploader from "./media/MediaUploader";
 import { useUserStats } from "../../hooks/useUserStats";
-import Notification from "../Notification";
+import Notification from "../user_profile/Notification";
 
 interface ReviewFormProps {
   placeId: string;

@@ -27,9 +27,9 @@ import ItineraryList from "./components/itineraries/ItineraryList";
 import ItineraryDetail from "./components/itineraries/ItineraryDetail";
 import Chats from "./components/users_chats/Chats";
 import Profile from "./components/user_profile/Profile";
-import Notification from "./components/Notification";
+import Notification from "./components/user_profile/Notification";
 import SearchResults from "./components/search/SearchResults";
-import UserProfile from "./components/UserProfile";
+import UserProfile from "./components/user/UserProfile";
 import GroupPage from "./components/groups/Groups";
 
 function AnalyticsListener() {

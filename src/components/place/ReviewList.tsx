@@ -9,7 +9,7 @@ import {
 import reviewService from "../../services/review.service";
 import type { Review } from "../../types/review";
 import { Rating } from '@fluentui/react-rating';
-import MediaCarousel from "../reviews/MediaCarousel";
+import MediaCarousel from "../reviews/media/MediaCarousel";
 import LikeButton from "../reviews/LikeButton";
 
 interface ReviewListProps {

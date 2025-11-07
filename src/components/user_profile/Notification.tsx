@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import type { LevelUpNotification } from '../types/user';
+import type { LevelUpNotification } from '../../types/user';
 
 interface NotificationProps {
   notification: LevelUpNotification | null;
