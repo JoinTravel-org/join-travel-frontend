@@ -1,10 +1,10 @@
 import React, { useContext, useState, useEffect, useRef } from 'react';
-import { AuthContext } from '../contexts/AuthContext';
+import { AuthContext } from '../../contexts/AuthContext';
 import { Box, Fab, Paper, Typography, TextField, Button, List, ListItem, ListItemText, Avatar, CircularProgress, IconButton, Tooltip } from '@mui/material';
 import ChatIcon from '@mui/icons-material/Chat';
 import SendIcon from '@mui/icons-material/Send';
 import AddIcon from '@mui/icons-material/Add';
-import apiService from '../services/api.service';
+import apiService from '../../services/api.service';
 
 interface Message {
   id: string;

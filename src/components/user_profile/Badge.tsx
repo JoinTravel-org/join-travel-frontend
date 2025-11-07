@@ -1,5 +1,5 @@
 import React from 'react';
-import type { Badge as BadgeType } from '../types/user';
+import type { Badge as BadgeType } from '../../types/user';
 
 interface BadgeProps {
   badge: BadgeType;

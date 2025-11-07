@@ -1,13 +1,13 @@
 import React, { useState, useEffect } from 'react';
-import { useAuth } from '../hooks/useAuth';
-import { useUserStats } from '../hooks/useUserStats';
+import { useAuth } from '../../hooks/useAuth';
+import { useUserStats } from '../../hooks/useUserStats';
 import UserStats from './UserStats';
-import Notification from './Notification';
+import Notification from '../Notification';
 import Milestones from './Milestones';
-import userService from '../services/user.service';
-import api from '../services/api.service';
-import type { Milestone } from '../types/user';
-import type { Place } from '../types/place';
+import userService from '../../services/user.service';
+import api from '../../services/api.service';
+import type { Milestone } from '../../types/user';
+import type { Place } from '../../types/place';
 import {
   Card,
   CardContent,

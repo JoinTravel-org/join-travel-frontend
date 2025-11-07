@@ -1,5 +1,5 @@
 import React from 'react';
-import type { UserStats as UserStatsType } from '../types/user';
+import type { UserStats as UserStatsType } from '../../types/user';
 import BadgeComponent from './Badge';
 
 interface UserStatsProps {

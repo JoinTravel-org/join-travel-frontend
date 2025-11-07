@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import type { Milestone } from '../types/user';
+import type { Milestone } from '../../types/user';
 
 interface MilestonesProps {
   milestones: Milestone[];

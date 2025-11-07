@@ -19,12 +19,12 @@ import {
   DialogActions,
 } from "@mui/material";
 import { Email, Lock, Visibility, VisibilityOff } from "@mui/icons-material";
-import authService from "../services/auth.service";
+import authService from "../../services/auth.service";
 import {
   isValidEmail,
   validatePassword,
   getErrorMessage,
-} from "../utils/validators";
+} from "../../utils/validators";
 
 interface RegisterProps {
   onSwitchToLogin: () => void;
