@@ -17,10 +17,10 @@ import PersonAddIcon from "@mui/icons-material/PersonAdd";
 import CloseIcon from "@mui/icons-material/Close";
 import DeleteIcon from "@mui/icons-material/Delete";
 import { useNavigate } from "react-router-dom";
-import { useAuth } from "../hooks/useAuth";
-import groupService from "../services/group.service";
-import userService from "../services/user.service";
-import type { Group, CreateGroupRequest } from "../types/group";
+import { useAuth } from "../../hooks/useAuth";
+import groupService from "../../services/group.service";
+import userService from "../../services/user.service";
+import type { Group, CreateGroupRequest } from "../../types/group";
 
 interface CreateGroupForm extends CreateGroupRequest {}
 

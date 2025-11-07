@@ -11,11 +11,11 @@ import {
   Pagination,
 } from "@mui/material";
 import { useNavigate } from "react-router-dom";
-import reviewService from "../services/review.service";
-import type { Review } from "../types/review";
-import type { Place } from "../types/place";
+import reviewService from "../../services/review.service";
+import type { Review } from "../../types/review";
+import type { Place } from "../../types/place";
 import { Rating } from "@fluentui/react-rating";
-import ReviewSkeleton from "./ReviewSkeleton";
+import ReviewSkeleton from "../place/ReviewSkeleton";
 
 interface Props {
   places: Place[];

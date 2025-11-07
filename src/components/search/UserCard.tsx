@@ -8,7 +8,7 @@ import {
   Chip,
 } from "@mui/material";
 import { Person as PersonIcon } from "@mui/icons-material";
-import type { User } from "../types/user";
+import type { User } from "../../types/user";
 
 interface UserCardProps {
   user: User;

@@ -13,8 +13,8 @@ import {
 import { Search as SearchIcon, Clear as ClearIcon } from "@mui/icons-material";
 import { useSearchParams, useNavigate } from "react-router-dom";
 import UserCard from "./UserCard";
-import userService from "../services/user.service";
-import type { User } from "../types/user";
+import userService from "../../services/user.service";
+import type { User } from "../../types/user";
 
 const SearchResults: React.FC = () => {
   const [searchParams, setSearchParams] = useSearchParams();

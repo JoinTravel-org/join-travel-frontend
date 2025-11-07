@@ -6,7 +6,7 @@ import { useNavigate } from "react-router-dom";
 import { trackEvent } from "../../utils/analytics";
 import { useAuth } from "../../hooks/useAuth";
 import api from "../../services/api.service";
-import PlacesSection from "../PlacesSection";
+import PlacesSection from "./PlacesSection";
 import type { Place } from "../../types/place";
 import AllReviewsList from "./AllReviewsList";
 

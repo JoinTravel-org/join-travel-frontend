@@ -18,12 +18,12 @@ import {
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import FavoriteIcon from "@mui/icons-material/Favorite";
 import FavoriteBorderIcon from "@mui/icons-material/FavoriteBorder";
-import api from "../services/api.service";
-import type { Place } from "../types/place";
-import { useAuth } from "../hooks/useAuth";
-import ReviewForm from "./reviews/ReviewForm";
+import api from "../../services/api.service";
+import type { Place } from "../../types/place";
+import { useAuth } from "../../hooks/useAuth";
+import ReviewForm from "../reviews/ReviewForm";
 import ReviewList from "./ReviewList";
-import reviewService from "../services/review.service";
+import reviewService from "../../services/review.service";
 import { Rating } from '@fluentui/react-rating';
 import PlaceMap from "./PlaceMap";
 

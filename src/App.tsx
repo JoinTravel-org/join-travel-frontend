@@ -21,16 +21,16 @@ import Login from "./components/auth/Login";
 import Register from "./components/auth/Register";
 import ConfirmEmail from "./components/auth/ConfirmEmail";
 import AddPlace from "./components/add_place/AddPlace";
-import PlaceDetail from "./components/PlaceDetail";
+import PlaceDetail from "./components/place/PlaceDetail";
 import CreateItinerary from "./components/itineraries/CreateItinerary";
 import ItineraryList from "./components/itineraries/ItineraryList";
 import ItineraryDetail from "./components/itineraries/ItineraryDetail";
 import Chats from "./components/users_chats/Chats";
 import Profile from "./components/user_profile/Profile";
 import Notification from "./components/Notification";
-import SearchResults from "./components/SearchResults";
+import SearchResults from "./components/search/SearchResults";
 import UserProfile from "./components/UserProfile";
-import GroupPage from "./components/Groups";
+import GroupPage from "./components/groups/Groups";
 
 function AnalyticsListener() {
   const location = useLocation();
