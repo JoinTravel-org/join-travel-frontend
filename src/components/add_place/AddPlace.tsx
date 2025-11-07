@@ -228,7 +228,7 @@ const AddPlace: React.FC = () => {
       // Award points for adding a place and handle badge notifications
       try {
         await updatePoints('place_added');
-      } catch (pointsError) {
+      } catch {
         console.log('No points awarded for place addition (this is normal)');
       }
 
