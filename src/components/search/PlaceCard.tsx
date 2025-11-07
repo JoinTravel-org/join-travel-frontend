@@ -6,9 +6,9 @@ import {
   Avatar,
   Box,
   Chip,
-  Rating,
 } from "@mui/material";
 import { LocationOn as LocationIcon, Place as PlaceIcon } from "@mui/icons-material";
+import { Rating } from "@fluentui/react-rating";
 import type { Place } from "../../types/place";
 
 interface PlaceCardProps {
@@ -53,7 +53,13 @@ const PlaceCard: React.FC<PlaceCardProps> = ({ place, onClick }) => {
           )}
           {place.rating && (
             <Box sx={{ display: "flex", alignItems: "center", gap: 0.5, mt: 0.5 }}>
-              <Rating value={place.rating} readOnly size="small" />
+              <Rating
+                size="small"
+                color="marigold"
+                max={5}
+                value={place.rating}
+                style={{ pointerEvents: 'none' }}
+              />
               <Typography variant="body2" color="text.secondary">
                 ({place.rating.toFixed(1)})
               </Typography>

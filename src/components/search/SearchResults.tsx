@@ -19,6 +19,7 @@ import {
   LocationOn as LocationIcon,
   MyLocation as MyLocationIcon
 } from "@mui/icons-material";
+import { Rating } from "@fluentui/react-rating";
 import { useSearchParams, useNavigate } from "react-router-dom";
 import UserCard from "./UserCard";
 import PlaceCard from "./PlaceCard";
@@ -426,9 +427,18 @@ const SearchResults: React.FC = () => {
                   }}
                   sx={{ minWidth: { xs: "100%", sm: 300 } }}
                 />
-                <Typography variant="body2" color="text.secondary" sx={{ textAlign: { xs: "center", sm: "left" } }}>
-                  (opcional, filtra lugares con calificación mayor o igual al valor especificado)
-                </Typography>
+                <Box sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>
+                  <Rating
+                    size="small"
+                    color="marigold"
+                    max={5}
+                    value={ratingFilter !== "" ? Number(ratingFilter) : 0}
+                    style={{ pointerEvents: 'none' }}
+                  />
+                  <Typography variant="body2" color="text.secondary">
+                    (opcional, filtra lugares con calificación ≥ {ratingFilter !== "" ? ratingFilter : "0"})
+                  </Typography>
+                </Box>
               </Box>
             </Box>
           )}
