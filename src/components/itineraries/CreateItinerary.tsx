@@ -19,8 +19,8 @@ import {
 import CloseIcon from '@mui/icons-material/Close';
 import EditIcon from '@mui/icons-material/Edit';
 import { useNavigate, useParams } from 'react-router-dom';
-import { useAuth } from '../hooks/useAuth';
-import { useUserStats } from '../hooks/useUserStats';
+import { useAuth } from '../../hooks/useAuth';
+import { useUserStats } from '../../hooks/useUserStats';
 import {
     DndContext,
     closestCenter,
@@ -39,9 +39,9 @@ import {
     rectSortingStrategy,
 } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
-import type { Place } from '../types/place';
-import type { Itinerary, ItineraryItem, CreateItineraryRequest } from '../types/itinerary';
-import apiService from '../services/api.service';
+import type { Place } from '../../types/place';
+import type { Itinerary, ItineraryItem, CreateItineraryRequest } from '../../types/itinerary';
+import apiService from '../../services/api.service';
 
 const defaultItinerary: Itinerary = { name: "", items: [] }
 

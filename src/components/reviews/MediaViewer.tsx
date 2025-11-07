@@ -8,8 +8,8 @@ import {
   Alert,
 } from '@mui/material';
 import { Close, Download } from '@mui/icons-material';
-import reviewService from '../services/review.service';
-import type { ReviewMedia } from '../types/review';
+import reviewService from '../../services/review.service';
+import type { ReviewMedia } from '../../types/review';
 
 interface MediaViewerProps {
   media: ReviewMedia;

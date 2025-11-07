@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { IconButton, Typography, Box, Alert } from '@mui/material';
 import { Favorite, FavoriteBorder, HeartBroken } from '@mui/icons-material';
-import { useAuth } from '../hooks/useAuth';
-import reviewService from '../services/review.service';
+import { useAuth } from '../../hooks/useAuth';
+import reviewService from '../../services/review.service';
 
 interface LikeButtonProps {
   reviewId: string;

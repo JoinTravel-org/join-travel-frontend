@@ -19,9 +19,9 @@ import {
   Tab,
 } from "@mui/material";
 import { useNavigate, useParams } from "react-router-dom";
-import { useAuth } from "../hooks/useAuth";
-import apiService from "../services/api.service";
-import type { Place } from "../types/place";
+import { useAuth } from "../../hooks/useAuth";
+import apiService from "../../services/api.service";
+import type { Place } from "../../types/place";
 import ItineraryMap from "./ItineraryMap";
 
 interface ItineraryItem {

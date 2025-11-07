@@ -11,7 +11,7 @@ import reviewService from "../../services/review.service";
 import type { Review } from "../../types/review";
 import { Rating } from "@fluentui/react-rating";
 import { useNavigate } from "react-router-dom";
-import LikeButton from "../LikeButton";
+import LikeButton from "../reviews/LikeButton";
 
 const PAGE_SIZE = 20;
 

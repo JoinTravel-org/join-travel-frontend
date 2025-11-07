@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { Wrapper, Status } from '@googlemaps/react-wrapper';
 import { Box, CircularProgress, Typography, Alert } from '@mui/material';
-import type { Place } from '../types/place';
+import type { Place } from '../../types/place';
 
 // Extend window interface for Google Maps
 declare global {

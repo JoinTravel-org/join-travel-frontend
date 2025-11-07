@@ -9,13 +9,13 @@ import {
 } from "@mui/material";
 import { Rating } from '@fluentui/react-rating';
 import * as React from 'react';
-import { useAuth } from "../hooks/useAuth";
+import { useAuth } from "../../hooks/useAuth";
 import { useNavigate } from "react-router-dom";
-import reviewService from "../services/review.service";
-import type { CreateReviewData } from "../types/review";
+import reviewService from "../../services/review.service";
+import type { CreateReviewData } from "../../types/review";
 import MediaUploader from "./MediaUploader";
-import { useUserStats } from "../hooks/useUserStats";
-import Notification from "./Notification";
+import { useUserStats } from "../../hooks/useUserStats";
+import Notification from "../Notification";
 
 interface ReviewFormProps {
   placeId: string;

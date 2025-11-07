@@ -13,9 +13,9 @@ import {
     Stack,
 } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
-import { useAuth } from '../hooks/useAuth';
-import type { Place } from '../types/place';
-import apiService from '../services/api.service';
+import { useAuth } from '../../hooks/useAuth';
+import type { Place } from '../../types/place';
+import apiService from '../../services/api.service';
 
 interface BackendItineraryItem {
     id: string;
