@@ -4,6 +4,7 @@ import { useUserStats } from '../../hooks/useUserStats';
 import UserStats from './UserStats';
 import Notification from './Notification';
 import Milestones from './Milestones';
+import UserGallery from '../user/UserGallery';
 import userService from '../../services/user.service';
 import api from '../../services/api.service';
 import type { Milestone } from '../../types/user';
@@ -172,6 +173,9 @@ const Profile: React.FC = () => {
                 </Box>
               )}
             </Box>
+
+            {/* Gallery Section */}
+            {user?.id && <UserGallery userId={user.id} />}
           </>
         )}
       </div>
