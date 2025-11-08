@@ -436,6 +436,19 @@ class ApiService {
   }
 
   /**
+   * Obtiene las imágenes públicas recientes con paginación
+   * @param page - Número de página
+   * @param limit - Número de imágenes por página
+   * @returns Promise con la respuesta del servidor
+   */
+  async getRecentPublicImages(page: number = 1, limit: number = 20) {
+    const response = await this.api.get("/media/recent", {
+      params: { page, limit },
+    });
+    return response.data;
+  }
+
+  /**
      * Obtiene la instancia de axios para peticiones personalizadas
      * @returns Instancia de axios
      */

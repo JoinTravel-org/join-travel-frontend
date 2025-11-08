@@ -9,6 +9,7 @@ import api from "../../services/api.service";
 import PlacesSection from "./PlacesSection";
 import type { Place } from "../../types/place";
 import AllReviewsList from "./AllReviewsList";
+import AllImagesList from "./AllImagesList";
 
 /**
  * Home
@@ -182,6 +183,7 @@ const Home: React.FC = () => {
         totalPages={totalPages}
         onPageChange={handlePageChange}
       />
+      <AllImagesList />
       <AllReviewsList />
       {/* Features Section */}
       <Box
