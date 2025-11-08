@@ -51,11 +51,6 @@ const ConfirmEmail: React.FC = () => {
 
         setStatus("success");
         setMessage(response.message || "Email confirmado exitosamente.");
-
-        // Redirigir al login después de 3 segundos
-        setTimeout(() => {
-          navigate("/");
-        }, 3000);
       } catch (err) {
         setStatus("error");
         setMessage(getErrorMessage(err));
@@ -73,10 +68,14 @@ const ConfirmEmail: React.FC = () => {
     navigate("/");
   };
 
+  const handleGoToLogin = () => {
+    navigate("/login");
+  };
+
   return (
     <Paper
       elevation={3}
-      sx={{ p: 4, maxWidth: 500, mx: "auto", mt: 8, textAlign: "center" }}
+      sx={{ p: 4, maxWidth: 500, mx: "auto", mt: 8, mb: 4, textAlign: "center" }}
     >
       {status === "loading" && (
         <Box role="status" aria-live="polite">
@@ -99,12 +98,14 @@ const ConfirmEmail: React.FC = () => {
           <Alert severity="success" sx={{ mt: 2, mb: 3, textAlign: "left" }}>
             {message}
           </Alert>
-          <Typography variant="body1" color="text.secondary" sx={{ mb: 3 }}>
-            Serás redirigido al inicio en unos segundos...
-          </Typography>
-          <Button variant="contained" onClick={handleGoHome} fullWidth>
-            Ir al inicio ahora
-          </Button>
+          <Box sx={{ display: 'flex', gap: 2, flexDirection: 'column' }}>
+            <Button variant="outlined" onClick={handleGoToLogin} fullWidth>
+              Iniciar sesión
+            </Button>
+            <Button variant="contained" onClick={handleGoHome} fullWidth>
+              Ir al inicio ahora
+            </Button>
+          </Box>
         </Box>
       )}
 
