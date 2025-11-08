@@ -1,4 +1,4 @@
-import React from 'react';
+import React from "react";
 import {
   Table,
   TableBody,
@@ -11,9 +11,9 @@ import {
   Box,
   IconButton,
   Tooltip,
-} from '@mui/material';
-import DeleteIcon from '@mui/icons-material/Delete';
-import type { Expense } from '../../types/expense';
+} from "@mui/material";
+import DeleteIcon from "@mui/icons-material/Delete";
+import type { Expense } from "../../types/expense";
 
 interface ExpenseTableProps {
   expenses: Expense[];
@@ -46,7 +46,8 @@ export default function ExpenseTable({
                 <TableRow>
                   <TableCell>Concepto</TableCell>
                   <TableCell align="right">Monto</TableCell>
-                  <TableCell>Responsable</TableCell>
+                  <TableCell>Registrado por</TableCell>
+                  <TableCell>Pagado por</TableCell>
                   <TableCell align="center">Acciones</TableCell>
                 </TableRow>
               </TableHead>
@@ -56,7 +57,12 @@ export default function ExpenseTable({
                     <TableCell>{expense.concept}</TableCell>
                     <TableCell align="right">${expense.amount}</TableCell>
                     <TableCell>
-                      {expense.user?.username || expense.user?.email || 'Usuario desconocido'}
+                      {expense.user?.email || "Usuario desconocido"}
+                    </TableCell>
+                    <TableCell>
+                      {expense.paidBy
+                        ? expense.paidBy.email
+                        : "Sin especificar"}
                     </TableCell>
                     <TableCell align="center">
                       {canDeleteExpense(expense) && (
@@ -77,8 +83,14 @@ export default function ExpenseTable({
             </Table>
           </TableContainer>
 
-          <Box sx={{ display: 'flex', justifyContent: 'flex-end', alignItems: 'center' }}>
-            <Typography variant="h6" sx={{ fontWeight: 'bold' }}>
+          <Box
+            sx={{
+              display: "flex",
+              justifyContent: "flex-end",
+              alignItems: "center",
+            }}
+          >
+            <Typography variant="h6" sx={{ fontWeight: "bold" }}>
               Total: ${total}
             </Typography>
           </Box>
