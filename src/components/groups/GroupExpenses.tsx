@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Box, Alert, CircularProgress, Container, Typography } from '@mui/material';
 import { useAuth } from '../../hooks/useAuth';
 import expenseService from '../../services/expense.service';
