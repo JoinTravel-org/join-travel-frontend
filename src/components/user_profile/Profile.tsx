@@ -176,6 +176,15 @@ const Profile: React.FC = () => {
 
             {/* Gallery Section */}
             {user?.id && <UserGallery userId={user.id} />}
+
+            <Box sx={{ mt: 4 }}>
+              <Typography variant="h5" component="h2" gutterBottom>
+                Listas de lugares próximamente
+              </Typography>
+              <Typography variant="body1" color="text.secondary">
+                Próximamente podrás crear y compartir listas de lugares favoritos.
+              </Typography>
+            </Box>
           </>
         )}
       </div>

@@ -270,10 +270,21 @@ const UserProfile: React.FC = () => {
               ))}
             </Box>
           )}
-        </Box>
 
         {/* Gallery Section */}
         {userId && <UserGallery userId={userId} />}
+
+
+        {/* Listas de lugares próximamente Section */}
+        <Box sx={{ mt: 4 }}>
+          <Typography variant="h5" component="h2" gutterBottom>
+            Listas de lugares próximamente
+          </Typography>
+          <Typography variant="body1" color="text.secondary">
+            Próximamente podrás crear y compartir listas de lugares favoritos.
+          </Typography>
+        </Box>
+        </Box>
       </div>
 
       {/* Direct Chat Dialog */}
