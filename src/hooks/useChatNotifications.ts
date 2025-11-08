@@ -31,7 +31,7 @@ export const useChatNotifications = () => {
 
     try {
       const response = await directMessageService.getUnreadCount();
-      console.log('Chat notifications response:', response); // Debug log
+      console.log(`Chat notifications response: ${JSON.stringify(response)}`); // Debug log
       if (response.success && response.data) {
         setState(prev => ({
           ...prev,

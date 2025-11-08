@@ -1,5 +1,5 @@
 import apiService from "./api.service";
-import type { UserStatsResponse, MilestonesResponse, User } from "../types/user";
+import type { UserStatsResponse, MilestonesResponse, User, UserMediaResponse } from "../types/user";
 
 /**
  * Servicio para manejar estadísticas y niveles de usuario
@@ -60,14 +60,10 @@ class UserService {
    * @returns Promise con la lista de usuarios encontrados
    */
   async searchUsers(email: string): Promise<{ success: boolean; data?: User[]; message?: string }> {
-    try {
-      const response = await apiService
-        .getAxiosInstance()
-        .get(`/users/search`, { params: { email } });
-      return response.data;
-    } catch (error) {
-      throw error;
-    }
+    const response = await apiService
+      .getAxiosInstance()
+      .get(`/users/search`, { params: { email } });
+    return response.data;
   }
 
   /**
@@ -76,13 +72,25 @@ class UserService {
    * @returns Promise con la información del usuario
    */
   async getUserById(userId: string): Promise<{ success: boolean; data?: User; message?: string }> {
+    const response = await apiService
+      .getAxiosInstance()
+      .get(`/users/${userId}`);
+    return response.data;
+  }
+
+  /**
+   * Obtiene los archivos multimedia públicos de un usuario
+   * @param userId - ID del usuario
+   * @returns Promise con la lista de archivos multimedia
+   */
+  async getUserMedia(userId: string): Promise<UserMediaResponse> {
     try {
       const response = await apiService
         .getAxiosInstance()
-        .get(`/users/${userId}`);
+        .get(`/users/${userId}/media`);
       return response.data;
     } catch (error) {
-      throw error;
+      throw error as UserMediaResponse;
     }
   }
 }
