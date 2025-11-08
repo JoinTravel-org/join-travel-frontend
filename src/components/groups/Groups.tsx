@@ -16,6 +16,7 @@ import {
 } from "@mui/material";
 import AddIcon from "@mui/icons-material/Add";
 import PersonAddIcon from "@mui/icons-material/PersonAdd";
+import ChatIcon from "@mui/icons-material/Chat";
 import CloseIcon from "@mui/icons-material/Close";
 import DeleteIcon from "@mui/icons-material/Delete";
 import { useNavigate } from "react-router-dom";
@@ -24,6 +25,7 @@ import groupService from "../../services/group.service";
 import GroupExpenses from "./GroupExpenses";
 import type { Group, CreateGroupRequest } from "../../types/group";
 import { AddMemberDialog } from "./AddMemberDialog";
+import { GroupChatDialog } from "./GroupChatDialog";
 
 export default function GroupPage() {
   const navigate = useNavigate();
@@ -39,10 +41,9 @@ export default function GroupPage() {
   const [groups, setGroups] = useState<Group[]>([]);
   const [addMemberDialogOpen, setAddMemberDialogOpen] = useState(false);
   const [selectedGroup, setSelectedGroup] = useState<Group | null>(null);
-  const [addUserOpen, setAddUserOpen] = useState<string | null>(null);
-  const [addUserEmail, setAddUserEmail] = useState("");
-  const [addUserError, setAddUserError] = useState<string | null>(null);
-  const [addUserLoading, setAddUserLoading] = useState(false);
+  const [chatDialogOpen, setChatDialogOpen] = useState(false);
+  const [selectedGroupForChat, setSelectedGroupForChat] =
+    useState<Group | null>(null);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [groupToDelete, setGroupToDelete] = useState<Group | null>(null);
   const [deleteLoading, setDeleteLoading] = useState(false);
@@ -122,31 +123,6 @@ export default function GroupPage() {
     await fetchGroups(); // Refresh group list to show new member
   };
 
-  const handleAddUser = async (groupId: string) => {
-    if (!addUserEmail.trim()) {
-      setAddUserError("El email es requerido");
-      return;
-    }
-
-    setAddUserLoading(true);
-    setAddUserError(null);
-
-    try {
-      await groupService.addMember(groupId, [addUserEmail.trim()]);
-      setAddUserOpen(null);
-      setAddUserEmail("");
-      await fetchGroups(); // Refresh group list to show new member
-    } catch (err: unknown) {
-      if (err instanceof Error) {
-        setAddUserError(err.message || "No se pudo agregar el usuario.");
-      } else {
-        setAddUserError("No se pudo agregar el usuario.");
-      }
-    } finally {
-      setAddUserLoading(false);
-    }
-  };
-
   const handleRemoveUser = async (groupId: string, userId: string) => {
     try {
       await groupService.removeMember(groupId, userId);
@@ -175,6 +151,16 @@ export default function GroupPage() {
         // No need to set selectedGroupId, GroupExpenses will handle null
       }
     }
+  };
+
+  const handleOpenChat = (group: Group) => {
+    setSelectedGroupForChat(group);
+    setChatDialogOpen(true);
+  };
+
+  const handleCloseChat = () => {
+    setChatDialogOpen(false);
+    setSelectedGroupForChat(null);
   };
 
   return (
@@ -236,137 +222,6 @@ export default function GroupPage() {
                 Crea un grupo para comenzar a compartir itinerarios con otros
                 viajeros
               </Typography>
-              {groups.length > 0 && groups[0] && (
-                <>
-                  <Typography variant="caption" color="text.secondary">
-                    Admin: {groups[0].admin?.email || groups[0].adminId}
-                  </Typography>
-
-                  {/* Display group members */}
-                  <Box sx={{ mt: 2 }}>
-                    <Typography variant="subtitle2" sx={{ mb: 0.5 }}>
-                      Usuarios:
-                    </Typography>
-                    {groups[0].members && groups[0].members.length > 0 ? (
-                      <Box
-                        sx={{
-                          display: "flex",
-                          flexDirection: "column",
-                          gap: 0.5,
-                        }}
-                      >
-                        {groups[0].members?.map((member) => {
-                          const isAdmin = member.id === groups[0].adminId;
-                          const isCurrentUser = member.id === auth.user?.id;
-
-                          return (
-                            <Box
-                              key={member.id}
-                              sx={{
-                                display: "flex",
-                                alignItems: "center",
-                                pl: 1,
-                              }}
-                            >
-                              <Typography
-                                variant="body2"
-                                color="text.secondary"
-                                sx={{ flexGrow: 1 }}
-                              >
-                                • {member.email}
-                                {isAdmin && (
-                                  <Typography
-                                    component="span"
-                                    variant="caption"
-                                    sx={{
-                                      ml: 1,
-                                      px: 0.75,
-                                      py: 0.25,
-                                      borderRadius: 1,
-                                      bgcolor: "primary.main",
-                                      color: "white",
-                                      fontSize: "0.7rem",
-                                    }}
-                                  >
-                                    Admin
-                                  </Typography>
-                                )}
-                                {isCurrentUser && !isAdmin && (
-                                  <Typography
-                                    component="span"
-                                    variant="caption"
-                                    sx={{
-                                      ml: 1,
-                                      color: "text.disabled",
-                                      fontSize: "0.7rem",
-                                    }}
-                                  >
-                                    (Tú)
-                                  </Typography>
-                                )}
-                              </Typography>
-                              {/* Only show remove button if current user is admin and target is not admin */}
-                              {groups[0].adminId === auth.user?.id &&
-                                !isAdmin && (
-                                  <Button
-                                    size="small"
-                                    color="error"
-                                    sx={{ minWidth: 0, ml: 1 }}
-                                    onClick={() =>
-                                      handleRemoveUser(groups[0].id, member.id)
-                                    }
-                                  >
-                                    <CloseIcon fontSize="small" />
-                                  </Button>
-                                )}
-                            </Box>
-                          );
-                        })}
-                      </Box>
-                    ) : (
-                      <Typography
-                        variant="body2"
-                        color="text.disabled"
-                        sx={{ pl: 1 }}
-                      >
-                        No hay usuarios agregados
-                      </Typography>
-                    )}
-                  </Box>
-
-                  {/* Only show add members button if current user is admin */}
-                  {groups[0].adminId === auth.user?.id && (
-                    <Box sx={{ mt: 2 }}>
-                      <Button
-                        size="small"
-                        variant="outlined"
-                        startIcon={<PersonAddIcon />}
-                        onClick={() => handleOpenAddMemberDialog(groups[0])}
-                      >
-                        Agregar usuarios
-                      </Button>
-                    </Box>
-                  )}
-
-                  {/* Delete Group Button - Only visible to admin */}
-                  {groups[0].adminId === auth.user?.id && (
-                    <Box sx={{ position: "absolute", top: 8, right: 8 }}>
-                      <Button
-                        size="small"
-                        color="error"
-                        onClick={() => {
-                          setGroupToDelete(groups[0]);
-                          setDeleteDialogOpen(true);
-                          setDeleteError(null);
-                        }}
-                        sx={{ minWidth: 0, p: 0 }}
-                      >
-                        <DeleteIcon />
-                      </Button>
-                    </Box>
-                  )}
-                </>
-              )}
             </Box>
           ) : (
             <Box sx={{ display: "flex", flexWrap: "wrap", gap: 2 }}>
@@ -472,19 +327,20 @@ export default function GroupPage() {
                   </Box>
 
                   <Box sx={{ mt: 2, display: "flex", gap: 1 }}>
-                    <Button
-                      size="small"
-                      variant="outlined"
-                      startIcon={<PersonAddIcon />}
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        setAddUserOpen(group.id);
-                        setAddUserEmail("");
-                        setAddUserError(null);
-                      }}
-                    >
-                      Agregar usuarios
-                    </Button>
+                    {/* Only show add members button if current user is admin */}
+                    {group.adminId === auth.user?.id && (
+                      <Button
+                        size="small"
+                        variant="outlined"
+                        startIcon={<PersonAddIcon />}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleOpenAddMemberDialog(group);
+                        }}
+                      >
+                        Agregar usuarios
+                      </Button>
+                    )}
                     <Button
                       size="small"
                       variant="contained"
@@ -497,47 +353,19 @@ export default function GroupPage() {
                     >
                       Ver Gastos
                     </Button>
+                    <Button
+                      size="small"
+                      variant="contained"
+                      color="secondary"
+                      startIcon={<ChatIcon />}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleOpenChat(group);
+                      }}
+                    >
+                      Chat
+                    </Button>
                   </Box>
-                  {addUserOpen === group.id && (
-                    <Box sx={{ mt: 2 }}>
-                      <TextField
-                        size="small"
-                        label="Email del usuario"
-                        value={addUserEmail}
-                        onChange={(e) => setAddUserEmail(e.target.value)}
-                        disabled={addUserLoading}
-                        sx={{ mr: 1 }}
-                      />
-                      <Button
-                        size="small"
-                        variant="contained"
-                        onClick={() => handleAddUser(group.id)}
-                        disabled={addUserLoading || !addUserEmail}
-                      >
-                        {addUserLoading ? (
-                          <CircularProgress size={18} />
-                        ) : (
-                          "Agregar"
-                        )}
-                      </Button>
-                      <Button
-                        size="small"
-                        onClick={() => {
-                          setAddUserOpen(null);
-                          setAddUserEmail("");
-                          setAddUserError(null);
-                        }}
-                        sx={{ ml: 1 }}
-                      >
-                        Cancelar
-                      </Button>
-                      {addUserError && (
-                        <Alert severity="error" sx={{ mt: 1 }}>
-                          {addUserError}
-                        </Alert>
-                      )}
-                    </Box>
-                  )}
 
                   {/* Delete Group Button */}
                   <Box sx={{ position: "absolute", top: 8, right: 8 }}>
@@ -681,6 +509,16 @@ export default function GroupPage() {
           groupName={selectedGroup.name}
           currentMembers={selectedGroup.members || []}
           onMemberAdded={handleMemberAdded}
+        />
+      )}
+
+      {/* Group Chat Dialog */}
+      {selectedGroupForChat && (
+        <GroupChatDialog
+          open={chatDialogOpen}
+          onClose={handleCloseChat}
+          groupId={selectedGroupForChat.id}
+          groupName={selectedGroupForChat.name}
         />
       )}
     </Container>
