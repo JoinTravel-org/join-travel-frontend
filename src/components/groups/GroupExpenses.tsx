@@ -1,10 +1,17 @@
-import { useEffect, useState } from 'react';
-import { Box, Alert, CircularProgress, Container, Typography } from '@mui/material';
-import { useAuth } from '../../hooks/useAuth';
-import expenseService from '../../services/expense.service';
-import ExpenseTable from '../expenses/ExpenseTable';
-import AddExpenseForm from '../expenses/AddExpenseForm';
-import type { Expense } from '../../types/expense';
+import React, { useEffect, useState } from "react";
+import {
+  Box,
+  Alert,
+  CircularProgress,
+  Container,
+  Typography,
+} from "@mui/material";
+import { useAuth } from "../../hooks/useAuth";
+import expenseService from "../../services/expense.service";
+import groupService from "../../services/group.service";
+import ExpenseTable from "../expenses/ExpenseTable";
+import AddExpenseForm from "../expenses/AddExpenseForm";
+import type { Expense } from "../../types/expense";
 
 interface GroupExpensesProps {
   groupId?: string; // Optional now
@@ -13,9 +20,10 @@ interface GroupExpensesProps {
 export default function GroupExpenses({ groupId }: GroupExpensesProps) {
   const auth = useAuth();
   const [expenses, setExpenses] = useState<Expense[]>([]);
-  const [total, setTotal] = useState<string>('0.00');
+  const [total, setTotal] = useState<string>("0.00");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [isAdmin, setIsAdmin] = useState(false);
 
   const fetchExpenses = async () => {
     try {
@@ -24,16 +32,30 @@ export default function GroupExpenses({ groupId }: GroupExpensesProps) {
       const response = await expenseService.getGroupExpenses(groupId);
       setExpenses(response.data.expenses);
       setTotal(response.data.total);
-    } catch (err: any) {
-      console.error('Error fetching expenses:', err);
-      setError(err.message || 'Error al cargar los gastos.');
+    } catch (err: unknown) {
+      const errorMessage =
+        err instanceof Error ? err.message : "Error al cargar los gastos.";
+      console.error("Error fetching expenses:", err);
+      setError(errorMessage);
     } finally {
       setLoading(false);
     }
   };
 
+  const fetchGroupInfo = async () => {
+    try {
+      const response = await groupService.getGroupById(groupId);
+      if (response.success && response.data) {
+        setIsAdmin(response.data.adminId === auth.user?.id);
+      }
+    } catch (err) {
+      console.error("Error fetching group info:", err);
+    }
+  };
+
   useEffect(() => {
     fetchExpenses();
+    fetchGroupInfo();
   }, [groupId]);
 
   const handleExpenseAdded = () => {
@@ -41,15 +63,17 @@ export default function GroupExpenses({ groupId }: GroupExpensesProps) {
   };
 
   const handleDeleteExpense = async (expenseId: string) => {
-    if (!window.confirm('¿Estás seguro de que quieres eliminar este gasto?')) {
+    if (!window.confirm("¿Estás seguro de que quieres eliminar este gasto?")) {
       return;
     }
 
     try {
       await expenseService.deleteExpense(expenseId);
       fetchExpenses();
-    } catch (err: any) {
-      alert(err.message || 'Error al eliminar el gasto.');
+    } catch (err: unknown) {
+      const errorMessage =
+        err instanceof Error ? err.message : "Error al eliminar el gasto.";
+      alert(errorMessage);
     }
   };
 
@@ -90,7 +114,10 @@ export default function GroupExpenses({ groupId }: GroupExpensesProps) {
       <ExpenseTable
         expenses={expenses}
         total={total}
+        groupId={groupId}
+        isAdmin={isAdmin}
         onDeleteExpense={handleDeleteExpense}
+        onExpenseAssigned={handleExpenseAdded}
         canDeleteExpense={canDeleteExpense}
         showGroupColumn={!groupId}
       />

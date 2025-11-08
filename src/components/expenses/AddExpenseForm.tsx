@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState } from "react";
 import {
   Button,
   TextField,
@@ -8,35 +8,38 @@ import {
   DialogActions,
   Alert,
   CircularProgress,
-} from '@mui/material';
-import AddIcon from '@mui/icons-material/Add';
-import type { CreateExpenseRequest } from '../../types/expense';
+} from "@mui/material";
+import AddIcon from "@mui/icons-material/Add";
+import type { CreateExpenseRequest } from "../../types/expense";
 
 interface AddExpenseFormProps {
   groupId: string;
   onExpenseAdded: () => void;
 }
 
-export default function AddExpenseForm({ groupId, onExpenseAdded }: AddExpenseFormProps) {
+export default function AddExpenseForm({
+  groupId,
+  onExpenseAdded,
+}: AddExpenseFormProps) {
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [form, setForm] = useState<CreateExpenseRequest>({
-    concept: '',
-    amount: '',
+    concept: "",
+    amount: "",
   });
 
   const handleOpen = () => setOpen(true);
   const handleClose = () => {
     setOpen(false);
     setError(null);
-    setForm({ concept: '', amount: '' });
+    setForm({ concept: "", amount: "" });
   };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
 
-    if (name === 'amount') {
+    if (name === "amount") {
       // Allow only numbers and decimal point, limit to 2 decimal places
       const regex = /^\d*\.?\d{0,2}$/;
       if (!regex.test(value)) {
@@ -65,12 +68,12 @@ export default function AddExpenseForm({ groupId, onExpenseAdded }: AddExpenseFo
     e.preventDefault();
 
     if (!form.concept.trim()) {
-      setError('El concepto es obligatorio.');
+      setError("El concepto es obligatorio.");
       return;
     }
 
     if (!validateAmount(form.amount)) {
-      setError('Valor incorrecto.');
+      setError("Valor incorrecto.");
       return;
     }
 
@@ -78,12 +81,16 @@ export default function AddExpenseForm({ groupId, onExpenseAdded }: AddExpenseFo
     setError(null);
 
     try {
-      const { default: expenseService } = await import('../../services/expense.service');
+      const { default: expenseService } = await import(
+        "../../services/expense.service"
+      );
       await expenseService.createExpense(groupId, form);
       handleClose();
       onExpenseAdded();
-    } catch (err: any) {
-      setError(err.message);
+    } catch (err: unknown) {
+      const errorMessage =
+        err instanceof Error ? err.message : "Error desconocido";
+      setError(errorMessage);
     } finally {
       setLoading(false);
     }
@@ -134,8 +141,8 @@ export default function AddExpenseForm({ groupId, onExpenseAdded }: AddExpenseFo
               placeholder="0.00"
               helperText="Monto entre 0.01 y 9,999,999.99 con máximo 2 decimales"
               inputProps={{
-                inputMode: 'decimal',
-                pattern: '[0-9]*[.,]?[0-9]*'
+                inputMode: "decimal",
+                pattern: "[0-9]*[.,]?[0-9]*",
               }}
             />
           </DialogContent>
@@ -146,7 +153,7 @@ export default function AddExpenseForm({ groupId, onExpenseAdded }: AddExpenseFo
               variant="contained"
               disabled={loading || !form.concept.trim() || !form.amount}
             >
-              {loading ? <CircularProgress size={24} /> : 'Agregar'}
+              {loading ? <CircularProgress size={24} /> : "Agregar"}
             </Button>
           </DialogActions>
         </form>

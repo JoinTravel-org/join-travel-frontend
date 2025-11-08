@@ -3,15 +3,23 @@ export interface CreateExpenseRequest {
   amount: string; // String to preserve decimal precision
 }
 
+export interface AssignExpenseRequest {
+  paidById: string;
+}
+
 export interface Expense {
   id: string;
   concept: string;
   amount: string; // String to preserve decimal precision
   groupId: string;
   userId: string;
+  paidById?: string | null;
   user?: {
     id: string;
-    username: string;
+    email: string;
+  };
+  paidBy?: {
+    id: string;
     email: string;
   };
   group?: {
