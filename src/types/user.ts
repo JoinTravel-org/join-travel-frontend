@@ -54,3 +54,19 @@ export interface UserStatsResponse {
   message?: string;
   notification?: LevelUpNotification;
 }
+
+export interface UserMedia {
+  id: string;
+  filename: string;
+  originalFilename: string;
+  fileSize: number;
+  mimeType: string;
+  url: string;
+  createdAt: string;
+}
+
+export interface UserMediaResponse {
+  success: boolean;
+  data?: UserMedia[];
+  message?: string;
+}

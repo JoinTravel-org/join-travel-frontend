@@ -429,9 +429,43 @@ class ApiService {
   }
 
   /**
-   * Obtiene la instancia de axios para peticiones personalizadas
-   * @returns Instancia de axios
+   * Busca lugares por nombre, ciudad y calificación mínima
+   * @param query - Término de búsqueda (opcional, mínimo 3 caracteres)
+   * @param city - Ciudad para filtrar (opcional)
+   * @param latitude - Latitud para ordenar por proximidad (opcional)
+   * @param longitude - Longitud para ordenar por proximidad (opcional)
+   * @param minRating - Calificación mínima para filtrar (opcional)
+   * @returns Promise con la respuesta del servidor
    */
+  async searchPlaces(query?: string, city?: string, latitude?: number, longitude?: number, minRating?: number) {
+    const params: Record<string, string | number> = {};
+    if (query) params.q = query;
+    if (city) params.city = city;
+    if (latitude !== undefined) params.latitude = latitude;
+    if (longitude !== undefined) params.longitude = longitude;
+    if (minRating !== undefined) params.minRating = minRating;
+
+    const response = await this.api.get("/places/search", { params });
+    return response.data;
+  }
+
+  /**
+   * Obtiene las imágenes públicas recientes con paginación
+   * @param page - Número de página
+   * @param limit - Número de imágenes por página
+   * @returns Promise con la respuesta del servidor
+   */
+  async getRecentPublicImages(page: number = 1, limit: number = 20) {
+    const response = await this.api.get("/media/recent", {
+      params: { page, limit },
+    });
+    return response.data;
+  }
+
+  /**
+     * Obtiene la instancia de axios para peticiones personalizadas
+     * @returns Instancia de axios
+     */
   getAxiosInstance() {
     return this.api;
   }

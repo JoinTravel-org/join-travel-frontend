@@ -9,29 +9,28 @@ import { Suspense, useEffect } from "react";
 import "./App.css";
 import AppThemeProvider from "./contexts/ThemeProvider";
 import { AuthProvider } from "./contexts/AuthContext";
-import Home from "./components/Home";
-import Header from "./components/Header";
-import Footer from "./components/Footer";
-import ChatBubble from "./components/ChatBubble";
+import Home from "./components/home/Home";
+import Header from "./components/header/Header";
+import Footer from "./components/home/Footer";
+import ChatBubble from "./components/ai_chat/ChatBubble";
 import { initAnalytics, trackPageview } from "./utils/analytics";
 import { useUserStats } from "./hooks/useUserStats";
 import { useAnalytics } from "./hooks/useAnalytics";
 
-import Login from "./components/Login";
-import Register from "./components/Register";
-import ConfirmEmail from "./components/ConfirmEmail";
-import AddPlace from "./components/AddPlace";
-import PlaceDetail from "./components/PlaceDetail";
-import CreateItinerary from "./components/CreateItinerary";
-import ItineraryList from "./components/ItineraryList";
-import ItineraryDetail from "./components/ItineraryDetail";
-import ChatView from "./components/ChatView";
-import Chats from "./components/Chats";
-import Profile from "./components/Profile";
-import Notification from "./components/Notification";
-import SearchResults from "./components/SearchResults";
-import UserProfile from "./components/UserProfile";
-import GroupPage from "./components/Groups";
+import Login from "./components/auth/Login";
+import Register from "./components/auth/Register";
+import ConfirmEmail from "./components/auth/ConfirmEmail";
+import AddPlace from "./components/add_place/AddPlace";
+import PlaceDetail from "./components/place/PlaceDetail";
+import CreateItinerary from "./components/itineraries/CreateItinerary";
+import ItineraryList from "./components/itineraries/ItineraryList";
+import ItineraryDetail from "./components/itineraries/ItineraryDetail";
+import Chats from "./components/users_chats/Chats";
+import Profile from "./components/user_profile/Profile";
+import Notification from "./components/user_profile/Notification";
+import SearchResults from "./components/search/SearchResults";
+import UserProfile from "./components/user/UserProfile";
+import GroupPage from "./components/groups/Groups";
 
 function AnalyticsListener() {
   const location = useLocation();
@@ -100,7 +99,6 @@ function App() {
                 <Route path="/create-itinerary" element={<CreateItinerary />} />
                 <Route path="/place/:id" element={<PlaceDetail />} />
                 <Route path="/chats" element={<Chats />} />
-                <Route path="/ai-chat" element={<ChatView />} />
                 <Route path="/profile" element={<Profile />} />
                 <Route path="/user/:userId" element={<UserProfile />} />
                 <Route path="/search" element={<SearchResults />} />
