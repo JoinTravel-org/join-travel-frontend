@@ -17,6 +17,7 @@ import SendIcon from "@mui/icons-material/Send";
 import CloseIcon from "@mui/icons-material/Close";
 import { AuthContext } from "../../contexts/AuthContext";
 import groupMessageService from "../../services/groupMessage.service";
+import socketService from "../../services/socket.service";
 import type { GroupMessage } from "../../types/groupMessage";
 
 interface GroupChatDialogProps {
@@ -43,30 +44,63 @@ export const GroupChatDialog: React.FC<GroupChatDialogProps> = ({
 
   const currentUserId = authContext?.user?.id || null;
 
-  const loadMessages = React.useCallback(async () => {
-    setLoading(true);
-    setError(null);
-    try {
-      const response = await groupMessageService.getMessages(groupId);
-      if (response.success && response.data) {
-        setMessages(response.data.messages);
+  const loadMessages = React.useCallback(
+    async (showLoading = true) => {
+      if (showLoading) {
+        setLoading(true);
       }
-    } catch (err: unknown) {
-      if (err instanceof Error) {
-        setError(err.message);
-      } else {
-        setError("Error al cargar los mensajes");
+      setError(null);
+      try {
+        const response = await groupMessageService.getMessages(groupId);
+        if (response.success && response.data) {
+          setMessages(response.data.messages);
+        }
+      } catch (err: unknown) {
+        if (err instanceof Error) {
+          setError(err.message);
+        } else {
+          setError("Error al cargar los mensajes");
+        }
+      } finally {
+        if (showLoading) {
+          setLoading(false);
+        }
       }
-    } finally {
-      setLoading(false);
-    }
-  }, [groupId]);
+    },
+    [groupId]
+  );
 
+  // Load messages when dialog opens
   useEffect(() => {
     if (open && groupId) {
       loadMessages();
+      // Join the group room to receive real-time messages
+      socketService.joinGroup(groupId);
     }
+
+    return () => {
+      // Leave the group room when dialog closes
+      if (groupId) {
+        socketService.leaveGroup(groupId);
+      }
+    };
   }, [open, groupId, loadMessages]);
+
+  // Subscribe to new group messages via websocket
+  useEffect(() => {
+    if (!open || !groupId) return;
+
+    const unsubscribe = socketService.onNewGroupMessage(groupId, (message) => {
+      // Only add if it's not already in the list (avoid duplicates)
+      setMessages((prev) => {
+        const exists = prev.some((m) => m.id === message.id);
+        if (exists) return prev;
+        return [...prev, message];
+      });
+    });
+
+    return unsubscribe;
+  }, [open, groupId]);
 
   useEffect(() => {
     scrollToBottom();
@@ -85,11 +119,16 @@ export const GroupChatDialog: React.FC<GroupChatDialogProps> = ({
     setNewMessage("");
 
     try {
-      const response = await groupMessageService.sendMessage(groupId, {
-        content: messageToSend,
-      });
-      if (response.success && response.data) {
-        setMessages((prev) => [...prev, response.data!]);
+      // Send via websocket if connected, otherwise fallback to HTTP
+      if (socketService.isConnected()) {
+        socketService.sendGroupMessage(groupId, messageToSend);
+      } else {
+        const response = await groupMessageService.sendMessage(groupId, {
+          content: messageToSend,
+        });
+        if (response.success && response.data) {
+          setMessages((prev) => [...prev, response.data!]);
+        }
       }
     } catch (err: unknown) {
       if (err instanceof Error) {

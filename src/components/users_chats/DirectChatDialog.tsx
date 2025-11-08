@@ -18,6 +18,7 @@ import { AuthContext } from "../../contexts/AuthContext";
 import directMessageService, {
   type DirectMessage,
 } from "../../services/directMessage.service";
+import socketService from "../../services/socket.service";
 
 interface DirectChatDialogProps {
   open: boolean;
@@ -43,21 +44,28 @@ export const DirectChatDialog: React.FC<DirectChatDialogProps> = ({
   // Obtener el ID del usuario actual del contexto de autenticación
   const currentUserId = authContext?.user?.id || null;
 
-  const loadConversationHistory = React.useCallback(async () => {
-    setLoading(true);
-    try {
-      const response = await directMessageService.getConversationHistory(
-        otherUserId
-      );
-      if (response.success && response.data) {
-        setMessages(response.data.messages);
+  const loadConversationHistory = React.useCallback(
+    async (showLoading = true) => {
+      if (showLoading) {
+        setLoading(true);
       }
-    } catch (error) {
-      console.error("Error loading conversation:", error);
-    } finally {
-      setLoading(false);
-    }
-  }, [otherUserId]);
+      try {
+        const response = await directMessageService.getConversationHistory(
+          otherUserId
+        );
+        if (response.success && response.data) {
+          setMessages(response.data.messages);
+        }
+      } catch (error) {
+        console.error("Error loading conversation:", error);
+      } finally {
+        if (showLoading) {
+          setLoading(false);
+        }
+      }
+    },
+    [otherUserId]
+  );
 
   // Load conversation history when dialog opens
   useEffect(() => {
@@ -65,6 +73,27 @@ export const DirectChatDialog: React.FC<DirectChatDialogProps> = ({
       loadConversationHistory();
     }
   }, [open, otherUserId, loadConversationHistory]);
+
+  // Subscribe to new direct messages via websocket
+  useEffect(() => {
+    if (!open || !otherUserId) return;
+
+    const unsubscribe = socketService.onNewMessage((message) => {
+      // Only add messages from or to this conversation
+      if (
+        message.senderId === otherUserId ||
+        message.receiverId === otherUserId
+      ) {
+        setMessages((prev) => {
+          const exists = prev.some((m) => m.id === message.id);
+          if (exists) return prev;
+          return [...prev, message];
+        });
+      }
+    });
+
+    return unsubscribe;
+  }, [open, otherUserId]);
 
   // Auto-scroll to bottom when new messages arrive
   useEffect(() => {
@@ -83,12 +112,17 @@ export const DirectChatDialog: React.FC<DirectChatDialogProps> = ({
     setNewMessage("");
 
     try {
-      const response = await directMessageService.sendMessage(
-        otherUserId,
-        messageToSend
-      );
-      if (response.success && response.data) {
-        setMessages((prev) => [...prev, response.data!]);
+      // Send via websocket if connected, otherwise fallback to HTTP
+      if (socketService.isConnected()) {
+        socketService.sendDirectMessage(otherUserId, messageToSend);
+      } else {
+        const response = await directMessageService.sendMessage(
+          otherUserId,
+          messageToSend
+        );
+        if (response.success && response.data) {
+          setMessages((prev) => [...prev, response.data!]);
+        }
       }
     } catch (error) {
       console.error("Error sending message:", error);
