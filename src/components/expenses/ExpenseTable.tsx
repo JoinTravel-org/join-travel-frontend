@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import {
   Table,
   TableBody,
@@ -13,21 +13,47 @@ import {
   Tooltip,
 } from "@mui/material";
 import DeleteIcon from "@mui/icons-material/Delete";
+import AssignmentIndIcon from "@mui/icons-material/AssignmentInd";
 import type { Expense } from "../../types/expense";
+import AssignExpenseDialog from "./AssignExpenseDialog";
 
 interface ExpenseTableProps {
   expenses: Expense[];
   total: string;
+  groupId: string;
+  isAdmin: boolean;
   onDeleteExpense: (expenseId: string) => void;
+  onExpenseAssigned: () => void;
   canDeleteExpense: (expense: Expense) => boolean;
 }
 
 export default function ExpenseTable({
   expenses,
   total,
+  groupId,
+  isAdmin,
   onDeleteExpense,
+  onExpenseAssigned,
   canDeleteExpense,
 }: ExpenseTableProps) {
+  const [assignDialogOpen, setAssignDialogOpen] = useState(false);
+  const [selectedExpense, setSelectedExpense] = useState<Expense | null>(null);
+
+  const handleOpenAssignDialog = (expense: Expense) => {
+    setSelectedExpense(expense);
+    setAssignDialogOpen(true);
+  };
+
+  const handleCloseAssignDialog = () => {
+    setAssignDialogOpen(false);
+    setSelectedExpense(null);
+  };
+
+  const handleExpenseAssigned = () => {
+    onExpenseAssigned();
+    handleCloseAssignDialog();
+  };
+
   return (
     <Box>
       <Typography variant="h6" sx={{ mb: 2 }}>
@@ -65,6 +91,17 @@ export default function ExpenseTable({
                         : "Sin especificar"}
                     </TableCell>
                     <TableCell align="center">
+                      {isAdmin && (
+                        <Tooltip title="Asignar gasto">
+                          <IconButton
+                            size="small"
+                            color="primary"
+                            onClick={() => handleOpenAssignDialog(expense)}
+                          >
+                            <AssignmentIndIcon fontSize="small" />
+                          </IconButton>
+                        </Tooltip>
+                      )}
                       {canDeleteExpense(expense) && (
                         <Tooltip title="Eliminar gasto">
                           <IconButton
@@ -96,6 +133,14 @@ export default function ExpenseTable({
           </Box>
         </>
       )}
+
+      <AssignExpenseDialog
+        open={assignDialogOpen}
+        expense={selectedExpense}
+        groupId={groupId}
+        onClose={handleCloseAssignDialog}
+        onAssigned={handleExpenseAssigned}
+      />
     </Box>
   );
 }
