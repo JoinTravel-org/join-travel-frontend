@@ -1,6 +1,7 @@
 export interface CreateExpenseRequest {
   concept: string;
   amount: string; // String to preserve decimal precision
+  paidById?: string; // Optional: ID del usuario que pagó
 }
 
 export interface Expense {
@@ -9,9 +10,13 @@ export interface Expense {
   amount: string; // String to preserve decimal precision
   groupId: string;
   userId: string;
+  paidById?: string | null;
   user?: {
     id: string;
-    username: string;
+    email: string;
+  };
+  paidBy?: {
+    id: string;
     email: string;
   };
   createdAt: string;
