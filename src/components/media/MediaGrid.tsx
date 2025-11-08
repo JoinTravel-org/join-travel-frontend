@@ -60,17 +60,31 @@ const MediaGrid: React.FC<MediaGridProps> = ({ media }) => {
             }}
             onClick={() => handleMediaClick(item)}
           >
-            <CardMedia
-              component="img"
-              image={`${import.meta.env.VITE_BACKEND_URL || "http://localhost:8080"}/api/media/${item.id}`}
-              alt={item.filename}
-              sx={{
-                width: '100%',
-                height: '100%',
-                objectFit: 'cover',
-              }}
-              onError={handleImageError}
-            />
+            {item.mimeType.startsWith('image/') ? (
+              <CardMedia
+                component="img"
+                image={`${import.meta.env.VITE_BACKEND_URL || "http://localhost:8080"}/api/media/${item.id}`}
+                alt={item.filename}
+                sx={{
+                  width: '100%',
+                  height: '100%',
+                  objectFit: 'cover',
+                }}
+                onError={handleImageError}
+              />
+            ) : item.mimeType.startsWith('video/') ? (
+              <video
+                src={`${import.meta.env.VITE_BACKEND_URL || "http://localhost:8080"}/api/media/${item.id}`}
+                style={{
+                  width: '100%',
+                  height: '100%',
+                  objectFit: 'cover',
+                }}
+                controls
+                preload="metadata"
+                crossOrigin="anonymous"
+              />
+            ) : null}
           </Card>
         ))}
       </Box>
