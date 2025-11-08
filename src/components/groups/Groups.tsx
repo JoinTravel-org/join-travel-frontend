@@ -11,18 +11,21 @@ import {
   Typography,
   Alert,
   CircularProgress,
+  Tabs,
+  Tab,
 } from "@mui/material";
 import AddIcon from "@mui/icons-material/Add";
 import PersonAddIcon from "@mui/icons-material/PersonAdd";
+import ChatIcon from "@mui/icons-material/Chat";
 import CloseIcon from "@mui/icons-material/Close";
 import DeleteIcon from "@mui/icons-material/Delete";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../../hooks/useAuth";
 import groupService from "../../services/group.service";
-import userService from "../../services/user.service";
+import GroupExpenses from "./GroupExpenses";
 import type { Group, CreateGroupRequest } from "../../types/group";
-
-interface CreateGroupForm extends CreateGroupRequest {}
+import { AddMemberDialog } from "./AddMemberDialog";
+import { GroupChatDialog } from "./GroupChatDialog";
 
 export default function GroupPage() {
   const navigate = useNavigate();
@@ -31,19 +34,22 @@ export default function GroupPage() {
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [form, setForm] = useState<CreateGroupForm>({
+  const [form, setForm] = useState<CreateGroupRequest>({
     name: "",
     description: "",
   });
   const [groups, setGroups] = useState<Group[]>([]);
-  const [addUserOpen, setAddUserOpen] = useState<string | null>(null); // groupId or null
-  const [addUserEmail, setAddUserEmail] = useState("");
-  const [addUserLoading, setAddUserLoading] = useState(false);
-  const [addUserError, setAddUserError] = useState<string | null>(null);
+  const [addMemberDialogOpen, setAddMemberDialogOpen] = useState(false);
+  const [selectedGroup, setSelectedGroup] = useState<Group | null>(null);
+  const [chatDialogOpen, setChatDialogOpen] = useState(false);
+  const [selectedGroupForChat, setSelectedGroupForChat] =
+    useState<Group | null>(null);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [groupToDelete, setGroupToDelete] = useState<Group | null>(null);
   const [deleteLoading, setDeleteLoading] = useState(false);
   const [deleteError, setDeleteError] = useState<string | null>(null);
+  const [selectedGroupId, setSelectedGroupId] = useState<string | null>(null);
+  const [tabValue, setTabValue] = useState(0);
 
   useEffect(() => {
     if (!hasCheckedAuth.current) {
@@ -92,49 +98,69 @@ export default function GroupPage() {
       handleClose();
       // Refresh groups list after creation
       await fetchGroups();
-    } catch (err: any) {
-      setError(err.message);
+    } catch (err: unknown) {
+      if (err instanceof Error) {
+        setError(err.message);
+      } else {
+        setError("Error al crear el grupo");
+      }
     } finally {
       setLoading(false);
     }
   };
 
-  const handleAddUser = async (groupId: string) => {
-    setAddUserLoading(true);
-    setAddUserError(null);
-    try {
-      // Search for user by email
-      const searchResult = await userService.searchUsers(addUserEmail.trim());
-      const user =
-        searchResult.data && searchResult.data.length > 0
-          ? searchResult.data[0]
-          : null;
+  const handleOpenAddMemberDialog = (group: Group) => {
+    setSelectedGroup(group);
+    setAddMemberDialogOpen(true);
+  };
 
-      if (!user || !user.id) {
-        setAddUserError("El usuario no existe.");
-        setAddUserLoading(false);
-        return;
-      }
+  const handleCloseAddMemberDialog = () => {
+    setAddMemberDialogOpen(false);
+    setSelectedGroup(null);
+  };
 
-      // Add user by ID
-      await groupService.addMember(groupId, [user.id]);
-      setAddUserOpen(null);
-      setAddUserEmail("");
-      await fetchGroups(); // Refresh group list to show new member
-    } catch (err: any) {
-      setAddUserError(err.message || "No se pudo agregar el usuario.");
-    } finally {
-      setAddUserLoading(false);
-    }
+  const handleMemberAdded = async () => {
+    await fetchGroups(); // Refresh group list to show new member
   };
 
   const handleRemoveUser = async (groupId: string, userId: string) => {
     try {
       await groupService.removeMember(groupId, userId);
       await fetchGroups(); // Refresh group list after removal
-    } catch (err: any) {
-      alert(err.message || "No se pudo eliminar el usuario.");
+    } catch (err: unknown) {
+      if (err instanceof Error) {
+        alert(err.message || "No se pudo eliminar el usuario.");
+      } else {
+        alert("No se pudo eliminar el usuario.");
+      }
     }
+  };
+
+  const handleGroupClick = (groupId: string) => {
+    setSelectedGroupId(groupId);
+    setTabValue(1); // Switch to expenses tab
+  };
+
+  const handleTabChange = (_event: React.SyntheticEvent, newValue: number) => {
+    setTabValue(newValue);
+    if (newValue === 0) {
+      setSelectedGroupId(null);
+    } else if (newValue === 1) {
+      // When switching to expenses tab, show all user expenses if no group selected
+      if (!selectedGroupId) {
+        // No need to set selectedGroupId, GroupExpenses will handle null
+      }
+    }
+  };
+
+  const handleOpenChat = (group: Group) => {
+    setSelectedGroupForChat(group);
+    setChatDialogOpen(true);
+  };
+
+  const handleCloseChat = () => {
+    setChatDialogOpen(false);
+    setSelectedGroupForChat(null);
   };
 
   return (
@@ -160,168 +186,211 @@ export default function GroupPage() {
         </Button>
       </Box>
 
-      {/* No Groups Message */}
-      {groups.length === 0 ? (
-        <Box
-          sx={{
-            flex: 1,
-            display: "flex",
-            flexDirection: "column",
-            alignItems: "center",
-            justifyContent: "center",
-          }}
-        >
-          <Typography
-            variant="h6"
-            color="text.secondary"
-            textAlign="center"
-            sx={{ mb: 2 }}
-          >
-            No hay grupos creados
-          </Typography>
-          <Typography variant="body2" color="text.secondary" textAlign="center">
-            Crea un grupo para comenzar a compartir itinerarios con otros
-            viajeros
-          </Typography>
-        </Box>
-      ) : (
-        <Box sx={{ display: "flex", flexWrap: "wrap", gap: 2 }}>
-          {groups.map((group) => (
+      <Box sx={{ borderBottom: 1, borderColor: "divider", mb: 3 }}>
+        <Tabs value={tabValue} onChange={handleTabChange}>
+          <Tab label="Grupos" />
+          <Tab label="Gastos" />
+        </Tabs>
+      </Box>
+
+      {tabValue === 0 && (
+        <>
+          {/* No Groups Message */}
+          {groups.length === 0 ? (
             <Box
-              key={group.id}
               sx={{
-                position: "relative",
-                border: "1px solid #e0e0e0",
-                borderRadius: 2,
-                p: 2,
-                minWidth: 250,
-                maxWidth: 350,
-                flex: "1 1 250px",
-                background: "#fafafa",
+                flex: 1,
+                display: "flex",
+                flexDirection: "column",
+                alignItems: "center",
+                justifyContent: "center",
               }}
             >
-              <Typography variant="h6" sx={{ mb: 1 }}>
-                {group.name}
+              <Typography
+                variant="h6"
+                color="text.secondary"
+                textAlign="center"
+                sx={{ mb: 2 }}
+              >
+                No hay grupos creados
               </Typography>
-              <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
-                {group.description || "Sin descripción"}
+              <Typography
+                variant="body2"
+                color="text.secondary"
+                textAlign="center"
+              >
+                Crea un grupo para comenzar a compartir itinerarios con otros
+                viajeros
               </Typography>
-              <Typography variant="caption" color="text.secondary">
-                Admin: {group.admin?.email || group.adminId}
-              </Typography>
-
-              {/* Display group members */}
-              <Box sx={{ mt: 2 }}>
-                <Typography variant="subtitle2" sx={{ mb: 0.5 }}>
-                  Usuarios:
-                </Typography>
-                {group.members && group.members.length > 0 ? (
-                  <Box sx={{ display: "flex", flexDirection: "column", gap: 0.5 }}>
-                    {group.members
-                      ?.filter((member) => member.id !== auth.user?.id)
-                      .map((member) => (
-                        <Box
-                          key={member.id}
-                          sx={{
-                            display: "flex",
-                            alignItems: "center",
-                            pl: 1,
-                          }}
-                        >
-                          <Typography
-                            variant="body2"
-                            color="text.secondary"
-                            sx={{ flexGrow: 1 }}
-                          >
-                            • {member.email}
-                          </Typography>
-                          <Button
-                            size="small"
-                            color="error"
-                            sx={{ minWidth: 0, ml: 1 }}
-                            onClick={() => handleRemoveUser(group.id, member.id)}
-                          >
-                            <CloseIcon fontSize="small" />
-                          </Button>
-                        </Box>
-                      ))}
-                  </Box>
-                ) : (
-                  <Typography variant="body2" color="text.disabled" sx={{ pl: 1 }}>
-                    No hay usuarios agregados
-                  </Typography>
-                )}
-              </Box>
-
-              <Box sx={{ mt: 2 }}>
-                <Button
-                  size="small"
-                  variant="outlined"
-                  startIcon={<PersonAddIcon />}
-                  onClick={() => {
-                    setAddUserOpen(group.id);
-                    setAddUserEmail("");
-                    setAddUserError(null);
-                  }}
-                >
-                  Agregar usuarios
-                </Button>
-              </Box>
-              {addUserOpen === group.id && (
-                <Box sx={{ mt: 2 }}>
-                  <TextField
-                    size="small"
-                    label="Email del usuario"
-                    value={addUserEmail}
-                    onChange={(e) => setAddUserEmail(e.target.value)}
-                    disabled={addUserLoading}
-                    sx={{ mr: 1 }}
-                  />
-                  <Button
-                    size="small"
-                    variant="contained"
-                    onClick={() => handleAddUser(group.id)}
-                    disabled={addUserLoading || !addUserEmail}
-                  >
-                    {addUserLoading ? <CircularProgress size={18} /> : "Agregar"}
-                  </Button>
-                  <Button
-                    size="small"
-                    onClick={() => {
-                      setAddUserOpen(null);
-                      setAddUserEmail("");
-                      setAddUserError(null);
-                    }}
-                    sx={{ ml: 1 }}
-                  >
-                    Cancelar
-                  </Button>
-                  {addUserError && (
-                    <Alert severity="error" sx={{ mt: 1 }}>
-                      {addUserError}
-                    </Alert>
-                  )}
-                </Box>
-              )}
-
-              {/* Delete Group Button */}
-              <Box sx={{ position: "absolute", top: 8, right: 8 }}>
-                <Button
-                  size="small"
-                  color="error"
-                  onClick={() => {
-                    setGroupToDelete(group);
-                    setDeleteDialogOpen(true);
-                    setDeleteError(null);
-                  }}
-                  sx={{ minWidth: 0, p: 0 }}
-                >
-                  <DeleteIcon />
-                </Button>
-              </Box>
             </Box>
-          ))}
-        </Box>
+          ) : (
+            <Box sx={{ display: "flex", flexWrap: "wrap", gap: 2 }}>
+              {groups.map((group) => (
+                <Box
+                  key={group.id}
+                  sx={{
+                    position: "relative",
+                    border: "1px solid #e0e0e0",
+                    borderRadius: 2,
+                    p: 2,
+                    minWidth: 250,
+                    maxWidth: 350,
+                    flex: "1 1 250px",
+                    background: "#fafafa",
+                    cursor: "pointer",
+                    "&:hover": {
+                      background: "#f5f5f5",
+                      boxShadow: 1,
+                    },
+                  }}
+                  onClick={(e) => {
+                    // Prevent navigation to expenses if clicking on interactive elements
+                    if (
+                      (e.target as HTMLElement).closest(
+                        "button, input, textarea, select"
+                      )
+                    ) {
+                      e.stopPropagation();
+                      return;
+                    }
+                    handleGroupClick(group.id);
+                  }}
+                >
+                  <Typography variant="h6" sx={{ mb: 1 }}>
+                    {group.name}
+                  </Typography>
+                  <Typography
+                    variant="body2"
+                    color="text.secondary"
+                    sx={{ mb: 1 }}
+                  >
+                    {group.description || "Sin descripción"}
+                  </Typography>
+                  <Typography variant="caption" color="text.secondary">
+                    Admin: {group.admin?.email || group.adminId}
+                  </Typography>
+
+                  {/* Display group members */}
+                  <Box sx={{ mt: 2 }}>
+                    <Typography variant="subtitle2" sx={{ mb: 0.5 }}>
+                      Usuarios:
+                    </Typography>
+                    {group.members && group.members.length > 0 ? (
+                      <Box
+                        sx={{
+                          display: "flex",
+                          flexDirection: "column",
+                          gap: 0.5,
+                        }}
+                      >
+                        {group.members
+                          ?.filter((member) => member.id !== auth.user?.id)
+                          .map((member) => (
+                            <Box
+                              key={member.id}
+                              sx={{
+                                display: "flex",
+                                alignItems: "center",
+                                pl: 1,
+                              }}
+                            >
+                              <Typography
+                                variant="body2"
+                                color="text.secondary"
+                                sx={{ flexGrow: 1 }}
+                              >
+                                • {member.email}
+                              </Typography>
+                              <Button
+                                size="small"
+                                color="error"
+                                sx={{ minWidth: 0, ml: 1 }}
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  handleRemoveUser(group.id, member.id);
+                                }}
+                              >
+                                <CloseIcon fontSize="small" />
+                              </Button>
+                            </Box>
+                          ))}
+                      </Box>
+                    ) : (
+                      <Typography
+                        variant="body2"
+                        color="text.disabled"
+                        sx={{ pl: 1 }}
+                      >
+                        No hay usuarios agregados
+                      </Typography>
+                    )}
+                  </Box>
+
+                  <Box sx={{ mt: 2, display: "flex", gap: 1 }}>
+                    {/* Only show add members button if current user is admin */}
+                    {group.adminId === auth.user?.id && (
+                      <Button
+                        size="small"
+                        variant="outlined"
+                        startIcon={<PersonAddIcon />}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleOpenAddMemberDialog(group);
+                        }}
+                      >
+                        Agregar usuarios
+                      </Button>
+                    )}
+                    <Button
+                      size="small"
+                      variant="contained"
+                      color="primary"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setSelectedGroupId(group.id);
+                        setTabValue(1);
+                      }}
+                    >
+                      Ver Gastos
+                    </Button>
+                    <Button
+                      size="small"
+                      variant="contained"
+                      color="secondary"
+                      startIcon={<ChatIcon />}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleOpenChat(group);
+                      }}
+                    >
+                      Chat
+                    </Button>
+                  </Box>
+
+                  {/* Delete Group Button */}
+                  <Box sx={{ position: "absolute", top: 8, right: 8 }}>
+                    <Button
+                      size="small"
+                      color="error"
+                      onClick={() => {
+                        setGroupToDelete(group);
+                        setDeleteDialogOpen(true);
+                        setDeleteError(null);
+                      }}
+                      sx={{ minWidth: 0, p: 0 }}
+                    >
+                      <DeleteIcon />
+                    </Button>
+                  </Box>
+                </Box>
+              ))}
+            </Box>
+          )}
+        </>
+      )}
+
+      {tabValue === 1 && (
+        <GroupExpenses groupId={selectedGroupId || undefined} />
       )}
 
       {/* Create Group Dialog */}
@@ -383,7 +452,10 @@ export default function GroupPage() {
       </Dialog>
 
       {/* Delete Group Dialog */}
-      <Dialog open={deleteDialogOpen} onClose={() => setDeleteDialogOpen(false)}>
+      <Dialog
+        open={deleteDialogOpen}
+        onClose={() => setDeleteDialogOpen(false)}
+      >
         <DialogTitle>Eliminar grupo</DialogTitle>
         <DialogContent>
           <Typography>
@@ -409,8 +481,14 @@ export default function GroupPage() {
                 setDeleteDialogOpen(false);
                 setGroupToDelete(null);
                 await fetchGroups();
-              } catch (err: any) {
-                setDeleteError(err.message || "No se pudo eliminar el grupo.");
+              } catch (err: unknown) {
+                if (err instanceof Error) {
+                  setDeleteError(
+                    err.message || "No se pudo eliminar el grupo."
+                  );
+                } else {
+                  setDeleteError("No se pudo eliminar el grupo.");
+                }
               } finally {
                 setDeleteLoading(false);
               }
@@ -421,6 +499,28 @@ export default function GroupPage() {
           </Button>
         </DialogActions>
       </Dialog>
+
+      {/* Add Member Dialog */}
+      {selectedGroup && (
+        <AddMemberDialog
+          open={addMemberDialogOpen}
+          onClose={handleCloseAddMemberDialog}
+          groupId={selectedGroup.id}
+          groupName={selectedGroup.name}
+          currentMembers={selectedGroup.members || []}
+          onMemberAdded={handleMemberAdded}
+        />
+      )}
+
+      {/* Group Chat Dialog */}
+      {selectedGroupForChat && (
+        <GroupChatDialog
+          open={chatDialogOpen}
+          onClose={handleCloseChat}
+          groupId={selectedGroupForChat.id}
+          groupName={selectedGroupForChat.name}
+        />
+      )}
     </Container>
   );
 }

@@ -1,5 +1,10 @@
 import apiService from "./api.service";
-import type { UserStatsResponse, MilestonesResponse, User, UserMediaResponse } from "../types/user";
+import type {
+  UserStatsResponse,
+  MilestonesResponse,
+  User,
+  UserMediaResponse,
+} from "../types/user";
 
 /**
  * Servicio para manejar estadísticas y niveles de usuario
@@ -27,7 +32,10 @@ class UserService {
    * @param action - Tipo de acción (e.g., 'review_created', 'vote_received')
    * @returns Promise con respuesta de actualización
    */
-  async updateUserPoints(userId: string, action: string): Promise<UserStatsResponse> {
+  async updateUserPoints(
+    userId: string,
+    action: string
+  ): Promise<UserStatsResponse> {
     try {
       const response = await apiService
         .getAxiosInstance()
@@ -59,7 +67,9 @@ class UserService {
    * @param email - Email a buscar
    * @returns Promise con la lista de usuarios encontrados
    */
-  async searchUsers(email: string): Promise<{ success: boolean; data?: User[]; message?: string }> {
+  async searchUsers(
+    email: string
+  ): Promise<{ success: boolean; data?: User[]; message?: string }> {
     const response = await apiService
       .getAxiosInstance()
       .get(`/users/search`, { params: { email } });
@@ -67,11 +77,37 @@ class UserService {
   }
 
   /**
+   * Busca un usuario específico por email
+   * @param email - Email del usuario
+   * @returns Promise con el usuario encontrado
+   */
+  async getUserByEmail(email: string): Promise<User> {
+    try {
+      const response = await apiService
+        .getAxiosInstance()
+        .get(`/users/email/${email}`);
+
+      if (!response.data.success || !response.data.data) {
+        throw new Error("Usuario no encontrado");
+      }
+
+      return response.data.data;
+    } catch (error: unknown) {
+      if (error instanceof Error) {
+        throw new Error(error.message || "Usuario no encontrado");
+      }
+      throw new Error("Usuario no encontrado");
+    }
+  }
+
+  /**
    * Obtiene información básica de un usuario por ID
    * @param userId - ID del usuario
    * @returns Promise con la información del usuario
    */
-  async getUserById(userId: string): Promise<{ success: boolean; data?: User; message?: string }> {
+  async getUserById(
+    userId: string
+  ): Promise<{ success: boolean; data?: User; message?: string }> {
     const response = await apiService
       .getAxiosInstance()
       .get(`/users/${userId}`);
