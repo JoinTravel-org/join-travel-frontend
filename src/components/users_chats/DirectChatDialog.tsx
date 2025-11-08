@@ -18,7 +18,6 @@ import { AuthContext } from "../../contexts/AuthContext";
 import directMessageService, {
   type DirectMessage,
 } from "../../services/directMessage.service";
-import socketService from "../../services/socket.service";
 
 interface DirectChatDialogProps {
   open: boolean;
@@ -81,8 +80,8 @@ export const DirectChatDialog: React.FC<DirectChatDialogProps> = ({
 
     setSending(true);
     const messageToSend = newMessage;
-    setNewMessage('');
-    
+    setNewMessage("");
+
     try {
       const response = await directMessageService.sendMessage(
         otherUserId,

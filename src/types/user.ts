@@ -16,6 +16,7 @@ export interface UserStats {
 export interface User {
   id: string;
   email: string;
+  name?: string;
   isEmailConfirmed: boolean;
   createdAt: string;
   updatedAt: string;
@@ -36,7 +37,7 @@ export interface Milestone {
   progress: number; // Current progress (e.g., 0-100 or count)
   target: number; // Target to complete (e.g., 100 or 5)
   isCompleted: boolean;
-  category: 'badge' | 'level'; // What it leads to
+  category: "badge" | "level"; // What it leads to
   badgeName?: string; // If category is badge
   levelRequired?: number; // If category is level
   instructions: string[]; // Step-by-step instructions
