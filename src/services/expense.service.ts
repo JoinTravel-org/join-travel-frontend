@@ -37,22 +37,23 @@ class ExpenseService {
     }
 
     /**
-     * Obtiene todos los gastos de un grupo
-     * @param groupId - ID del grupo
+     * Obtiene todos los gastos de un grupo o todos los gastos del usuario
+     * @param groupId - ID del grupo (opcional, si no se pasa obtiene todos los gastos del usuario)
      * @returns Promise con la lista de gastos y total
      */
-    async getGroupExpenses(groupId: string): Promise<GroupExpensesResponse> {
+    async getGroupExpenses(groupId?: string): Promise<GroupExpensesResponse> {
         try {
+            const url = groupId ? `/groups/${groupId}/expenses` : '/expenses/user';
             const response = await apiService
                 .getAxiosInstance()
-                .get(`/groups/${groupId}/expenses`);
+                .get(url);
             return response.data;
         } catch (error: any) {
             if (error.response?.status === 403) {
-                throw new Error('No tienes permisos para ver los gastos de este grupo.');
+                throw new Error('No tienes permisos para ver los gastos.');
             }
             if (error.response?.status === 404) {
-                throw new Error('Grupo no encontrado.');
+                throw new Error('Recurso no encontrado.');
             }
             throw new Error('Error al obtener los gastos. Por favor intente nuevamente.');
         }

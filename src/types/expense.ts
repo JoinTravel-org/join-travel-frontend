@@ -14,6 +14,10 @@ export interface Expense {
     username: string;
     email: string;
   };
+  group?: {
+    id: string;
+    name: string;
+  };
   createdAt: string;
   updatedAt: string;
 }

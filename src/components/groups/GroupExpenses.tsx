@@ -7,7 +7,7 @@ import AddExpenseForm from '../expenses/AddExpenseForm';
 import type { Expense } from '../../types/expense';
 
 interface GroupExpensesProps {
-  groupId: string;
+  groupId?: string; // Optional now
 }
 
 export default function GroupExpenses({ groupId }: GroupExpensesProps) {
@@ -81,15 +81,18 @@ export default function GroupExpenses({ groupId }: GroupExpensesProps) {
         Gastos del Grupo
       </Typography>
 
-      <Box sx={{ mb: 3 }}>
-        <AddExpenseForm groupId={groupId} onExpenseAdded={handleExpenseAdded} />
-      </Box>
+      {groupId && (
+        <Box sx={{ mb: 3 }}>
+          <AddExpenseForm groupId={groupId} onExpenseAdded={handleExpenseAdded} />
+        </Box>
+      )}
 
       <ExpenseTable
         expenses={expenses}
         total={total}
         onDeleteExpense={handleDeleteExpense}
         canDeleteExpense={canDeleteExpense}
+        showGroupColumn={!groupId}
       />
     </Container>
   );

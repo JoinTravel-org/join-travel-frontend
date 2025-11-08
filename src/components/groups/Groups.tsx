@@ -151,6 +151,11 @@ export default function GroupPage() {
     setTabValue(newValue);
     if (newValue === 0) {
       setSelectedGroupId(null);
+    } else if (newValue === 1) {
+      // When switching to expenses tab, show all user expenses if no group selected
+      if (!selectedGroupId) {
+        // No need to set selectedGroupId, GroupExpenses will handle null
+      }
     }
   };
 
@@ -180,10 +185,7 @@ export default function GroupPage() {
       <Box sx={{ borderBottom: 1, borderColor: 'divider', mb: 3 }}>
         <Tabs value={tabValue} onChange={handleTabChange}>
           <Tab label="Grupos" />
-          <Tab
-            label={selectedGroupId ? `Gastos de ${groups.find(g => g.id === selectedGroupId)?.name || 'Grupo'}` : "Gastos"}
-            disabled={!selectedGroupId}
-          />
+          <Tab label="Gastos" />
         </Tabs>
       </Box>
 
@@ -298,7 +300,7 @@ export default function GroupPage() {
                     )}
                   </Box>
 
-                  <Box sx={{ mt: 2 }}>
+                  <Box sx={{ mt: 2, display: 'flex', gap: 1 }}>
                     <Button
                       size="small"
                       variant="outlined"
@@ -311,6 +313,18 @@ export default function GroupPage() {
                       }}
                     >
                       Agregar usuarios
+                    </Button>
+                    <Button
+                      size="small"
+                      variant="contained"
+                      color="primary"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setSelectedGroupId(group.id);
+                        setTabValue(1);
+                      }}
+                    >
+                      Ver Gastos
                     </Button>
                   </Box>
                   {addUserOpen === group.id && (
@@ -372,8 +386,8 @@ export default function GroupPage() {
         </>
       )}
 
-      {tabValue === 1 && selectedGroupId && (
-        <GroupExpenses groupId={selectedGroupId} />
+      {tabValue === 1 && (
+        <GroupExpenses groupId={selectedGroupId || undefined} />
       )}
 
       {/* Create Group Dialog */}

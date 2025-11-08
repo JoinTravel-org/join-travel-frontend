@@ -20,6 +20,7 @@ interface ExpenseTableProps {
   total: string;
   onDeleteExpense: (expenseId: string) => void;
   canDeleteExpense: (expense: Expense) => boolean;
+  showGroupColumn?: boolean;
 }
 
 export default function ExpenseTable({
@@ -27,11 +28,12 @@ export default function ExpenseTable({
   total,
   onDeleteExpense,
   canDeleteExpense,
+  showGroupColumn = false,
 }: ExpenseTableProps) {
   return (
     <Box>
       <Typography variant="h6" sx={{ mb: 2 }}>
-        Gastos del Grupo
+        {showGroupColumn ? 'Todos mis Gastos' : 'Gastos del Grupo'}
       </Typography>
 
       {expenses.length === 0 ? (
@@ -45,6 +47,7 @@ export default function ExpenseTable({
               <TableHead>
                 <TableRow>
                   <TableCell>Concepto</TableCell>
+                  {showGroupColumn && <TableCell>Grupo</TableCell>}
                   <TableCell align="right">Monto</TableCell>
                   <TableCell>Responsable</TableCell>
                   <TableCell align="center">Acciones</TableCell>
@@ -54,6 +57,11 @@ export default function ExpenseTable({
                 {expenses.map((expense) => (
                   <TableRow key={expense.id}>
                     <TableCell>{expense.concept}</TableCell>
+                    {showGroupColumn && (
+                      <TableCell>
+                        {expense.group?.name || 'Grupo desconocido'}
+                      </TableCell>
+                    )}
                     <TableCell align="right">${expense.amount}</TableCell>
                     <TableCell>
                       {expense.user?.username || expense.user?.email || 'Usuario desconocido'}
