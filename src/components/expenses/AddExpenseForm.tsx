@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import {
   Button,
   TextField,
@@ -8,14 +8,9 @@ import {
   DialogActions,
   Alert,
   CircularProgress,
-  MenuItem,
-  FormControl,
-  InputLabel,
-  Select,
 } from "@mui/material";
 import AddIcon from "@mui/icons-material/Add";
 import type { CreateExpenseRequest } from "../../types/expense";
-import type { User } from "../../types/user";
 
 interface AddExpenseFormProps {
   groupId: string;
@@ -28,55 +23,18 @@ export default function AddExpenseForm({
 }: AddExpenseFormProps) {
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [loadingMembers, setLoadingMembers] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [members, setMembers] = useState<User[]>([]);
   const [form, setForm] = useState<CreateExpenseRequest>({
     concept: "",
     amount: "",
-    paidById: undefined,
   });
 
   const handleOpen = () => setOpen(true);
   const handleClose = () => {
     setOpen(false);
     setError(null);
-    setForm({ concept: "", amount: "", paidById: undefined });
+    setForm({ concept: "", amount: "" });
   };
-
-  // Cargar miembros del grupo cuando se abre el diálogo
-  useEffect(() => {
-    const loadMembers = async () => {
-      if (!open) return;
-
-      setLoadingMembers(true);
-      try {
-        const { default: groupService } = await import(
-          "../../services/group.service"
-        );
-        const response = await groupService.getGroupById(groupId);
-
-        if (response.success && response.data.members) {
-          // Incluir al admin si no está en la lista de miembros
-          const allMembers = [...response.data.members];
-          if (
-            response.data.admin &&
-            !allMembers.some((m) => m.id === response.data.admin?.id)
-          ) {
-            allMembers.push(response.data.admin);
-          }
-          setMembers(allMembers);
-        }
-      } catch (err) {
-        console.error("Error loading group members:", err);
-        setError("Error al cargar los miembros del grupo");
-      } finally {
-        setLoadingMembers(false);
-      }
-    };
-
-    loadMembers();
-  }, [open, groupId]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -97,14 +55,6 @@ export default function AddExpenseForm({
     setForm({
       ...form,
       [name]: value,
-    });
-    setError(null);
-  };
-
-  const handleSelectChange = (value: string) => {
-    setForm({
-      ...form,
-      paidById: value || undefined,
     });
     setError(null);
   };
@@ -194,27 +144,7 @@ export default function AddExpenseForm({
                 inputMode: "decimal",
                 pattern: "[0-9]*[.,]?[0-9]*",
               }}
-              sx={{ mb: 2 }}
             />
-            <FormControl fullWidth margin="dense">
-              <InputLabel id="paid-by-label">Pagado por</InputLabel>
-              <Select
-                labelId="paid-by-label"
-                value={form.paidById || ""}
-                label="Pagado por"
-                onChange={(e) => handleSelectChange(e.target.value)}
-                disabled={loadingMembers}
-              >
-                <MenuItem value="">
-                  <em>Sin especificar</em>
-                </MenuItem>
-                {members.map((member) => (
-                  <MenuItem key={member.id} value={member.id}>
-                    {member.email}
-                  </MenuItem>
-                ))}
-              </Select>
-            </FormControl>
           </DialogContent>
           <DialogActions>
             <Button onClick={handleClose}>Cancelar</Button>

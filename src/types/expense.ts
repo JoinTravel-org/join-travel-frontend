@@ -1,7 +1,10 @@
 export interface CreateExpenseRequest {
   concept: string;
   amount: string; // String to preserve decimal precision
-  paidById?: string; // Optional: ID del usuario que pagó
+}
+
+export interface AssignExpenseRequest {
+  paidById: string;
 }
 
 export interface Expense {
