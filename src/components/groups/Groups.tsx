@@ -41,7 +41,8 @@ export default function GroupPage() {
   const [addUserLoading, setAddUserLoading] = useState(false);
   const [addUserError, setAddUserError] = useState<string | null>(null);
   const [chatDialogOpen, setChatDialogOpen] = useState(false);
-  const [selectedGroupForChat, setSelectedGroupForChat] = useState<Group | null>(null);
+  const [selectedGroupForChat, setSelectedGroupForChat] =
+    useState<Group | null>(null);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [groupToDelete, setGroupToDelete] = useState<Group | null>(null);
   const [deleteLoading, setDeleteLoading] = useState(false);
@@ -240,7 +241,9 @@ export default function GroupPage() {
                   Usuarios:
                 </Typography>
                 {group.members && group.members.length > 0 ? (
-                  <Box sx={{ display: "flex", flexDirection: "column", gap: 0.5 }}>
+                  <Box
+                    sx={{ display: "flex", flexDirection: "column", gap: 0.5 }}
+                  >
                     {group.members
                       ?.filter((member) => member.id !== auth.user?.id)
                       .map((member) => (
@@ -263,7 +266,9 @@ export default function GroupPage() {
                             size="small"
                             color="error"
                             sx={{ minWidth: 0, ml: 1 }}
-                            onClick={() => handleRemoveUser(group.id, member.id)}
+                            onClick={() =>
+                              handleRemoveUser(group.id, member.id)
+                            }
                           >
                             <CloseIcon fontSize="small" />
                           </Button>
@@ -271,7 +276,11 @@ export default function GroupPage() {
                       ))}
                   </Box>
                 ) : (
-                  <Typography variant="body2" color="text.disabled" sx={{ pl: 1 }}>
+                  <Typography
+                    variant="body2"
+                    color="text.disabled"
+                    sx={{ pl: 1 }}
+                  >
                     No hay usuarios agregados
                   </Typography>
                 )}
@@ -322,7 +331,11 @@ export default function GroupPage() {
                     onClick={() => handleAddUser(group.id)}
                     disabled={addUserLoading || !addUserEmail}
                   >
-                    {addUserLoading ? <CircularProgress size={18} /> : "Agregar"}
+                    {addUserLoading ? (
+                      <CircularProgress size={18} />
+                    ) : (
+                      "Agregar"
+                    )}
                   </Button>
                   <Button
                     size="small"
@@ -422,7 +435,10 @@ export default function GroupPage() {
       </Dialog>
 
       {/* Delete Group Dialog */}
-      <Dialog open={deleteDialogOpen} onClose={() => setDeleteDialogOpen(false)}>
+      <Dialog
+        open={deleteDialogOpen}
+        onClose={() => setDeleteDialogOpen(false)}
+      >
         <DialogTitle>Eliminar grupo</DialogTitle>
         <DialogContent>
           <Typography>
@@ -450,7 +466,9 @@ export default function GroupPage() {
                 await fetchGroups();
               } catch (err: unknown) {
                 if (err instanceof Error) {
-                  setDeleteError(err.message || "No se pudo eliminar el grupo.");
+                  setDeleteError(
+                    err.message || "No se pudo eliminar el grupo."
+                  );
                 } else {
                   setDeleteError("No se pudo eliminar el grupo.");
                 }

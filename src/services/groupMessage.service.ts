@@ -25,8 +25,10 @@ class GroupMessageService {
         .post(`/groups/${groupId}/messages`, data);
       return response.data;
     } catch (error: unknown) {
-      if (error instanceof Error && 'response' in error) {
-        const axiosError = error as { response?: { status?: number; data?: { message?: string } } };
+      if (error instanceof Error && "response" in error) {
+        const axiosError = error as {
+          response?: { status?: number; data?: { message?: string } };
+        };
         if (axiosError.response?.status === 404) {
           throw new Error("El grupo ya no existe.");
         }
@@ -37,7 +39,9 @@ class GroupMessageService {
           throw new Error(axiosError.response.data.message);
         }
       }
-      throw new Error("Error al enviar el mensaje. Por favor intente nuevamente.");
+      throw new Error(
+        "Error al enviar el mensaje. Por favor intente nuevamente."
+      );
     }
   }
 
@@ -61,8 +65,10 @@ class GroupMessageService {
         });
       return response.data;
     } catch (error: unknown) {
-      if (error instanceof Error && 'response' in error) {
-        const axiosError = error as { response?: { status?: number; data?: { message?: string } } };
+      if (error instanceof Error && "response" in error) {
+        const axiosError = error as {
+          response?: { status?: number; data?: { message?: string } };
+        };
         if (axiosError.response?.status === 404) {
           throw new Error("El grupo ya no existe.");
         }

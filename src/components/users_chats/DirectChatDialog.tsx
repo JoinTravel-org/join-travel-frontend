@@ -80,8 +80,8 @@ export const DirectChatDialog: React.FC<DirectChatDialogProps> = ({
 
     setSending(true);
     const messageToSend = newMessage;
-    setNewMessage('');
-    
+    setNewMessage("");
+
     try {
       const response = await directMessageService.sendMessage(
         otherUserId,

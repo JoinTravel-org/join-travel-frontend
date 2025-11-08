@@ -218,9 +218,7 @@ export const GroupChatDialog: React.FC<GroupChatDialogProps> = ({
                     sx={{
                       p: 1.5,
                       maxWidth: "70%",
-                      backgroundColor: isOwnMessage
-                        ? "#1976d2"
-                        : "#e0e0e0",
+                      backgroundColor: isOwnMessage ? "#1976d2" : "#e0e0e0",
                       color: isOwnMessage ? "#ffffff" : "#000000",
                       borderRadius: isOwnMessage
                         ? "12px 12px 2px 12px"

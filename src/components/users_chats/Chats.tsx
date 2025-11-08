@@ -84,7 +84,11 @@ const Chats: React.FC = () => {
         const groupsWithLastMessage = await Promise.all(
           response.data.map(async (group) => {
             try {
-              const messages = await groupMessageService.getMessages(group.id, 1, 0);
+              const messages = await groupMessageService.getMessages(
+                group.id,
+                1,
+                0
+              );
               const lastMsg = messages.data?.messages[0];
               return {
                 ...group,
@@ -177,7 +181,11 @@ const Chats: React.FC = () => {
           indicatorColor="primary"
           textColor="primary"
         >
-          <Tab label="Mensajes Directos" icon={<PersonIcon />} iconPosition="start" />
+          <Tab
+            label="Mensajes Directos"
+            icon={<PersonIcon />}
+            iconPosition="start"
+          />
           <Tab label="Grupos" icon={<GroupIcon />} iconPosition="start" />
         </Tabs>
       </Paper>
@@ -262,7 +270,9 @@ const Chats: React.FC = () => {
                                   conversation.unreadCount > 0 ? 500 : 400,
                               }}
                             >
-                              {truncateMessage(conversation.lastMessage.content)}
+                              {truncateMessage(
+                                conversation.lastMessage.content
+                              )}
                             </Typography>
                             <Typography
                               variant="caption"
@@ -282,87 +292,89 @@ const Chats: React.FC = () => {
             </List>
           </Paper>
         )
+      ) : // Groups Tab
+      groups.length === 0 ? (
+        <Paper sx={{ p: 4, textAlign: "center" }}>
+          <Typography variant="h6" color="text.secondary" gutterBottom>
+            No eres miembro de ningún grupo
+          </Typography>
+          <Typography variant="body2" color="text.secondary">
+            Crea o únete a un grupo para chatear con varios miembros
+          </Typography>
+        </Paper>
       ) : (
-        // Groups Tab
-        groups.length === 0 ? (
-          <Paper sx={{ p: 4, textAlign: "center" }}>
-            <Typography variant="h6" color="text.secondary" gutterBottom>
-              No eres miembro de ningún grupo
-            </Typography>
-            <Typography variant="body2" color="text.secondary">
-              Crea o únete a un grupo para chatear con varios miembros
-            </Typography>
-          </Paper>
-        ) : (
-          <Paper elevation={2}>
-            <List sx={{ p: 0 }}>
-              {groups.map((group, index) => (
-                <React.Fragment key={group.id}>
-                  <ListItem disablePadding>
-                    <ListItemButton
-                      onClick={() => handleGroupClick(group)}
-                      sx={{
-                        py: 2,
-                        px: 3,
-                        "&:hover": {
-                          backgroundColor: "action.hover",
-                        },
-                      }}
-                    >
-                      <ListItemAvatar>
-                        <Avatar sx={{ bgcolor: "secondary.main" }}>
-                          <GroupIcon />
-                        </Avatar>
-                      </ListItemAvatar>
-                      <ListItemText
-                        primary={
-                          <Typography variant="subtitle1">
-                            {group.name}
-                          </Typography>
-                        }
-                        secondary={
-                          <Box
+        <Paper elevation={2}>
+          <List sx={{ p: 0 }}>
+            {groups.map((group, index) => (
+              <React.Fragment key={group.id}>
+                <ListItem disablePadding>
+                  <ListItemButton
+                    onClick={() => handleGroupClick(group)}
+                    sx={{
+                      py: 2,
+                      px: 3,
+                      "&:hover": {
+                        backgroundColor: "action.hover",
+                      },
+                    }}
+                  >
+                    <ListItemAvatar>
+                      <Avatar sx={{ bgcolor: "secondary.main" }}>
+                        <GroupIcon />
+                      </Avatar>
+                    </ListItemAvatar>
+                    <ListItemText
+                      primary={
+                        <Typography variant="subtitle1">
+                          {group.name}
+                        </Typography>
+                      }
+                      secondary={
+                        <Box
+                          sx={{
+                            display: "flex",
+                            justifyContent: "space-between",
+                            alignItems: "center",
+                            mt: 0.5,
+                          }}
+                        >
+                          <Typography
+                            variant="body2"
+                            color="text.secondary"
                             sx={{
-                              display: "flex",
-                              justifyContent: "space-between",
-                              alignItems: "center",
-                              mt: 0.5,
+                              flex: 1,
+                              overflow: "hidden",
+                              textOverflow: "ellipsis",
+                              whiteSpace: "nowrap",
                             }}
                           >
+                            {group.lastMessage
+                              ? `${
+                                  group.lastMessage.senderEmail
+                                }: ${truncateMessage(
+                                  group.lastMessage.content
+                                )}`
+                              : "Sin mensajes aún"}
+                          </Typography>
+                          {group.lastMessage && (
                             <Typography
-                              variant="body2"
+                              variant="caption"
                               color="text.secondary"
-                              sx={{
-                                flex: 1,
-                                overflow: "hidden",
-                                textOverflow: "ellipsis",
-                                whiteSpace: "nowrap",
-                              }}
+                              sx={{ ml: 2, flexShrink: 0 }}
                             >
-                              {group.lastMessage
-                                ? `${group.lastMessage.senderEmail}: ${truncateMessage(group.lastMessage.content)}`
-                                : "Sin mensajes aún"}
+                              {formatTime(group.lastMessage.createdAt)}
                             </Typography>
-                            {group.lastMessage && (
-                              <Typography
-                                variant="caption"
-                                color="text.secondary"
-                                sx={{ ml: 2, flexShrink: 0 }}
-                              >
-                                {formatTime(group.lastMessage.createdAt)}
-                              </Typography>
-                            )}
-                          </Box>
-                        }
-                      />
-                    </ListItemButton>
-                  </ListItem>
-                  {index < groups.length - 1 && <Divider />}
-                </React.Fragment>
-              ))}
-            </List>
-          </Paper>
-        )
+                          )}
+                        </Box>
+                      }
+                    />
+                  </ListItemButton>
+                </ListItem>
+                {index < groups.length - 1 && <Divider />}
+              </React.Fragment>
+            ))}
+          </List>
+        </Paper>
       )}
 
       {/* Direct Chat Dialog */}
