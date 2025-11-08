@@ -14,6 +14,7 @@ import {
 } from "@mui/material";
 import AddIcon from "@mui/icons-material/Add";
 import PersonAddIcon from "@mui/icons-material/PersonAdd";
+import ChatIcon from "@mui/icons-material/Chat";
 import CloseIcon from "@mui/icons-material/Close";
 import DeleteIcon from "@mui/icons-material/Delete";
 import { useNavigate } from "react-router-dom";
@@ -21,8 +22,7 @@ import { useAuth } from "../../hooks/useAuth";
 import groupService from "../../services/group.service";
 import userService from "../../services/user.service";
 import type { Group, CreateGroupRequest } from "../../types/group";
-
-interface CreateGroupForm extends CreateGroupRequest {}
+import { GroupChatDialog } from "./GroupChatDialog";
 
 export default function GroupPage() {
   const navigate = useNavigate();
@@ -31,7 +31,7 @@ export default function GroupPage() {
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [form, setForm] = useState<CreateGroupForm>({
+  const [form, setForm] = useState<CreateGroupRequest>({
     name: "",
     description: "",
   });
@@ -40,6 +40,8 @@ export default function GroupPage() {
   const [addUserEmail, setAddUserEmail] = useState("");
   const [addUserLoading, setAddUserLoading] = useState(false);
   const [addUserError, setAddUserError] = useState<string | null>(null);
+  const [chatDialogOpen, setChatDialogOpen] = useState(false);
+  const [selectedGroupForChat, setSelectedGroupForChat] = useState<Group | null>(null);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [groupToDelete, setGroupToDelete] = useState<Group | null>(null);
   const [deleteLoading, setDeleteLoading] = useState(false);
@@ -92,8 +94,12 @@ export default function GroupPage() {
       handleClose();
       // Refresh groups list after creation
       await fetchGroups();
-    } catch (err: any) {
-      setError(err.message);
+    } catch (err: unknown) {
+      if (err instanceof Error) {
+        setError(err.message);
+      } else {
+        setError("Error al crear el grupo");
+      }
     } finally {
       setLoading(false);
     }
@@ -121,8 +127,12 @@ export default function GroupPage() {
       setAddUserOpen(null);
       setAddUserEmail("");
       await fetchGroups(); // Refresh group list to show new member
-    } catch (err: any) {
-      setAddUserError(err.message || "No se pudo agregar el usuario.");
+    } catch (err: unknown) {
+      if (err instanceof Error) {
+        setAddUserError(err.message || "No se pudo agregar el usuario.");
+      } else {
+        setAddUserError("No se pudo agregar el usuario.");
+      }
     } finally {
       setAddUserLoading(false);
     }
@@ -132,9 +142,23 @@ export default function GroupPage() {
     try {
       await groupService.removeMember(groupId, userId);
       await fetchGroups(); // Refresh group list after removal
-    } catch (err: any) {
-      alert(err.message || "No se pudo eliminar el usuario.");
+    } catch (err: unknown) {
+      if (err instanceof Error) {
+        alert(err.message || "No se pudo eliminar el usuario.");
+      } else {
+        alert("No se pudo eliminar el usuario.");
+      }
     }
+  };
+
+  const handleOpenChat = (group: Group) => {
+    setSelectedGroupForChat(group);
+    setChatDialogOpen(true);
+  };
+
+  const handleCloseChat = () => {
+    setChatDialogOpen(false);
+    setSelectedGroupForChat(null);
   };
 
   return (
@@ -267,6 +291,21 @@ export default function GroupPage() {
                   Agregar usuarios
                 </Button>
               </Box>
+
+              {/* Chat Button */}
+              <Box sx={{ mt: 2 }}>
+                <Button
+                  size="small"
+                  variant="contained"
+                  color="primary"
+                  startIcon={<ChatIcon />}
+                  onClick={() => handleOpenChat(group)}
+                  fullWidth
+                >
+                  Abrir Chat
+                </Button>
+              </Box>
+
               {addUserOpen === group.id && (
                 <Box sx={{ mt: 2 }}>
                   <TextField
@@ -409,8 +448,12 @@ export default function GroupPage() {
                 setDeleteDialogOpen(false);
                 setGroupToDelete(null);
                 await fetchGroups();
-              } catch (err: any) {
-                setDeleteError(err.message || "No se pudo eliminar el grupo.");
+              } catch (err: unknown) {
+                if (err instanceof Error) {
+                  setDeleteError(err.message || "No se pudo eliminar el grupo.");
+                } else {
+                  setDeleteError("No se pudo eliminar el grupo.");
+                }
               } finally {
                 setDeleteLoading(false);
               }
@@ -421,6 +464,16 @@ export default function GroupPage() {
           </Button>
         </DialogActions>
       </Dialog>
+
+      {/* Group Chat Dialog */}
+      {selectedGroupForChat && (
+        <GroupChatDialog
+          open={chatDialogOpen}
+          onClose={handleCloseChat}
+          groupId={selectedGroupForChat.id}
+          groupName={selectedGroupForChat.name}
+        />
+      )}
     </Container>
   );
 }
