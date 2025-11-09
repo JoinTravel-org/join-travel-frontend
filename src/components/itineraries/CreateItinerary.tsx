@@ -15,6 +15,8 @@ import {
     IconButton,
     Popover,
     Chip,
+    Backdrop,
+    Snackbar,
 } from '@mui/material';
 import CloseIcon from '@mui/icons-material/Close';
 import EditIcon from '@mui/icons-material/Edit';
@@ -148,7 +150,9 @@ const CreateItinerary: React.FC = () => {
     const [loading, setLoading] = useState(false);
     const [loadingItinerary, setLoadingItinerary] = useState(false);
     const [error, setError] = useState<string | null>(null);
-    const [success, setSuccess] = useState(false);
+    const [successSnackbarOpen, setSuccessSnackbarOpen] = useState(false);
+    const [isProcessingSuccess, setIsProcessingSuccess] = useState(false);
+    const [successMessage, setSuccessMessage] = useState("");
 
     // Date editing
     const [editingDateIndex, setEditingDateIndex] = useState<number | null>(null);
@@ -356,14 +360,15 @@ const CreateItinerary: React.FC = () => {
             // Refresh user stats to trigger level up notifications
             await fetchUserStats();
 
-            setSuccess(true);
+            setSuccessMessage(isEditMode ? '¡Itinerario actualizado exitosamente!' : '¡Itinerario creado exitosamente!');
+            setSuccessSnackbarOpen(true);
+            setIsProcessingSuccess(true);
 
-            // Reset after success
-            setTimeout(() => {
-                setSuccess(false);
-                setCurrentItinerary(defaultItinerary);
-                navigate('/itineraries');
-            }, 3000);
+            // Wait 2 seconds to show success message, then navigate
+            await new Promise(resolve => setTimeout(resolve, 2000));
+            
+            setCurrentItinerary(defaultItinerary);
+            navigate('/itineraries');
         } catch (err: unknown) {
             const errorMessage = err instanceof Error ? err.message : 'Error desconocido';
             if (errorMessage.includes('duplicate')) {
@@ -375,11 +380,28 @@ const CreateItinerary: React.FC = () => {
             }
         } finally {
             setLoading(false);
+            setIsProcessingSuccess(false);
         }
     };
 
     return (
         <>
+            {/* Success Processing Backdrop */}
+            <Backdrop
+                open={isProcessingSuccess}
+                sx={{
+                    zIndex: (theme) => theme.zIndex.drawer + 1000,
+                    backgroundColor: "rgba(255, 255, 255, 0.8)",
+                }}
+            >
+                <Box sx={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 2 }}>
+                    <CircularProgress size={60} />
+                    <Typography variant="body1" color="primary" fontWeight={500}>
+                        {isEditMode ? "Actualizando itinerario..." : "Creando itinerario..."}
+                    </Typography>
+                </Box>
+            </Backdrop>
+
             {/* Date Picker Popover */}
             <Popover
                 open={Boolean(dateAnchorEl)}
@@ -529,16 +551,11 @@ const CreateItinerary: React.FC = () => {
                     </Alert>
                 )}
 
-                {success && (
-                    <Alert severity="success" sx={{ mb: 3 }}>
-                        {isEditMode ? '¡Itinerario actualizado exitosamente!' : '¡Itinerario creado exitosamente!'}
-                    </Alert>
-                )}
-
                 <Stack direction="row" spacing={2}>
                     <Button
                         variant="contained"
                         onClick={handleSubmit}
+                        disabled={loading || isProcessingSuccess}
                         sx={{ minWidth: 120 }}
                     >
                         {loading ? <CircularProgress size={20} /> : isEditMode ? 'Guardar Cambios' : 'Crear Itinerario'}
@@ -546,11 +563,30 @@ const CreateItinerary: React.FC = () => {
                     <Button
                         variant="outlined"
                         onClick={() => navigate('/itineraries')}
+                        disabled={isProcessingSuccess}
                     >
                         Cancelar
                     </Button>
                 </Stack>
             </Paper>
+
+            {/* Success Snackbar */}
+            <Snackbar
+                open={successSnackbarOpen}
+                autoHideDuration={1900}
+                onClose={() => setSuccessSnackbarOpen(false)}
+                anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
+                sx={{ zIndex: (theme) => theme.zIndex.drawer + 1001 }}
+            >
+                <Alert
+                    onClose={() => setSuccessSnackbarOpen(false)}
+                    severity="success"
+                    variant="filled"
+                    sx={{ width: "100%" }}
+                >
+                    {successMessage}
+                </Alert>
+            </Snackbar>
         </Container>
         </>
     );

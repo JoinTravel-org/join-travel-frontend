@@ -21,6 +21,8 @@ import {
   Card,
   CardContent,
   CardActions,
+  Snackbar,
+  Backdrop,
 } from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
 import PersonAddIcon from "@mui/icons-material/PersonAdd";
@@ -57,6 +59,8 @@ export const GroupDetailDialog: React.FC<GroupDetailDialogProps> = ({
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [assigningItinerary, setAssigningItinerary] = useState(false);
+  const [successMessage, setSuccessMessage] = useState<string>("");
+  const [successSnackbarOpen, setSuccessSnackbarOpen] = useState(false);
 
   const isAdmin = group?.adminId === auth.user?.id;
 
@@ -95,7 +99,12 @@ export const GroupDetailDialog: React.FC<GroupDetailDialogProps> = ({
     try {
       await groupService.assignItinerary(group.id, itineraryId);
       setShowItinerarySelector(false);
+      setSuccessMessage("¡Itinerario asignado exitosamente al grupo!");
+      setSuccessSnackbarOpen(true);
       onRefresh();
+      
+      // Wait 2 seconds before closing to show the success message
+      await new Promise(resolve => setTimeout(resolve, 2000));
       onClose();
     } catch (err: unknown) {
       if (err instanceof Error) {
@@ -124,7 +133,12 @@ export const GroupDetailDialog: React.FC<GroupDetailDialogProps> = ({
 
     try {
       await groupService.removeItinerary(group.id);
+      setSuccessMessage("¡Itinerario desasignado exitosamente del grupo!");
+      setSuccessSnackbarOpen(true);
       onRefresh();
+
+      // Wait 2 seconds before closing to show the success message
+      await new Promise(resolve => setTimeout(resolve, 2000));
       onClose();
     } catch (err: unknown) {
       if (err instanceof Error) {
@@ -146,14 +160,16 @@ export const GroupDetailDialog: React.FC<GroupDetailDialogProps> = ({
 
   if (!group) return null;
 
+  const isProcessing = assigningItinerary || loading;
+
   return (
     <Dialog
       open={open}
-      onClose={onClose}
+      onClose={isProcessing ? undefined : onClose}
       maxWidth="md"
       fullWidth
       PaperProps={{
-        sx: { minHeight: "400px" },
+        sx: { minHeight: "400px", position: "relative" },
       }}
     >
       <DialogTitle
@@ -167,10 +183,28 @@ export const GroupDetailDialog: React.FC<GroupDetailDialogProps> = ({
           <PeopleIcon color="primary" />
           <Typography variant="h6">{group.name}</Typography>
         </Box>
-        <IconButton onClick={onClose} size="small">
+        <IconButton onClick={onClose} size="small" disabled={isProcessing}>
           <CloseIcon />
         </IconButton>
       </DialogTitle>
+
+      {/* Loading Backdrop */}
+      <Backdrop
+        open={isProcessing}
+        sx={{
+          position: "absolute",
+          zIndex: (theme) => theme.zIndex.drawer + 1,
+          backgroundColor: "rgba(255, 255, 255, 0.8)",
+          borderRadius: 1,
+        }}
+      >
+        <Box sx={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 2 }}>
+          <CircularProgress size={60} />
+          <Typography variant="body1" color="primary" fontWeight={500}>
+            Procesando...
+          </Typography>
+        </Box>
+      </Backdrop>
 
       <DialogContent dividers>
         {error && (
@@ -360,8 +394,25 @@ export const GroupDetailDialog: React.FC<GroupDetailDialogProps> = ({
       </DialogContent>
 
       <DialogActions>
-        <Button onClick={onClose}>Cerrar</Button>
+        <Button onClick={onClose} disabled={isProcessing}>Cerrar</Button>
       </DialogActions>
+
+      {/* Success Snackbar */}
+      <Snackbar
+        open={successSnackbarOpen}
+        autoHideDuration={1900}
+        onClose={() => setSuccessSnackbarOpen(false)}
+        anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
+      >
+        <Alert
+          onClose={() => setSuccessSnackbarOpen(false)}
+          severity="success"
+          variant="filled"
+          sx={{ width: "100%" }}
+        >
+          {successMessage}
+        </Alert>
+      </Snackbar>
     </Dialog>
   );
 };
