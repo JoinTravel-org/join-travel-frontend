@@ -11,7 +11,17 @@ import {
     Alert,
     Chip,
     Stack,
+    IconButton,
+    Tooltip,
+    Dialog,
+    DialogTitle,
+    DialogContent,
+    DialogActions,
+    List,
+    ListItem,
+    ListItemText,
 } from '@mui/material';
+import PeopleIcon from '@mui/icons-material/People';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../hooks/useAuth';
 import type { Place } from '../../types/place';
@@ -33,6 +43,14 @@ interface BackendItinerary {
     updatedAt: string;
 }
 
+interface GroupInfo {
+    id: string;
+    name: string;
+    description: string | null;
+    adminId: string;
+    memberCount: number;
+}
+
 const ItineraryList: React.FC = () => {
     const navigate = useNavigate();
     const auth = useAuth();
@@ -41,6 +59,10 @@ const ItineraryList: React.FC = () => {
     const [itineraries, setItineraries] = useState<BackendItinerary[]>([]);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
+    const [groupsDialogOpen, setGroupsDialogOpen] = useState(false);
+    const [selectedItineraryGroups, setSelectedItineraryGroups] = useState<GroupInfo[]>([]);
+    const [selectedItineraryName, setSelectedItineraryName] = useState('');
+    const [loadingGroups, setLoadingGroups] = useState(false);
 
     useEffect(() => {
         if (!hasCheckedAuth.current) {
@@ -90,6 +112,25 @@ const ItineraryList: React.FC = () => {
             month: 'long',
             day: 'numeric'
         });
+    };
+
+    const handleShowGroups = async (e: React.MouseEvent, itineraryId: string, itineraryName: string) => {
+        e.stopPropagation(); // Prevent card click
+        setLoadingGroups(true);
+        setSelectedItineraryName(itineraryName);
+        setGroupsDialogOpen(true);
+
+        try {
+            const response = await apiService.getItineraryGroups(itineraryId);
+            if (response.success && response.data) {
+                setSelectedItineraryGroups(response.data);
+            }
+        } catch (err) {
+            console.error('Error loading groups:', err);
+            setSelectedItineraryGroups([]);
+        } finally {
+            setLoadingGroups(false);
+        }
     };
 
     return (
@@ -146,6 +187,7 @@ const ItineraryList: React.FC = () => {
                                 flexDirection: 'column',
                                 cursor: 'pointer',
                                 transition: 'all 0.3s ease',
+                                position: 'relative',
                                 '&:hover': {
                                     transform: 'translateY(-4px)',
                                     boxShadow: 6,
@@ -153,14 +195,25 @@ const ItineraryList: React.FC = () => {
                             }}
                         >
                             <CardContent sx={{ flexGrow: 1, p: 3 }}>
-                                <Typography
-                                    variant="h6"
-                                    component="h2"
-                                    gutterBottom
-                                    sx={{ fontWeight: 700, mb: 2 }}
-                                >
-                                    {itinerary.name}
-                                </Typography>
+                                <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 2 }}>
+                                    <Typography
+                                        variant="h6"
+                                        component="h2"
+                                        sx={{ fontWeight: 700, flex: 1 }}
+                                    >
+                                        {itinerary.name}
+                                    </Typography>
+                                    <Tooltip title="Ver grupos donde está compartido">
+                                        <IconButton
+                                            size="small"
+                                            color="primary"
+                                            onClick={(e) => handleShowGroups(e, itinerary.id, itinerary.name)}
+                                            sx={{ ml: 1 }}
+                                        >
+                                            <PeopleIcon fontSize="small" />
+                                        </IconButton>
+                                    </Tooltip>
+                                </Box>
 
                                 <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
                                     {itinerary.items.length} lugar{itinerary.items.length !== 1 ? 'es' : ''}
@@ -201,6 +254,67 @@ const ItineraryList: React.FC = () => {
                     ))}
                 </Box>
             )}
+
+            {/* Groups Dialog */}
+            <Dialog
+                open={groupsDialogOpen}
+                onClose={() => setGroupsDialogOpen(false)}
+                maxWidth="sm"
+                fullWidth
+            >
+                <DialogTitle>
+                    Grupos con "{selectedItineraryName}"
+                </DialogTitle>
+                <DialogContent dividers>
+                    {loadingGroups ? (
+                        <Box sx={{ display: 'flex', justifyContent: 'center', p: 3 }}>
+                            <CircularProgress />
+                        </Box>
+                    ) : selectedItineraryGroups.length === 0 ? (
+                        <Box sx={{ textAlign: 'center', py: 4 }}>
+                            <PeopleIcon sx={{ fontSize: 48, color: 'text.secondary', mb: 2 }} />
+                            <Typography variant="body1" color="text.secondary">
+                                Este itinerario no está compartido en ningún grupo
+                            </Typography>
+                        </Box>
+                    ) : (
+                        <List>
+                            {selectedItineraryGroups.map((group) => (
+                                <ListItem
+                                    key={group.id}
+                                    sx={{
+                                        border: '1px solid',
+                                        borderColor: 'divider',
+                                        borderRadius: 1,
+                                        mb: 1,
+                                    }}
+                                >
+                                    <ListItemText
+                                        primary={group.name}
+                                        secondary={
+                                            <>
+                                                {group.description && (
+                                                    <Typography variant="body2" component="span" display="block">
+                                                        {group.description}
+                                                    </Typography>
+                                                )}
+                                                <Typography variant="caption" component="span">
+                                                    {group.memberCount} miembro{group.memberCount !== 1 ? 's' : ''}
+                                                </Typography>
+                                            </>
+                                        }
+                                    />
+                                </ListItem>
+                            ))}
+                        </List>
+                    )}
+                </DialogContent>
+                <DialogActions>
+                    <Button onClick={() => setGroupsDialogOpen(false)}>
+                        Cerrar
+                    </Button>
+                </DialogActions>
+            </Dialog>
         </Container>
     );
 };

@@ -26,6 +26,7 @@ import GroupExpenses from "./GroupExpenses";
 import type { Group, CreateGroupRequest } from "../../types/group";
 import { AddMemberDialog } from "./AddMemberDialog";
 import { GroupChatDialog } from "./GroupChatDialog";
+import { GroupDetailDialog } from "./GroupDetailDialog";
 
 export default function GroupPage() {
   const navigate = useNavigate();
@@ -48,6 +49,8 @@ export default function GroupPage() {
   const [groupToDelete, setGroupToDelete] = useState<Group | null>(null);
   const [deleteLoading, setDeleteLoading] = useState(false);
   const [deleteError, setDeleteError] = useState<string | null>(null);
+  const [detailDialogOpen, setDetailDialogOpen] = useState(false);
+  const [selectedGroupForDetail, setSelectedGroupForDetail] = useState<Group | null>(null);
   const [selectedGroupId, setSelectedGroupId] = useState<string | null>(null);
   const [tabValue, setTabValue] = useState(0);
 
@@ -244,7 +247,7 @@ export default function GroupPage() {
                     },
                   }}
                   onClick={(e) => {
-                    // Prevent navigation to expenses if clicking on interactive elements
+                    // Prevent navigation if clicking on interactive elements
                     if (
                       (e.target as HTMLElement).closest(
                         "button, input, textarea, select"
@@ -253,7 +256,8 @@ export default function GroupPage() {
                       e.stopPropagation();
                       return;
                     }
-                    handleGroupClick(group.id);
+                    setSelectedGroupForDetail(group);
+                    setDetailDialogOpen(true);
                   }}
                 >
                   <Typography variant="h6" sx={{ mb: 1 }}>
@@ -367,21 +371,23 @@ export default function GroupPage() {
                     </Button>
                   </Box>
 
-                  {/* Delete Group Button */}
-                  <Box sx={{ position: "absolute", top: 8, right: 8 }}>
-                    <Button
-                      size="small"
-                      color="error"
-                      onClick={() => {
-                        setGroupToDelete(group);
-                        setDeleteDialogOpen(true);
-                        setDeleteError(null);
-                      }}
-                      sx={{ minWidth: 0, p: 0 }}
-                    >
-                      <DeleteIcon />
-                    </Button>
-                  </Box>
+                  {/* Delete Group Button - Only show if user is admin */}
+                  {group.adminId === auth.user?.id && (
+                    <Box sx={{ position: "absolute", top: 8, right: 8 }}>
+                      <Button
+                        size="small"
+                        color="error"
+                        onClick={() => {
+                          setGroupToDelete(group);
+                          setDeleteDialogOpen(true);
+                          setDeleteError(null);
+                        }}
+                        sx={{ minWidth: 0, p: 0 }}
+                      >
+                        <DeleteIcon />
+                      </Button>
+                    </Box>
+                  )}
                 </Box>
               ))}
             </Box>
@@ -521,6 +527,21 @@ export default function GroupPage() {
           groupName={selectedGroupForChat.name}
         />
       )}
+
+      {/* Group Detail Dialog */}
+      <GroupDetailDialog
+        open={detailDialogOpen}
+        group={selectedGroupForDetail}
+        onClose={() => {
+          setDetailDialogOpen(false);
+          setSelectedGroupForDetail(null);
+        }}
+        onAddMember={(group) => {
+          setSelectedGroup(group);
+          setAddMemberDialogOpen(true);
+        }}
+        onRefresh={fetchGroups}
+      />
     </Container>
   );
 }
