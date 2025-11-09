@@ -18,6 +18,7 @@ import { AuthContext } from "../../contexts/AuthContext";
 import directMessageService, {
   type DirectMessage,
 } from "../../services/directMessage.service";
+import socketService from "../../services/socket.service";
 
 interface DirectChatDialogProps {
   open: boolean;
@@ -77,7 +78,7 @@ export const DirectChatDialog: React.FC<DirectChatDialogProps> = ({
   useEffect(() => {
     if (!open || !otherUserId) return;
 
-    const unsubscribe = socketService.onNewMessage((message) => {
+    const unsubscribe = socketService.onNewMessage((message: DirectMessage) => {
       // Only add messages from or to this conversation
       if (
         message.senderId === otherUserId ||

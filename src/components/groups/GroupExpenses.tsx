@@ -43,6 +43,8 @@ export default function GroupExpenses({ groupId }: GroupExpensesProps) {
   };
 
   const fetchGroupInfo = async () => {
+    if (!groupId) return;
+
     try {
       const response = await groupService.getGroupById(groupId);
       if (response.success && response.data) {
@@ -56,6 +58,7 @@ export default function GroupExpenses({ groupId }: GroupExpensesProps) {
   useEffect(() => {
     fetchExpenses();
     fetchGroupInfo();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [groupId]);
 
   const handleExpenseAdded = () => {
@@ -107,7 +110,10 @@ export default function GroupExpenses({ groupId }: GroupExpensesProps) {
 
       {groupId && (
         <Box sx={{ mb: 3 }}>
-          <AddExpenseForm groupId={groupId} onExpenseAdded={handleExpenseAdded} />
+          <AddExpenseForm
+            groupId={groupId}
+            onExpenseAdded={handleExpenseAdded}
+          />
         </Box>
       )}
 

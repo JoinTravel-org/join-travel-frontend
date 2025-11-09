@@ -20,7 +20,7 @@ import AssignExpenseDialog from "./AssignExpenseDialog";
 interface ExpenseTableProps {
   expenses: Expense[];
   total: string;
-  groupId: string;
+  groupId?: string;
   isAdmin: boolean;
   onDeleteExpense: (expenseId: string) => void;
   onExpenseAssigned: () => void;
@@ -59,7 +59,7 @@ export default function ExpenseTable({
   return (
     <Box>
       <Typography variant="h6" sx={{ mb: 2 }}>
-        {showGroupColumn ? 'Todos mis Gastos' : 'Gastos del Grupo'}
+        {showGroupColumn ? "Todos mis Gastos" : "Gastos del Grupo"}
       </Typography>
 
       {expenses.length === 0 ? (
@@ -86,7 +86,7 @@ export default function ExpenseTable({
                     <TableCell>{expense.concept}</TableCell>
                     {showGroupColumn && (
                       <TableCell>
-                        {expense.group?.name || 'Grupo desconocido'}
+                        {expense.group?.name || "Grupo desconocido"}
                       </TableCell>
                     )}
                     <TableCell align="right">${expense.amount}</TableCell>
@@ -142,13 +142,15 @@ export default function ExpenseTable({
         </>
       )}
 
-      <AssignExpenseDialog
-        open={assignDialogOpen}
-        expense={selectedExpense}
-        groupId={groupId}
-        onClose={handleCloseAssignDialog}
-        onAssigned={handleExpenseAssigned}
-      />
+      {groupId && (
+        <AssignExpenseDialog
+          open={assignDialogOpen}
+          expense={selectedExpense}
+          groupId={groupId}
+          onClose={handleCloseAssignDialog}
+          onAssigned={handleExpenseAssigned}
+        />
+      )}
     </Box>
   );
 }

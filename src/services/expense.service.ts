@@ -41,15 +41,17 @@ class ExpenseService {
   }
 
   /**
-   * Obtiene todos los gastos de un grupo
-   * @param groupId - ID del grupo
+   * Obtiene todos los gastos de un grupo o del usuario
+   * @param groupId - ID del grupo (opcional). Si no se proporciona, obtiene todos los gastos del usuario
    * @returns Promise con la lista de gastos y total
    */
-  async getGroupExpenses(groupId: string): Promise<GroupExpensesResponse> {
+  async getGroupExpenses(groupId?: string): Promise<GroupExpensesResponse> {
     try {
-      const response = await apiService
-        .getAxiosInstance()
-        .get(`/groups/${groupId}/expenses`);
+      const endpoint = groupId
+        ? `/groups/${groupId}/expenses`
+        : `/expenses/user`;
+
+      const response = await apiService.getAxiosInstance().get(endpoint);
       return response.data;
     } catch (error: any) {
       if (error.response?.status === 403) {
