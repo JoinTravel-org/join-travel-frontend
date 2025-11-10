@@ -194,7 +194,17 @@ export default function GroupPage() {
       </Box>
 
       <Box sx={{ borderBottom: 1, borderColor: "divider", mb: 3 }}>
-        <Tabs value={tabValue} onChange={handleTabChange}>
+        <Tabs
+          value={tabValue}
+          onChange={handleTabChange}
+          variant="scrollable"
+          scrollButtons="auto"
+          sx={{
+            '& .MuiTabs-scrollButtons': {
+              display: { xs: 'flex', sm: 'none' }
+            }
+          }}
+        >
           <Tab label="Grupos" />
           <Tab label="Gastos" />
         </Tabs>
@@ -231,7 +241,14 @@ export default function GroupPage() {
               </Typography>
             </Box>
           ) : (
-            <Box sx={{ display: "flex", flexWrap: "wrap", gap: { xs: 1, sm: 2 } }}>
+            <Box sx={{
+              display: "grid",
+              gridTemplateColumns: {
+                xs: "1fr",
+                sm: "repeat(auto-fill, minmax(350px, 1fr))"
+              },
+              gap: { xs: 2, sm: 3 }
+            }}>
               {groups.map((group) => (
                 <Box
                   key={group.id}
@@ -239,14 +256,12 @@ export default function GroupPage() {
                     position: "relative",
                     border: "1px solid #e0e0e0",
                     borderRadius: 2,
-                    p: { xs: 1.5, sm: 2 },
-                    minWidth: { xs: "100%", sm: 300 },
-                    maxWidth: { xs: "100%", sm: 450 },
-                    flex: { xs: "1 1 100%", sm: "1 1 350px" },
+                    p: { xs: 2, sm: 3 },
                     background: "#fafafa",
                     cursor: "pointer",
                     display: "flex",
                     flexDirection: "column",
+                    minHeight: { xs: "auto", sm: "300px" },
                     "&:hover": {
                       background: "#f5f5f5",
                       boxShadow: 1,
@@ -345,31 +360,13 @@ export default function GroupPage() {
 
                   {/* Buttons always at the bottom */}
                   <Box sx={{
-                    mt: 2,
+                    mt: "auto",
+                    pt: 2,
                     display: "flex",
                     flexWrap: "wrap",
                     gap: 1,
                     flexDirection: { xs: "column", sm: "row" }
                   }}>
-                    {/* Only show add members button if current user is admin */}
-                    {group.adminId === auth.user?.id && (
-                      <Button
-                        size="small"
-                        variant="outlined"
-                        startIcon={<PersonAddIcon />}
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          handleOpenAddMemberDialog(group);
-                        }}
-                        sx={{
-                          flex: "1 1 auto",
-                          minWidth: { xs: "100%", sm: "140px" },
-                          width: { xs: "100%", sm: "auto" }
-                        }}
-                      >
-                        Agregar
-                      </Button>
-                    )}
                     <Button
                       size="small"
                       variant="contained"
@@ -404,6 +401,25 @@ export default function GroupPage() {
                     >
                       Chat
                     </Button>
+                    {/* Only show add members button if current user is admin */}
+                    {group.adminId === auth.user?.id && (
+                      <Button
+                        size="small"
+                        variant="outlined"
+                        startIcon={<PersonAddIcon />}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleOpenAddMemberDialog(group);
+                        }}
+                        sx={{
+                          flex: "1 1 auto",
+                          minWidth: { xs: "100%", sm: "140px" },
+                          width: { xs: "100%", sm: "auto" }
+                        }}
+                      >
+                        Agregar
+                      </Button>
+                    )}
                   </Box>
 
                   {/* Delete Group Button - Only show if user is admin */}

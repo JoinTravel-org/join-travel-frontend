@@ -736,11 +736,19 @@ const Header: React.FC = () => {
               <>
                 <ListItemButton
                   component={RouterLink}
+                  to="/groups"
+                  selected={location.pathname === "/groups"}
+                  onClick={toggleDrawer(false)}
+                >
+                  <ListItemText primary="Grupos" />
+                </ListItemButton>
+                <ListItemButton
+                  component={RouterLink}
                   to="/chats"
                   selected={location.pathname === "/chats"}
                   onClick={toggleDrawer(false)}
                 >
-                  <ListItemText primary="Mensajes" />
+                  <ListItemText primary="Mensajes Directos" />
                 </ListItemButton>
                 <ListItemButton
                   component={RouterLink}
