@@ -182,11 +182,8 @@ class ApiService {
    * Handle logout when refresh fails
    */
   private handleLogout() {
-    localStorage.removeItem("accessToken");
-    localStorage.removeItem("refreshToken");
-    localStorage.removeItem("user");
-    // Trigger page reload to reset app state
-    window.location.href = "/login";
+    // Dispatch custom event to trigger force logout in AuthContext
+    window.dispatchEvent(new CustomEvent('forceLogout'));
   }
 
   /**

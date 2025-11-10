@@ -9,6 +9,7 @@ interface AuthContextType {
   isAuthenticated: boolean;
   login: (user: User, accessToken: string, refreshToken: string) => void;
   logout: () => void;
+  forceLogout: () => void;
   accessToken: string | null;
   updateUserStats: (stats: UserStats) => void;
 }
@@ -30,16 +31,45 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     const storedUser = localStorage.getItem("user");
 
     if (storedAccessToken && storedRefreshToken && storedUser) {
-      setAccessToken(storedAccessToken);
-      setUser(JSON.parse(storedUser));
-      // Connect to socket when user is restored from localStorage
-      socketService.connect(storedAccessToken);
+      // Validate tokens are not expired before restoring session
+      try {
+        const tokenPayload = JSON.parse(atob(storedAccessToken.split('.')[1]));
+        const currentTime = Math.floor(Date.now() / 1000);
+
+        if (tokenPayload.exp && tokenPayload.exp > currentTime) {
+          setAccessToken(storedAccessToken);
+          setUser(JSON.parse(storedUser));
+          // Connect to socket when user is restored from localStorage
+          socketService.connect(storedAccessToken);
+        } else {
+          // Access token is expired, clear all auth state
+          localStorage.removeItem("accessToken");
+          localStorage.removeItem("refreshToken");
+          localStorage.removeItem("user");
+        }
+      } catch (error) {
+        // Invalid token format, clear all auth state
+        localStorage.removeItem("accessToken");
+        localStorage.removeItem("refreshToken");
+        localStorage.removeItem("user");
+      }
     } else {
       // Clear any partial auth state
       localStorage.removeItem("accessToken");
       localStorage.removeItem("refreshToken");
       localStorage.removeItem("user");
     }
+
+    // Listen for force logout events from API service
+    const handleForceLogout = () => {
+      forceLogout();
+    };
+
+    window.addEventListener('forceLogout', handleForceLogout);
+
+    return () => {
+      window.removeEventListener('forceLogout', handleForceLogout);
+    };
   }, []);
 
   const login = (
@@ -73,6 +103,17 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     }
   };
 
+  const forceLogout = () => {
+    // Force logout without API call - for when tokens are invalid
+    setUser(null);
+    setAccessToken(null);
+    localStorage.removeItem("accessToken");
+    localStorage.removeItem("refreshToken");
+    localStorage.removeItem("user");
+    // Disconnect socket on logout
+    socketService.disconnect();
+  };
+
   const updateUserStats = (stats: UserStats) => {
     console.log("[DEBUG] AuthContext updateUserStats called with:", stats);
     if (user) {
@@ -91,6 +132,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     isAuthenticated: !!user,
     login,
     logout,
+    forceLogout,
     accessToken,
     updateUserStats,
   };
