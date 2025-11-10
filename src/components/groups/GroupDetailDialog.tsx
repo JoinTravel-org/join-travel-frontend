@@ -27,7 +27,6 @@ import {
 import CloseIcon from "@mui/icons-material/Close";
 import PersonAddIcon from "@mui/icons-material/PersonAdd";
 import AssignmentIcon from "@mui/icons-material/Assignment";
-import DeleteIcon from "@mui/icons-material/Delete";
 import PeopleIcon from "@mui/icons-material/People";
 import MapIcon from "@mui/icons-material/Map";
 import { useAuth } from "../../hooks/useAuth";
@@ -168,8 +167,13 @@ export const GroupDetailDialog: React.FC<GroupDetailDialogProps> = ({
       onClose={isProcessing ? undefined : onClose}
       maxWidth="md"
       fullWidth
-      PaperProps={{
-        sx: { minHeight: "400px", position: "relative" },
+      sx={{
+        "& .MuiDialog-paper": {
+          margin: { xs: 1, sm: 2 },
+          width: { xs: "calc(100% - 16px)", sm: "auto" },
+          minHeight: { xs: "80vh", sm: "400px" },
+          position: "relative",
+        },
       }}
     >
       <DialogTitle

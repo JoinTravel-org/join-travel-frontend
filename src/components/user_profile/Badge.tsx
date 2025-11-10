@@ -1,4 +1,5 @@
 import React from 'react';
+import { Box } from '@mui/material';
 import type { Badge as BadgeType } from '../../types/user';
 
 interface BadgeProps {
@@ -45,26 +46,27 @@ const Badge: React.FC<BadgeProps> = ({ badge, onShare, showShareButton = true })
   };
 
   return (
-    <div
-      style={{
+    <Box
+      sx={{
         display: 'inline-flex',
         alignItems: 'center',
-        gap: '8px',
-        padding: '8px 12px',
+        gap: { xs: '6px', sm: '8px' },
+        padding: { xs: '6px 10px', sm: '8px 12px' },
         border: '1px solid #1976d2',
         borderRadius: '20px',
-        fontSize: '14px',
+        fontSize: { xs: '13px', sm: '14px' },
         color: '#1976d2',
         backgroundColor: '#f8f9fa',
         cursor: 'pointer',
         transition: 'all 0.2s ease',
-        position: 'relative'
+        position: 'relative',
+        minHeight: { xs: '32px', sm: '36px' }
       }}
-      onMouseEnter={(e) => {
+      onMouseEnter={(e: React.MouseEvent<HTMLDivElement>) => {
         e.currentTarget.style.backgroundColor = '#e3f2fd';
         e.currentTarget.style.transform = 'scale(1.05)';
       }}
-      onMouseLeave={(e) => {
+      onMouseLeave={(e: React.MouseEvent<HTMLDivElement>) => {
         e.currentTarget.style.backgroundColor = '#f8f9fa';
         e.currentTarget.style.transform = 'scale(1)';
       }}
@@ -105,17 +107,17 @@ const Badge: React.FC<BadgeProps> = ({ badge, onShare, showShareButton = true })
       )}
 
       {/* Tooltip with earned date */}
-      <div
-        style={{
+      <Box
+        sx={{
           position: 'absolute',
           bottom: '100%',
           left: '50%',
           transform: 'translateX(-50%)',
           backgroundColor: '#333',
           color: 'white',
-          padding: '4px 8px',
+          padding: { xs: '3px 6px', sm: '4px 8px' },
           borderRadius: '4px',
-          fontSize: '12px',
+          fontSize: { xs: '11px', sm: '12px' },
           whiteSpace: 'nowrap',
           opacity: 0,
           pointerEvents: 'none',
@@ -125,8 +127,8 @@ const Badge: React.FC<BadgeProps> = ({ badge, onShare, showShareButton = true })
         className="badge-tooltip"
       >
         Ganada el {new Date(badge.earned_at).toLocaleDateString('es-ES')}
-      </div>
-    </div>
+      </Box>
+    </Box>
   );
 };
 

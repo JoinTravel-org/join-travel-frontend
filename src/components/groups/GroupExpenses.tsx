@@ -80,7 +80,7 @@ export default function GroupExpenses({ groupId }: GroupExpensesProps) {
     }
   };
 
-  const canDeleteExpense = (expense: Expense): boolean => {
+  const canDeleteExpense = (_expense: Expense): boolean => {
     // Only group admin can delete expenses
     return isAdmin;
   };
@@ -102,7 +102,7 @@ export default function GroupExpenses({ groupId }: GroupExpensesProps) {
   }
 
   return (
-    <Container maxWidth="lg" sx={{ py: 4 }}>
+    <Container maxWidth="lg" sx={{ py: { xs: 2, sm: 4 } }}>
       <Typography variant="h5" component="h2" sx={{ mb: 3 }}>
         Gastos del Grupo
       </Typography>

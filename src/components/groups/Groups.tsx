@@ -139,10 +139,6 @@ export default function GroupPage() {
     }
   };
 
-  const handleGroupClick = (groupId: string) => {
-    setSelectedGroupId(groupId);
-    setTabValue(1); // Switch to expenses tab
-  };
 
   const handleTabChange = (_event: React.SyntheticEvent, newValue: number) => {
     setTabValue(newValue);
@@ -176,7 +172,14 @@ export default function GroupPage() {
         flexDirection: "column",
       }}
     >
-      <Box sx={{ display: "flex", justifyContent: "space-between", mb: 4 }}>
+      <Box sx={{
+        display: "flex",
+        flexDirection: { xs: "column", sm: "row" },
+        justifyContent: { xs: "flex-start", sm: "space-between" },
+        alignItems: { xs: "stretch", sm: "center" },
+        mb: 4,
+        gap: { xs: 2, sm: 0 }
+      }}>
         <Typography variant="h4" component="h1">
           Mis Grupos
         </Typography>
@@ -184,13 +187,24 @@ export default function GroupPage() {
           variant="contained"
           startIcon={<AddIcon />}
           onClick={handleOpen}
+          sx={{ width: { xs: "100%", sm: "auto" } }}
         >
           Crear Grupo
         </Button>
       </Box>
 
       <Box sx={{ borderBottom: 1, borderColor: "divider", mb: 3 }}>
-        <Tabs value={tabValue} onChange={handleTabChange}>
+        <Tabs
+          value={tabValue}
+          onChange={handleTabChange}
+          variant="scrollable"
+          scrollButtons="auto"
+          sx={{
+            '& .MuiTabs-scrollButtons': {
+              display: { xs: 'flex', sm: 'none' }
+            }
+          }}
+        >
           <Tab label="Grupos" />
           <Tab label="Gastos" />
         </Tabs>
@@ -227,7 +241,14 @@ export default function GroupPage() {
               </Typography>
             </Box>
           ) : (
-            <Box sx={{ display: "flex", flexWrap: "wrap", gap: 2 }}>
+            <Box sx={{
+              display: "grid",
+              gridTemplateColumns: {
+                xs: "1fr",
+                sm: "repeat(auto-fill, minmax(350px, 1fr))"
+              },
+              gap: { xs: 2, sm: 3 }
+            }}>
               {groups.map((group) => (
                 <Box
                   key={group.id}
@@ -235,14 +256,12 @@ export default function GroupPage() {
                     position: "relative",
                     border: "1px solid #e0e0e0",
                     borderRadius: 2,
-                    p: 2,
-                    minWidth: 300,
-                    maxWidth: 450,
-                    flex: "1 1 350px",
+                    p: { xs: 2, sm: 3 },
                     background: "#fafafa",
                     cursor: "pointer",
                     display: "flex",
                     flexDirection: "column",
+                    minHeight: { xs: "auto", sm: "300px" },
                     "&:hover": {
                       background: "#f5f5f5",
                       boxShadow: 1,
@@ -340,22 +359,14 @@ export default function GroupPage() {
                   </Box>
 
                   {/* Buttons always at the bottom */}
-                  <Box sx={{ mt: 2, display: "flex", flexWrap: "wrap", gap: 1 }}>
-                    {/* Only show add members button if current user is admin */}
-                    {group.adminId === auth.user?.id && (
-                      <Button
-                        size="small"
-                        variant="outlined"
-                        startIcon={<PersonAddIcon />}
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          handleOpenAddMemberDialog(group);
-                        }}
-                        sx={{ flex: "1 1 auto", minWidth: "140px" }}
-                      >
-                        Agregar
-                      </Button>
-                    )}
+                  <Box sx={{
+                    mt: "auto",
+                    pt: 2,
+                    display: "flex",
+                    flexWrap: "wrap",
+                    gap: 1,
+                    flexDirection: { xs: "column", sm: "row" }
+                  }}>
                     <Button
                       size="small"
                       variant="contained"
@@ -365,7 +376,11 @@ export default function GroupPage() {
                         setSelectedGroupId(group.id);
                         setTabValue(1);
                       }}
-                      sx={{ flex: "1 1 auto", minWidth: "110px" }}
+                      sx={{
+                        flex: "1 1 auto",
+                        minWidth: { xs: "100%", sm: "110px" },
+                        width: { xs: "100%", sm: "auto" }
+                      }}
                     >
                       Gastos
                     </Button>
@@ -378,10 +393,33 @@ export default function GroupPage() {
                         e.stopPropagation();
                         handleOpenChat(group);
                       }}
-                      sx={{ flex: "1 1 auto", minWidth: "100px" }}
+                      sx={{
+                        flex: "1 1 auto",
+                        minWidth: { xs: "100%", sm: "100px" },
+                        width: { xs: "100%", sm: "auto" }
+                      }}
                     >
                       Chat
                     </Button>
+                    {/* Only show add members button if current user is admin */}
+                    {group.adminId === auth.user?.id && (
+                      <Button
+                        size="small"
+                        variant="outlined"
+                        startIcon={<PersonAddIcon />}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleOpenAddMemberDialog(group);
+                        }}
+                        sx={{
+                          flex: "1 1 auto",
+                          minWidth: { xs: "100%", sm: "140px" },
+                          width: { xs: "100%", sm: "auto" }
+                        }}
+                      >
+                        Agregar
+                      </Button>
+                    )}
                   </Box>
 
                   {/* Delete Group Button - Only show if user is admin */}
@@ -413,7 +451,18 @@ export default function GroupPage() {
       )}
 
       {/* Create Group Dialog */}
-      <Dialog open={open} onClose={handleClose} maxWidth="sm" fullWidth>
+      <Dialog
+        open={open}
+        onClose={handleClose}
+        maxWidth="sm"
+        fullWidth
+        sx={{
+          "& .MuiDialog-paper": {
+            margin: { xs: 1, sm: 2 },
+            width: { xs: "calc(100% - 16px)", sm: "auto" },
+          },
+        }}
+      >
         <form onSubmit={handleSubmit}>
           <DialogTitle>
             Crear Nuevo Grupo
@@ -474,6 +523,12 @@ export default function GroupPage() {
       <Dialog
         open={deleteDialogOpen}
         onClose={() => setDeleteDialogOpen(false)}
+        sx={{
+          "& .MuiDialog-paper": {
+            margin: { xs: 1, sm: 2 },
+            width: { xs: "calc(100% - 16px)", sm: "auto" },
+          },
+        }}
       >
         <DialogTitle>Eliminar grupo</DialogTitle>
         <DialogContent>
