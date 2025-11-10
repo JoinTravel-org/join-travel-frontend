@@ -52,34 +52,42 @@ const Milestones: React.FC<MilestonesProps> = ({ milestones }) => {
           <Box sx={{
             position: 'absolute',
             top: '50%',
-            left: '5%',
-            right: '5%',
+            left: '20px',
+            right: '20px',
             height: '3px',
             backgroundColor: 'grey.300',
             zIndex: 1,
-            minWidth: milestones.length > 3 ? `${milestones.length * 120}px` : '100%'
+            minWidth: `${Math.max(milestones.length * 160, 100)}%`
           }} />
 
           {/* Milestones dots */}
           {milestones.map((milestone, index) => {
-            const position = milestones.length > 1 ? (index / (milestones.length - 1)) * 90 + 5 : 50; // 5% to 95%
+            // Calculate position with more spacing between milestones
+            const totalWidth = milestones.length * 160; // 160px per milestone for more space
+            const position = (index * 160) + 80; // Center each milestone in its 160px slot
+
             return (
               <Box
                 key={milestone.id}
                 sx={{
                   position: 'absolute',
-                  left: `${position}%`,
+                  left: `${position}px`,
                   top: '50%',
                   transform: 'translate(-50%, -25px)',
                   zIndex: 2,
-                  minWidth: '120px',
+                  width: '140px',
                   display: 'flex',
                   justifyContent: 'center'
                 }}
                 onMouseEnter={() => setHoveredMilestone(milestone)}
                 onMouseLeave={() => setHoveredMilestone(null)}
               >
-                <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+                <Box sx={{
+                  display: 'flex',
+                  flexDirection: 'column',
+                  alignItems: 'center',
+                  minWidth: '100px'
+                }}>
                   <Box
                     sx={{
                       width: { xs: '40px', sm: '50px' },
@@ -89,6 +97,7 @@ const Milestones: React.FC<MilestonesProps> = ({ milestones }) => {
                       cursor: 'pointer',
                       border: '3px solid white',
                       boxShadow: '0 3px 6px rgba(0,0,0,0.3)',
+                      flexShrink: 0,
                       '&:hover': {
                         transform: 'scale(1.1)',
                         transition: 'transform 0.2s ease'
@@ -98,14 +107,18 @@ const Milestones: React.FC<MilestonesProps> = ({ milestones }) => {
                   />
                   <Box sx={{
                     marginTop: '10px',
-                    fontSize: { xs: '11px', sm: '13px' },
+                    fontSize: { xs: '10px', sm: '12px' },
                     color: 'text.secondary',
                     textAlign: 'center',
-                    maxWidth: { xs: '80px', sm: '100px' },
+                    maxWidth: '120px',
                     wordWrap: 'break-word',
-                    lineHeight: '1.2'
+                    lineHeight: '1.2',
+                    minHeight: '2.4em', // Ensure consistent height
+                    display: 'flex',
+                    alignItems: 'flex-start',
+                    justifyContent: 'center'
                   }}>
-                    {milestone.title.length > 18 ? milestone.title.substring(0, 18) + '...' : milestone.title}
+                    {milestone.title.length > 20 ? milestone.title.substring(0, 20) + '...' : milestone.title}
                   </Box>
                 </Box>
               </Box>
