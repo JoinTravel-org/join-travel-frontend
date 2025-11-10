@@ -2,6 +2,7 @@ import React, { createContext, useState, useEffect } from "react";
 import type { ReactNode } from "react";
 import authService from "../services/auth.service";
 import socketService from "../services/socket.service";
+import apiService from "../services/api.service";
 import type { User, UserStats } from "../types/user";
 
 interface AuthContextType {
@@ -9,6 +10,7 @@ interface AuthContextType {
   isAuthenticated: boolean;
   login: (user: User, accessToken: string, refreshToken: string) => void;
   logout: () => void;
+  forceLogout: () => void;
   accessToken: string | null;
   updateUserStats: (stats: UserStats) => void;
 }
@@ -26,14 +28,65 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   useEffect(() => {
     // Check for stored tokens on app load
     const storedAccessToken = localStorage.getItem("accessToken");
+    const storedRefreshToken = localStorage.getItem("refreshToken");
     const storedUser = localStorage.getItem("user");
 
-    if (storedAccessToken && storedUser) {
-      setAccessToken(storedAccessToken);
-      setUser(JSON.parse(storedUser));
-      // Connect to socket when user is restored from localStorage
-      socketService.connect(storedAccessToken);
-    }
+    // Function to validate tokens synchronously
+    const validateTokens = async () => {
+      if (!storedAccessToken || !storedRefreshToken || !storedUser) {
+        // Clear any partial auth state
+        localStorage.removeItem("accessToken");
+        localStorage.removeItem("refreshToken");
+        localStorage.removeItem("user");
+        return;
+      }
+
+      try {
+        // First, try to validate the access token with a simple API call
+        await apiService.getUserStats(JSON.parse(atob(storedAccessToken.split('.')[1])).userId);
+        // If successful, tokens are valid, restore session
+        setAccessToken(storedAccessToken);
+        setUser(JSON.parse(storedUser));
+        socketService.connect(storedAccessToken);
+      } catch (accessTokenError) {
+        // Access token is invalid, try refresh token
+        try {
+          const refreshResponse = await apiService.getAxiosInstance().post("/auth/refresh", {
+            refreshToken: storedRefreshToken
+          });
+          const { accessToken: newAccessToken, refreshToken: newRefreshToken } = refreshResponse.data.data;
+
+          // Update tokens in localStorage
+          localStorage.setItem("accessToken", newAccessToken);
+          localStorage.setItem("refreshToken", newRefreshToken);
+
+          // Restore session with new tokens
+          setAccessToken(newAccessToken);
+          setUser(JSON.parse(storedUser));
+          socketService.connect(newAccessToken);
+        } catch (refreshError) {
+          // Both tokens are invalid, clear all auth state
+          console.warn("Both tokens invalid, clearing auth state:", refreshError);
+          localStorage.removeItem("accessToken");
+          localStorage.removeItem("refreshToken");
+          localStorage.removeItem("user");
+        }
+      }
+    };
+
+    // Validate tokens on app load
+    validateTokens();
+
+    // Listen for force logout events from API service
+    const handleForceLogout = () => {
+      forceLogout();
+    };
+
+    window.addEventListener('forceLogout', handleForceLogout);
+
+    return () => {
+      window.removeEventListener('forceLogout', handleForceLogout);
+    };
   }, []);
 
   const login = (
@@ -67,6 +120,17 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     }
   };
 
+  const forceLogout = () => {
+    // Force logout without API call - for when tokens are invalid
+    setUser(null);
+    setAccessToken(null);
+    localStorage.removeItem("accessToken");
+    localStorage.removeItem("refreshToken");
+    localStorage.removeItem("user");
+    // Disconnect socket on logout
+    socketService.disconnect();
+  };
+
   const updateUserStats = (stats: UserStats) => {
     console.log("[DEBUG] AuthContext updateUserStats called with:", stats);
     if (user) {
@@ -85,6 +149,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     isAuthenticated: !!user,
     login,
     logout,
+    forceLogout,
     accessToken,
     updateUserStats,
   };
