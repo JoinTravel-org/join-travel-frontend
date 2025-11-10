@@ -1,16 +1,9 @@
-import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
-import {
-  Typography,
-  Box,
-  CircularProgress,
-  Alert,
-  Card,
-  Button,
-} from '@mui/material';
-import { Rating } from '@fluentui/react-rating';
-import reviewService from '../../services/review.service';
-import type { Review, ReviewStats } from '../../types/review';
+import React, { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+import { Typography, Box, CircularProgress, Alert, Card, Button } from "@mui/material";
+import { Rating } from "@fluentui/react-rating";
+import reviewService from "../../services/review.service";
+import type { Review, ReviewStats } from "../../types/review";
 
 interface UserReviewListProps {
   userId: string;
@@ -40,8 +33,8 @@ const UserReviewList: React.FC<UserReviewListProps> = ({ userId }) => {
           setReviewStats(statsResponse);
         }
       } catch (error) {
-        console.error('Error fetching reviews:', error);
-        setReviewsError('Error al cargar reseñas');
+        console.error("Error fetching reviews:", error);
+        setReviewsError("Error al cargar reseñas");
       } finally {
         setReviewsLoading(false);
       }
@@ -58,22 +51,18 @@ const UserReviewList: React.FC<UserReviewListProps> = ({ userId }) => {
 
       {reviewStats && reviewStats.totalReviews > 0 && (
         <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
-          Promedio de calificaciones: {reviewStats.averageRating.toFixed(1)} ⭐ ({reviewStats.totalReviews} reseña{reviewStats.totalReviews !== 1 ? 's' : ''})
+          Promedio de calificaciones: {reviewStats.averageRating.toFixed(1)} ⭐ ({reviewStats.totalReviews} reseña{reviewStats.totalReviews !== 1 ? "s" : ""})
         </Typography>
       )}
 
       {reviewsLoading ? (
-        <Box sx={{ display: 'flex', justifyContent: 'center', py: 4 }}>
+        <Box sx={{ display: "flex", justifyContent: "center", py: 4 }}>
           <CircularProgress />
         </Box>
       ) : reviewsError ? (
         <Alert severity="error" sx={{ mb: 2 }}>
           {reviewsError}
-          <Button
-            size="small"
-            onClick={() => window.location.reload()}
-            sx={{ ml: 2 }}
-          >
+          <Button size="small" onClick={() => window.location.reload()} sx={{ ml: 2 }}>
             Intentar nuevamente
           </Button>
         </Alert>
@@ -82,47 +71,69 @@ const UserReviewList: React.FC<UserReviewListProps> = ({ userId }) => {
           Este usuario no ha escrito reseñas aún.
         </Typography>
       ) : (
-        <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-          {reviews.map((review) => (
-            <Card
-              key={review.id}
-              sx={{
-                p: 2,
-                cursor: 'pointer',
-                '&:hover': {
-                  boxShadow: '0 8px 25px rgba(0,0,0,0.15)',
-                  transform: 'translateY(-2px)'
-                },
-                transition: 'all 0.2s ease'
-              }}
-              onClick={() => navigate(`/place/${review.placeId}`)}
-            >
-              <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 1 }}>
-                <Box>
-                  <Typography variant="h6" component="h3" sx={{ fontSize: '1rem', fontWeight: 600 }}>
-                    {review.placeName || 'Lugar desconocido'}
-                  </Typography>
-                  <Typography variant="body2" color="text.secondary">
-                    {new Date(review.createdAt).toLocaleDateString('es-ES')}
-                  </Typography>
+        <Box
+          sx={{
+            maxHeight: "400px",
+            overflowY: "auto",
+            pr: 1,
+            "&::-webkit-scrollbar": {
+              width: 6,
+              backgroundColor: "rgba(0,0,0,0.05)",
+            },
+            "&::-webkit-scrollbar-thumb": {
+              backgroundColor: "rgba(0,0,0,0.2)",
+              borderRadius: 3,
+              "&:hover": {
+                backgroundColor: "rgba(0,0,0,0.3)",
+              },
+            },
+            "&::-webkit-scrollbar-track": {
+              borderRadius: 3,
+            },
+          }}
+        >
+          <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
+            {reviews.map((review) => (
+              <Card
+                key={review.id}
+                sx={{
+                  p: 2,
+                  cursor: "pointer",
+                  "&:hover": {
+                    boxShadow: "0 8px 25px rgba(0,0,0,0.15)",
+                    transform: "translateY(-2px)",
+                  },
+                  transition: "all 0.2s ease",
+                }}
+                onClick={() => navigate(`/place/${review.placeId}`)}
+              >
+                <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", mb: 1 }}>
+                  <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+                    <Box>
+                      <Typography variant="h6" component="h3" sx={{ fontSize: "1rem", fontWeight: 600, mb: 0.5 }}>
+                        {review.placeName || "Lugar desconocido"}
+                      </Typography>
+                      <Typography variant="body2" color="text.secondary">
+                        {new Date(review.createdAt).toLocaleDateString("es-ES")}
+                        {review.media && review.media.length > 0 && (
+                          <span> - 📷 {review.media.length} {review.media.length === 1 ? 'imagen' : 'imágenes'}</span>
+                        )}
+                      </Typography>
+                    </Box>
+                  </Box>
+                  <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+                    <Rating color="marigold" size="small" value={review.rating} style={{ pointerEvents: "none" }} />
+                    <Typography variant="body2" color="text.secondary">
+                      {review.rating}/5
+                    </Typography>
+                  </Box>
                 </Box>
-                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                  <Rating
-                    color="marigold"
-                    size="small"
-                    value={review.rating}
-                    style={{ pointerEvents: 'none' }}
-                  />
-                  <Typography variant="body2" color="text.secondary">
-                    {review.rating}/5
-                  </Typography>
-                </Box>
-              </Box>
-              <Typography variant="body1" sx={{ mb: 1 }}>
-                {review.content}
-              </Typography>
-            </Card>
-          ))}
+                <Typography variant="body1" sx={{ mb: 1 }}>
+                  {review.content}
+                </Typography>
+              </Card>
+            ))}
+          </Box>
         </Box>
       )}
     </Box>
