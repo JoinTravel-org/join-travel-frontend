@@ -10,6 +10,11 @@ import type {
  */
 class ApiService {
   private api;
+  private isRefreshing = false;
+  private failedQueue: Array<{
+    resolve: (token: string) => void;
+    reject: (error: any) => void;
+  }> = [];
 
   constructor() {
     const baseURL = import.meta.env.VITE_BACKEND_URL;
@@ -60,6 +65,8 @@ class ApiService {
         return response;
       },
       (error: AxiosError) => {
+        const originalRequest = error.config;
+
         if (error.response) {
           // El servidor respondió con un código de error
           Logger.getInstance().error(
@@ -70,6 +77,58 @@ class ApiService {
             }`,
             JSON.stringify(error.response.data)
           );
+
+          // Handle 401 Unauthorized - attempt token refresh
+          if (error.response.status === 401 && originalRequest && !(originalRequest as any)._retry) {
+            if (this.isRefreshing) {
+              // If refresh is already in progress, queue the request
+              return new Promise((resolve, reject) => {
+                this.failedQueue.push({ resolve, reject });
+              }).then(token => {
+                originalRequest.headers.Authorization = `Bearer ${token}`;
+                return this.api(originalRequest);
+              }).catch(err => {
+                return Promise.reject(err);
+              });
+            }
+
+            (originalRequest as any)._retry = true;
+            this.isRefreshing = true;
+
+            const refreshToken = localStorage.getItem("refreshToken");
+            if (!refreshToken) {
+              // No refresh token available, logout user
+              this.handleLogout();
+              return Promise.reject(error.response.data);
+            }
+
+            return new Promise((resolve, reject) => {
+              this.refreshToken(refreshToken)
+                .then((response: any) => {
+                  const { accessToken, refreshToken: newRefreshToken } = response.data.data;
+                  localStorage.setItem("accessToken", accessToken);
+                  localStorage.setItem("refreshToken", newRefreshToken);
+
+                  // Update Authorization header for original request
+                  originalRequest.headers.Authorization = `Bearer ${accessToken}`;
+
+                  // Process queued requests
+                  this.processQueue(null, accessToken);
+
+                  resolve(this.api(originalRequest));
+                })
+                .catch((refreshError: any) => {
+                  // Refresh failed, logout user
+                  this.processQueue(refreshError, null);
+                  this.handleLogout();
+                  reject(refreshError);
+                })
+                .finally(() => {
+                  this.isRefreshing = false;
+                });
+            });
+          }
+
           throw error.response.data;
         } else if (error.request) {
           // La petición fue hecha pero no hubo respuesta
@@ -102,6 +161,41 @@ class ApiService {
         }
       }
     );
+  }
+
+  /**
+   * Process queued requests after token refresh
+   */
+  private processQueue(error: any, token: string | null = null) {
+    this.failedQueue.forEach(({ resolve, reject }) => {
+      if (error) {
+        reject(error);
+      } else {
+        resolve(token!);
+      }
+    });
+
+    this.failedQueue = [];
+  }
+
+  /**
+   * Handle logout when refresh fails
+   */
+  private handleLogout() {
+    localStorage.removeItem("accessToken");
+    localStorage.removeItem("refreshToken");
+    localStorage.removeItem("user");
+    // Trigger page reload to reset app state
+    window.location.href = "/login";
+  }
+
+  /**
+   * Refresh access token using refresh token
+   * @param refreshToken - The refresh token
+   * @returns Promise with new tokens
+   */
+  private async refreshToken(refreshToken: string) {
+    return this.api.post("/auth/refresh", { refreshToken });
   }
 
   /**

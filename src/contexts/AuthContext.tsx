@@ -26,13 +26,19 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   useEffect(() => {
     // Check for stored tokens on app load
     const storedAccessToken = localStorage.getItem("accessToken");
+    const storedRefreshToken = localStorage.getItem("refreshToken");
     const storedUser = localStorage.getItem("user");
 
-    if (storedAccessToken && storedUser) {
+    if (storedAccessToken && storedRefreshToken && storedUser) {
       setAccessToken(storedAccessToken);
       setUser(JSON.parse(storedUser));
       // Connect to socket when user is restored from localStorage
       socketService.connect(storedAccessToken);
+    } else {
+      // Clear any partial auth state
+      localStorage.removeItem("accessToken");
+      localStorage.removeItem("refreshToken");
+      localStorage.removeItem("user");
     }
   }, []);
 
