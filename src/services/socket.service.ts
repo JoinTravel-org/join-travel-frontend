@@ -3,7 +3,7 @@ import Logger from "../logger";
 import type { DirectMessage } from "./directMessage.service";
 import type { GroupMessage } from "../types/groupMessage";
 
-const SOCKET_URL = import.meta.env.VITE_API_URL || "http://localhost:3005";
+const SOCKET_URL = import.meta.env.VITE_BACKEND_URL || "http://localhost:3005";
 const logger = Logger.getInstance();
 
 class SocketService {
