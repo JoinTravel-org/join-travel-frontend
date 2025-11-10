@@ -148,7 +148,7 @@ class QuestionService {
       Logger.getInstance().info(`Voting on question: ${questionId}`);
       const response = await apiService
         .getAxiosInstance()
-        .post(`/questions/${questionId}/vote`);
+        .post(`/places/questions/${questionId}/vote`);
       Logger.getInstance().info(`Vote toggled successfully`);
       return response.data;
     } catch (error) {
@@ -166,7 +166,7 @@ class QuestionService {
     try {
       const response = await apiService
         .getAxiosInstance()
-        .get(`/questions/${questionId}/vote`);
+        .get(`/places/questions/${questionId}/vote`);
       return response.data;
     } catch (error) {
       Logger.getInstance().error(`Failed to get vote status for question: ${questionId}`, error);
@@ -224,7 +224,7 @@ class QuestionService {
       Logger.getInstance().info(`Voting on answer: ${answerId}`);
       const response = await apiService
         .getAxiosInstance()
-        .post(`/answers/${answerId}/vote`);
+        .post(`/places/answers/${answerId}/vote`);
       Logger.getInstance().info(`Vote toggled successfully`);
       return response.data;
     } catch (error) {
@@ -242,7 +242,7 @@ class QuestionService {
     try {
       const response = await apiService
         .getAxiosInstance()
-        .get(`/answers/${answerId}/vote`);
+        .get(`/places/answers/${answerId}/vote`);
       return response.data;
     } catch (error) {
       Logger.getInstance().error(`Failed to get vote status for answer: ${answerId}`, error);
