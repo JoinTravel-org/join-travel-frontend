@@ -91,11 +91,26 @@ export const GroupChatDialog: React.FC<GroupChatDialogProps> = ({
     if (!open || !groupId) return;
 
     const unsubscribe = socketService.onNewGroupMessage(groupId, (message) => {
-      // Only add if it's not already in the list (avoid duplicates)
       setMessages((prev) => {
-        const exists = prev.some((m) => m.id === message.id);
-        if (exists) return prev;
-        return [...prev, message];
+        // Check if this is a real message replacing an optimistic one
+        const optimisticIndex = prev.findIndex((m) =>
+          m.id.startsWith('temp-') &&
+          m.senderId === message.senderId &&
+          m.content === message.content &&
+          m.groupId === message.groupId
+        );
+
+        if (optimisticIndex !== -1) {
+          // Replace optimistic message with real message
+          const newMessages = [...prev];
+          newMessages[optimisticIndex] = message;
+          return newMessages;
+        } else {
+          // Only add if it's not already in the list (avoid duplicates)
+          const exists = prev.some((m) => m.id === message.id);
+          if (exists) return prev;
+          return [...prev, message];
+        }
       });
     });
 
@@ -122,10 +137,11 @@ export const GroupChatDialog: React.FC<GroupChatDialogProps> = ({
       // Send via websocket if connected, otherwise fallback to HTTP
       if (socketService.isConnected()) {
         socketService.sendGroupMessage(groupId, messageToSend);
-        
+
         // Add message optimistically (will show immediately)
+        const optimisticId = `temp-${Date.now()}-${Math.random()}`;
         const optimisticMessage: GroupMessage = {
-          id: `temp-${Date.now()}`, // Temporary ID
+          id: optimisticId, // Unique temporary ID
           groupId: groupId,
           senderId: currentUserId!,
           senderEmail: authContext?.user?.email || "",

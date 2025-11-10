@@ -232,11 +232,28 @@ class ApiService {
    * @returns Promise con la respuesta del servidor
    */
   async login(email: string, password: string) {
-    const response = await this.api.post("/auth/login", {
-      email,
-      password,
+    // Create a fresh axios instance without interceptors for login
+    const loginApi = axios.create({
+      baseURL: `${import.meta.env.VITE_BACKEND_URL}/api`,
+      headers: {
+        "Content-Type": "application/json",
+      },
+      timeout: 30000,
     });
-    return response.data;
+
+    try {
+      const response = await loginApi.post("/auth/login", {
+        email,
+        password,
+      });
+      return response.data;
+    } catch (error: any) {
+      // For login errors, throw the response data directly so the error message is preserved
+      if (error.response?.data) {
+        throw error.response.data;
+      }
+      throw error;
+    }
   }
 
   /**
