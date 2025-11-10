@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { Box, Typography } from '@mui/material';
 import type { Milestone } from '../../types/user';
 
 interface MilestonesProps {
@@ -11,136 +12,186 @@ const Milestones: React.FC<MilestonesProps> = ({ milestones }) => {
   const title = category === 'level' ? 'Niveles' : category === 'badge' ? 'Insignias' : '🎯 Hitos para Progresar';
 
   return (
-    <div style={{ width: '100%', margin: '16px 0', padding: '16px', border: '1px solid #ccc', borderRadius: '8px' }}>
-      <h3 style={{ marginBottom: '16px' }}>
+    <Box sx={{
+      width: '100%',
+      margin: { xs: '12px 0', sm: '16px 0' },
+      padding: { xs: '12px', sm: '16px' },
+      border: '1px solid #ccc',
+      borderRadius: '8px'
+    }}>
+      <Typography variant="h6" component="h3" sx={{ marginBottom: '16px' }}>
         {title}
-      </h3>
+      </Typography>
 
       {milestones.length === 0 ? (
-        <p style={{ color: '#666', textAlign: 'center' }}>
+        <Typography variant="body2" sx={{ color: 'text.secondary', textAlign: 'center' }}>
           No hay hitos disponibles en este momento.
-        </p>
+        </Typography>
       ) : (
-        <div style={{ position: 'relative', padding: '40px 20px', minHeight: '120px' }}>
+        <Box sx={{
+          position: 'relative',
+          padding: { xs: '30px 10px', sm: '40px 20px' },
+          minHeight: '120px',
+          overflowX: 'auto',
+          '&::-webkit-scrollbar': {
+            height: '4px',
+          },
+          '&::-webkit-scrollbar-track': {
+            backgroundColor: '#f1f1f1',
+            borderRadius: '2px',
+          },
+          '&::-webkit-scrollbar-thumb': {
+            backgroundColor: '#c1c1c1',
+            borderRadius: '2px',
+            '&:hover': {
+              backgroundColor: '#a8a8a8',
+            },
+          },
+        }}>
           {/* Timeline line */}
-          <div style={{
+          <Box sx={{
             position: 'absolute',
             top: '50%',
             left: '5%',
             right: '5%',
             height: '3px',
-            backgroundColor: '#e0e0e0',
-            zIndex: 1
+            backgroundColor: 'grey.300',
+            zIndex: 1,
+            minWidth: milestones.length > 3 ? `${milestones.length * 120}px` : '100%'
           }} />
 
           {/* Milestones dots */}
           {milestones.map((milestone, index) => {
             const position = milestones.length > 1 ? (index / (milestones.length - 1)) * 90 + 5 : 50; // 5% to 95%
             return (
-              <div
+              <Box
                 key={milestone.id}
-                style={{
+                sx={{
                   position: 'absolute',
                   left: `${position}%`,
                   top: '50%',
                   transform: 'translate(-50%, -25px)',
-                  zIndex: 2
+                  zIndex: 2,
+                  minWidth: '120px',
+                  display: 'flex',
+                  justifyContent: 'center'
                 }}
                 onMouseEnter={() => setHoveredMilestone(milestone)}
                 onMouseLeave={() => setHoveredMilestone(null)}
               >
-                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-                  <div
-                    style={{
-                      width: '50px',
-                      height: '50px',
+                <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+                  <Box
+                    sx={{
+                      width: { xs: '40px', sm: '50px' },
+                      height: { xs: '40px', sm: '50px' },
                       borderRadius: '50%',
-                      backgroundColor: milestone.isCompleted ? '#4caf50' : '#ccc',
+                      backgroundColor: milestone.isCompleted ? 'success.main' : 'grey.400',
                       cursor: 'pointer',
                       border: '3px solid white',
-                      boxShadow: '0 3px 6px rgba(0,0,0,0.3)'
+                      boxShadow: '0 3px 6px rgba(0,0,0,0.3)',
+                      '&:hover': {
+                        transform: 'scale(1.1)',
+                        transition: 'transform 0.2s ease'
+                      }
                     }}
                     title={milestone.title}
                   />
-                  <div style={{
+                  <Box sx={{
                     marginTop: '10px',
-                    fontSize: '13px',
-                    color: '#666',
+                    fontSize: { xs: '11px', sm: '13px' },
+                    color: 'text.secondary',
                     textAlign: 'center',
-                    maxWidth: '100px',
+                    maxWidth: { xs: '80px', sm: '100px' },
                     wordWrap: 'break-word',
                     lineHeight: '1.2'
                   }}>
                     {milestone.title.length > 18 ? milestone.title.substring(0, 18) + '...' : milestone.title}
-                  </div>
-                </div>
-              </div>
+                  </Box>
+                </Box>
+              </Box>
             );
           })}
 
           {/* Tooltip */}
           {hoveredMilestone && (
-            <div style={{
+            <Box sx={{
               position: 'fixed',
               top: '50%',
               left: '50%',
               transform: 'translate(-50%, -50%)',
-              backgroundColor: 'white',
-              border: '1px solid #ccc',
+              backgroundColor: 'background.paper',
+              border: '1px solid',
+              borderColor: 'divider',
               borderRadius: '8px',
-              padding: '16px',
+              padding: { xs: '12px', sm: '16px' },
               boxShadow: '0 4px 8px rgba(0,0,0,0.1)',
               zIndex: 1000,
-              maxWidth: '300px',
-              fontSize: '14px',
+              maxWidth: { xs: '280px', sm: '300px' },
+              fontSize: { xs: '13px', sm: '14px' },
               pointerEvents: 'none'
             }}>
-              <h4 style={{ margin: '0 0 8px 0' }}>{hoveredMilestone.title}</h4>
-              <p style={{ margin: '0 0 8px 0', color: '#666' }}>{hoveredMilestone.description}</p>
-              <div style={{ marginBottom: '8px' }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '4px' }}>
-                  <span>Progreso: {hoveredMilestone.progress} / {hoveredMilestone.target}</span>
+              <Typography variant="h6" sx={{ margin: '0 0 8px 0' }}>
+                {hoveredMilestone.title}
+              </Typography>
+              <Typography variant="body2" sx={{ margin: '0 0 8px 0', color: 'text.secondary' }}>
+                {hoveredMilestone.description}
+              </Typography>
+              <Box sx={{ marginBottom: '8px' }}>
+                <Box sx={{ display: 'flex', justifyContent: 'space-between', marginBottom: '4px' }}>
+                  <Typography variant="body2">
+                    Progreso: {hoveredMilestone.progress} / {hoveredMilestone.target}
+                  </Typography>
                   {(() => {
                     const percentage = hoveredMilestone.target > 0 ? Math.round((hoveredMilestone.progress / hoveredMilestone.target) * 100) : NaN;
                     return !isNaN(percentage) ? (
-                      <span>{percentage}%</span>
+                      <Typography variant="body2">{percentage}%</Typography>
                     ) : null;
                   })()}
-                </div>
-                <div style={{ width: '100%', height: '8px', backgroundColor: '#e0e0e0', borderRadius: '4px', overflow: 'hidden' }}>
-                  <div
-                    style={{
+                </Box>
+                <Box sx={{
+                  width: '100%',
+                  height: '8px',
+                  backgroundColor: 'grey.300',
+                  borderRadius: '4px',
+                  overflow: 'hidden'
+                }}>
+                  <Box
+                    sx={{
                       width: `${hoveredMilestone.target > 0 ? Math.min((hoveredMilestone.progress / hoveredMilestone.target) * 100, 100) : 0}%`,
                       height: '100%',
-                      backgroundColor: hoveredMilestone.isCompleted ? '#4caf50' : '#1976d2',
+                      backgroundColor: hoveredMilestone.isCompleted ? 'success.main' : 'primary.main',
                       transition: 'width 0.3s ease'
                     }}
                   />
-                </div>
-              </div>
-              <div>
-                <strong>Instrucciones:</strong>
-                <ol style={{ paddingLeft: '20px', margin: '4px 0' }}>
+                </Box>
+              </Box>
+              <Box>
+                <Typography variant="body2" sx={{ fontWeight: 'bold' }}>
+                  Instrucciones:
+                </Typography>
+                <Box component="ol" sx={{ paddingLeft: '20px', margin: '4px 0' }}>
                   {hoveredMilestone.instructions.map((instruction, idx) => (
-                    <li key={idx} style={{ marginBottom: '2px' }}>{instruction}</li>
+                    <Box component="li" key={idx} sx={{ marginBottom: '2px', fontSize: 'inherit' }}>
+                      {instruction}
+                    </Box>
                   ))}
-                </ol>
-              </div>
+                </Box>
+              </Box>
               {hoveredMilestone.category === 'badge' && hoveredMilestone.badgeName && (
-                <p style={{ margin: '8px 0 0 0', color: '#666' }}>
+                <Typography variant="body2" sx={{ margin: '8px 0 0 0', color: 'text.secondary' }}>
                   🏆 Al completar obtendrás: <strong>{hoveredMilestone.badgeName}</strong>
-                </p>
+                </Typography>
               )}
               {hoveredMilestone.category === 'level' && hoveredMilestone.levelRequired && (
-                <p style={{ margin: '8px 0 0 0', color: '#666' }}>
+                <Typography variant="body2" sx={{ margin: '8px 0 0 0', color: 'text.secondary' }}>
                   ⭐ Al completar subirás al Nivel {hoveredMilestone.levelRequired}
-                </p>
+                </Typography>
               )}
-            </div>
+            </Box>
           )}
-        </div>
+        </Box>
       )}
-    </div>
+    </Box>
   );
 };
 

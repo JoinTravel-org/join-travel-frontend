@@ -189,9 +189,12 @@ export const GroupChatDialog: React.FC<GroupChatDialogProps> = ({
       fullWidth
       PaperProps={{
         sx: {
-          height: "600px",
+          height: { xs: "100vh", sm: "600px" },
+          maxHeight: { xs: "100vh", sm: "80vh" },
           display: "flex",
           flexDirection: "column",
+          margin: { xs: 0, sm: 2 },
+          width: { xs: "100vw", sm: "auto" },
         },
       }}
     >
@@ -217,7 +220,7 @@ export const GroupChatDialog: React.FC<GroupChatDialogProps> = ({
         sx={{
           flex: 1,
           overflow: "auto",
-          p: 2,
+          p: { xs: 1, sm: 2 },
           display: "flex",
           flexDirection: "column",
         }}
@@ -282,8 +285,8 @@ export const GroupChatDialog: React.FC<GroupChatDialogProps> = ({
                   <Paper
                     elevation={isOwnMessage ? 2 : 1}
                     sx={{
-                      p: 1.5,
-                      maxWidth: "70%",
+                      p: { xs: 1, sm: 1.5 },
+                      maxWidth: { xs: "85%", sm: "70%" },
                       backgroundColor: isOwnMessage ? "#1976d2" : "#e0e0e0",
                       color: isOwnMessage ? "#ffffff" : "#000000",
                       borderRadius: isOwnMessage
@@ -336,7 +339,7 @@ export const GroupChatDialog: React.FC<GroupChatDialogProps> = ({
         sx={{
           borderTop: 1,
           borderColor: "divider",
-          p: 2,
+          p: { xs: 1, sm: 2 },
           gap: 1,
           flexDirection: "column",
           alignItems: "stretch",

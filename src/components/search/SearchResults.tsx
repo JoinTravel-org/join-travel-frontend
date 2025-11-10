@@ -326,8 +326,8 @@ const SearchResults: React.FC = () => {
   };
 
   return (
-    <Container maxWidth="lg" sx={{ py: 4 }}>
-      <Typography variant="h4" component="h1" gutterBottom sx={{ mb: 3 }}>
+    <Container maxWidth="lg" sx={{ py: { xs: 2, sm: 4 } }}>
+      <Typography variant="h4" component="h1" gutterBottom sx={{ mb: { xs: 2, sm: 3 } }}>
         Buscar
       </Typography>
 
@@ -340,7 +340,7 @@ const SearchResults: React.FC = () => {
       </Paper>
 
       {/* Search Form */}
-      <Paper sx={{ p: 3, mb: 4 }}>
+      <Paper sx={{ p: { xs: 2, sm: 3 }, mb: { xs: 3, sm: 4 } }}>
         <Box component="form" onSubmit={handleSearchSubmit}>
           {activeTab === 1 && (
             <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
@@ -373,7 +373,12 @@ const SearchResults: React.FC = () => {
           {/* Filters for places */}
           {activeTab === 1 && (
             <Box sx={{ display: "flex", flexDirection: "column", gap: 2, mb: 2 }}>
-              <Box sx={{ display: "flex", gap: 2, alignItems: "center" }}>
+              <Box sx={{
+                display: "flex",
+                flexDirection: { xs: "column", sm: "row" },
+                gap: { xs: 1, sm: 2 },
+                alignItems: { xs: "stretch", sm: "center" }
+              }}>
                 <TextField
                   fullWidth
                   label="Ciudad"
@@ -394,18 +399,25 @@ const SearchResults: React.FC = () => {
                     ),
                   }}
                 />
-                <Typography variant="body2" color="text.secondary" sx={{ minWidth: "fit-content" }}>
-                  o
-                </Typography>
-                <Button
-                  variant="outlined"
-                  startIcon={locationLoading ? <CircularProgress size={20} /> : <MyLocationIcon />}
-                  onClick={handleGetLocation}
-                  disabled={locationLoading || apiKeyLoading}
-                  sx={{ minWidth: "auto" }}
-                >
-                  {locationLoading ? "Obteniendo..." : apiKeyLoading ? "Cargando..." : "Ubicación actual"}
-                </Button>
+                <Box sx={{
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: { xs: "center", sm: "flex-start" },
+                  gap: 1
+                }}>
+                  <Typography variant="body2" color="text.secondary" sx={{ minWidth: "fit-content" }}>
+                    o
+                  </Typography>
+                  <Button
+                    variant="outlined"
+                    startIcon={locationLoading ? <CircularProgress size={20} /> : <MyLocationIcon />}
+                    onClick={handleGetLocation}
+                    disabled={locationLoading || apiKeyLoading}
+                    sx={{ minWidth: "auto", width: { xs: "100%", sm: "auto" } }}
+                  >
+                    {locationLoading ? "Obteniendo..." : apiKeyLoading ? "Cargando..." : "Ubicación actual"}
+                  </Button>
+                </Box>
               </Box>
               <Box sx={{ display: "flex", flexDirection: { xs: "column", sm: "row" }, alignItems: { xs: "stretch", sm: "center" }, gap: 2 }}>
                 <TextField

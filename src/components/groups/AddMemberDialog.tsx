@@ -138,7 +138,18 @@ export const AddMemberDialog: React.FC<AddMemberDialogProps> = ({
   };
 
   return (
-    <Dialog open={open} onClose={onClose} maxWidth="sm" fullWidth>
+    <Dialog
+      open={open}
+      onClose={onClose}
+      maxWidth="sm"
+      fullWidth
+      sx={{
+        "& .MuiDialog-paper": {
+          margin: { xs: 1, sm: 2 },
+          width: { xs: "calc(100% - 16px)", sm: "auto" },
+        },
+      }}
+    >
       <DialogTitle>
         <Box display="flex" alignItems="center" gap={1}>
           <PersonAddIcon />
