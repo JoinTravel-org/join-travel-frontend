@@ -54,11 +54,10 @@ const Milestones: React.FC<MilestonesProps> = ({ milestones }) => {
             position: 'absolute',
             top: '50%',
             left: '20px',
-            right: '20px',
+            width: `${Math.max(milestones.length * 160 - 40, 100)}px`,
             height: '3px',
             backgroundColor: 'grey.300',
-            zIndex: 1,
-            minWidth: `${Math.max(milestones.length * 160, 100)}%`
+            zIndex: 1
           }} />
 
           {/* Milestones dots */}
