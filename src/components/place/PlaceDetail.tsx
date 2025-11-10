@@ -23,6 +23,7 @@ import type { Place } from "../../types/place";
 import { useAuth } from "../../hooks/useAuth";
 import ReviewForm from "../reviews/ReviewForm";
 import ReviewList from "./ReviewList";
+import QuestionList from "../questions/QuestionList";
 import reviewService from "../../services/review.service";
 import { Rating } from '@fluentui/react-rating';
 import PlaceMap from "./PlaceMap";
@@ -48,6 +49,7 @@ const PlaceDetail: React.FC = () => {
   const [isFavorite, setIsFavorite] = useState(false);
   const [favoriteLoading, setFavoriteLoading] = useState(false);
   const [favoriteError, setFavoriteError] = useState<string | null>(null);
+  const [questionRefreshTrigger, setQuestionRefreshTrigger] = useState(0);
 
   useEffect (() => {
     const fetchReviewStats = async () => {
@@ -364,6 +366,12 @@ const PlaceDetail: React.FC = () => {
           <ReviewList
             placeId={place.id}
             refreshTrigger={reviewRefreshTrigger}
+          />
+
+          {/* --- Questions and Answers Section --- */}
+          <QuestionList
+            placeId={place.id}
+            refreshTrigger={questionRefreshTrigger}
           />
         </Box>
       </Box>
