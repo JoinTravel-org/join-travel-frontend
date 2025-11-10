@@ -25,25 +25,22 @@ const Footer: React.FC = () => {
       <Container
         maxWidth="lg"
         sx={{
-          py: { xs: 1, sm: 2 },
+          py: { xs: 0.5, sm: 1 },
           display: "grid",
           gridTemplateColumns: { xs: "1fr", sm: "1fr auto" },
           alignItems: "center",
-          gap: 2,
+          gap: { xs: 1, sm: 2 },
         }}
       >
         <Box>
-          <Typography variant="body2" sx={{ opacity: 0.9 }}>
-            © {year} JoinTravel
-          </Typography>
-          <Typography variant="caption" sx={{ display: "block", mt: 0.5, color: "var(--color-text-secondary)" }}>
-            Hecho con ❤️ por el equipo de JoinTravel
+          <Typography variant="caption" sx={{ opacity: 0.9, fontSize: { xs: "0.75rem", sm: "0.875rem" } }}>
+            © {year} JoinTravel • Hecho con ❤️ por el equipo de JoinTravel
           </Typography>
         </Box>
 
         <Stack
           direction="row"
-          spacing={3}
+          spacing={{ xs: 2, sm: 3 }}
           sx={{ justifyContent: { xs: "flex-start", sm: "flex-end" }, alignItems: "center" }}
         >
           <MUILink
@@ -60,6 +57,7 @@ const Footer: React.FC = () => {
               display: "flex",
               alignItems: "center",
               gap: 0.5,
+              fontSize: { xs: "0.75rem", sm: "0.875rem" },
             }}
           >
             <Email fontSize="small" />
@@ -81,6 +79,7 @@ const Footer: React.FC = () => {
               display: "flex",
               alignItems: "center",
               gap: 0.5,
+              fontSize: { xs: "0.75rem", sm: "0.875rem" },
             }}
             aria-label="Código fuente en GitHub (se abre en una nueva pestaña)"
           >
@@ -92,12 +91,14 @@ const Footer: React.FC = () => {
 
       <Divider sx={{ opacity: 0.08 }} />
 
-      <Container maxWidth="lg" sx={{ py: 0.5 }}>
+      <Container maxWidth="lg" sx={{ py: { xs: 0.25, sm: 0.5 } }}>
         <Typography
           variant="caption"
           sx={{
             display: "block",
             color: "var(--color-text-secondary)",
+            fontSize: { xs: "0.7rem", sm: "0.75rem" },
+            textAlign: "center",
           }}
         >
           Esta web respeta tu privacidad. No se cargan scripts de seguimiento invasivos.
