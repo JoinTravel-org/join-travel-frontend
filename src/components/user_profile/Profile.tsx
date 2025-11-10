@@ -5,6 +5,7 @@ import UserStats from './UserStats';
 import Notification from './Notification';
 import Milestones from './Milestones';
 import UserGallery from '../user/UserGallery';
+import UserReviewList from '../user/UserReviewList';
 import userService from '../../services/user.service';
 import api from '../../services/api.service';
 import type { Milestone } from '../../types/user';
@@ -176,6 +177,9 @@ const Profile: React.FC = () => {
 
             {/* Gallery Section */}
             {user?.id && <UserGallery userId={user.id} />}
+
+            {/* Reviews Section */}
+            {user?.id && <UserReviewList userId={user.id} />}
 
             <Box sx={{ mt: 4 }}>
               <Typography variant="h5" component="h2" gutterBottom>
