@@ -115,6 +115,17 @@ export const DirectChatDialog: React.FC<DirectChatDialogProps> = ({
       // Send via websocket if connected, otherwise fallback to HTTP
       if (socketService.isConnected()) {
         socketService.sendDirectMessage(otherUserId, messageToSend);
+        
+        // Add message optimistically (will show immediately)
+        const optimisticMessage: DirectMessage = {
+          id: `temp-${Date.now()}`, // Temporary ID
+          senderId: currentUserId!,
+          receiverId: otherUserId,
+          content: messageToSend,
+          isRead: false,
+          createdAt: new Date().toISOString(),
+        };
+        setMessages((prev) => [...prev, optimisticMessage]);
       } else {
         const response = await directMessageService.sendMessage(
           otherUserId,

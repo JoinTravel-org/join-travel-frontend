@@ -26,6 +26,7 @@ import GroupExpenses from "./GroupExpenses";
 import type { Group, CreateGroupRequest } from "../../types/group";
 import { AddMemberDialog } from "./AddMemberDialog";
 import { GroupChatDialog } from "./GroupChatDialog";
+import { GroupDetailDialog } from "./GroupDetailDialog";
 
 export default function GroupPage() {
   const navigate = useNavigate();
@@ -48,6 +49,8 @@ export default function GroupPage() {
   const [groupToDelete, setGroupToDelete] = useState<Group | null>(null);
   const [deleteLoading, setDeleteLoading] = useState(false);
   const [deleteError, setDeleteError] = useState<string | null>(null);
+  const [detailDialogOpen, setDetailDialogOpen] = useState(false);
+  const [selectedGroupForDetail, setSelectedGroupForDetail] = useState<Group | null>(null);
   const [selectedGroupId, setSelectedGroupId] = useState<string | null>(null);
   const [tabValue, setTabValue] = useState(0);
 
@@ -233,18 +236,20 @@ export default function GroupPage() {
                     border: "1px solid #e0e0e0",
                     borderRadius: 2,
                     p: 2,
-                    minWidth: 250,
-                    maxWidth: 350,
-                    flex: "1 1 250px",
+                    minWidth: 300,
+                    maxWidth: 450,
+                    flex: "1 1 350px",
                     background: "#fafafa",
                     cursor: "pointer",
+                    display: "flex",
+                    flexDirection: "column",
                     "&:hover": {
                       background: "#f5f5f5",
                       boxShadow: 1,
                     },
                   }}
                   onClick={(e) => {
-                    // Prevent navigation to expenses if clicking on interactive elements
+                    // Prevent navigation if clicking on interactive elements
                     if (
                       (e.target as HTMLElement).closest(
                         "button, input, textarea, select"
@@ -253,80 +258,89 @@ export default function GroupPage() {
                       e.stopPropagation();
                       return;
                     }
-                    handleGroupClick(group.id);
+                    setSelectedGroupForDetail(group);
+                    setDetailDialogOpen(true);
                   }}
                 >
-                  <Typography variant="h6" sx={{ mb: 1 }}>
-                    {group.name}
-                  </Typography>
-                  <Typography
-                    variant="body2"
-                    color="text.secondary"
-                    sx={{ mb: 1 }}
-                  >
-                    {group.description || "Sin descripción"}
-                  </Typography>
-                  <Typography variant="caption" color="text.secondary">
-                    Admin: {group.admin?.email || group.adminId}
-                  </Typography>
-
-                  {/* Display group members */}
-                  <Box sx={{ mt: 2 }}>
-                    <Typography variant="subtitle2" sx={{ mb: 0.5 }}>
-                      Usuarios:
+                  {/* Content that grows to push buttons down */}
+                  <Box sx={{ flex: 1 }}>
+                    <Typography variant="h6" sx={{ mb: 1 }}>
+                      {group.name}
                     </Typography>
-                    {group.members && group.members.length > 0 ? (
-                      <Box
-                        sx={{
-                          display: "flex",
-                          flexDirection: "column",
-                          gap: 0.5,
-                        }}
-                      >
-                        {group.members
-                          ?.filter((member) => member.id !== auth.user?.id)
-                          .map((member) => (
-                            <Box
-                              key={member.id}
-                              sx={{
-                                display: "flex",
-                                alignItems: "center",
-                                pl: 1,
-                              }}
-                            >
-                              <Typography
-                                variant="body2"
-                                color="text.secondary"
-                                sx={{ flexGrow: 1 }}
-                              >
-                                • {member.email}
-                              </Typography>
-                              <Button
-                                size="small"
-                                color="error"
-                                sx={{ minWidth: 0, ml: 1 }}
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  handleRemoveUser(group.id, member.id);
+                    <Typography
+                      variant="body2"
+                      color="text.secondary"
+                      sx={{ mb: 1 }}
+                    >
+                      {group.description || "Sin descripción"}
+                    </Typography>
+                    <Typography variant="caption" color="text.secondary">
+                      Admin: {group.admin?.email || group.adminId}
+                    </Typography>
+
+                    {/* Display group members */}
+                    <Box sx={{ mt: 2 }}>
+                      <Typography variant="subtitle2" sx={{ mb: 0.5 }}>
+                        Usuarios:
+                      </Typography>
+                      {group.members && group.members.length > 0 ? (
+                        <Box
+                          sx={{
+                            display: "flex",
+                            flexDirection: "column",
+                            gap: 0.5,
+                          }}
+                        >
+                          {group.members
+                            .filter((member) => member.id !== group.adminId)
+                            .map((member) => (
+                              <Box
+                                key={member.id}
+                                sx={{
+                                  display: "flex",
+                                  alignItems: "center",
+                                  pl: 1,
                                 }}
                               >
-                                <CloseIcon fontSize="small" />
-                              </Button>
-                            </Box>
-                          ))}
-                      </Box>
-                    ) : (
-                      <Typography
-                        variant="body2"
-                        color="text.disabled"
-                        sx={{ pl: 1 }}
-                      >
-                        No hay usuarios agregados
-                      </Typography>
-                    )}
+                                <Typography
+                                  variant="body2"
+                                  color="text.secondary"
+                                  sx={{ flexGrow: 1 }}
+                                >
+                                  • {member.email}
+                                  {member.id === auth.user?.id && " (tú)"}
+                                </Typography>
+                                {/* Only show remove button if current user is admin */}
+                                {group.adminId === auth.user?.id && (
+                                  <Button
+                                    size="small"
+                                    color="error"
+                                    sx={{ minWidth: 0, ml: 1 }}
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      handleRemoveUser(group.id, member.id);
+                                    }}
+                                  >
+                                    <CloseIcon fontSize="small" />
+                                  </Button>
+                                )}
+                              </Box>
+                            ))}
+                        </Box>
+                      ) : (
+                        <Typography
+                          variant="body2"
+                          color="text.disabled"
+                          sx={{ pl: 1 }}
+                        >
+                          No hay usuarios agregados
+                        </Typography>
+                      )}
+                    </Box>
                   </Box>
 
-                  <Box sx={{ mt: 2, display: "flex", gap: 1 }}>
+                  {/* Buttons always at the bottom */}
+                  <Box sx={{ mt: 2, display: "flex", flexWrap: "wrap", gap: 1 }}>
                     {/* Only show add members button if current user is admin */}
                     {group.adminId === auth.user?.id && (
                       <Button
@@ -337,8 +351,9 @@ export default function GroupPage() {
                           e.stopPropagation();
                           handleOpenAddMemberDialog(group);
                         }}
+                        sx={{ flex: "1 1 auto", minWidth: "140px" }}
                       >
-                        Agregar usuarios
+                        Agregar
                       </Button>
                     )}
                     <Button
@@ -350,8 +365,9 @@ export default function GroupPage() {
                         setSelectedGroupId(group.id);
                         setTabValue(1);
                       }}
+                      sx={{ flex: "1 1 auto", minWidth: "110px" }}
                     >
-                      Ver Gastos
+                      Gastos
                     </Button>
                     <Button
                       size="small"
@@ -362,26 +378,29 @@ export default function GroupPage() {
                         e.stopPropagation();
                         handleOpenChat(group);
                       }}
+                      sx={{ flex: "1 1 auto", minWidth: "100px" }}
                     >
                       Chat
                     </Button>
                   </Box>
 
-                  {/* Delete Group Button */}
-                  <Box sx={{ position: "absolute", top: 8, right: 8 }}>
-                    <Button
-                      size="small"
-                      color="error"
-                      onClick={() => {
-                        setGroupToDelete(group);
-                        setDeleteDialogOpen(true);
-                        setDeleteError(null);
-                      }}
-                      sx={{ minWidth: 0, p: 0 }}
-                    >
-                      <DeleteIcon />
-                    </Button>
-                  </Box>
+                  {/* Delete Group Button - Only show if user is admin */}
+                  {group.adminId === auth.user?.id && (
+                    <Box sx={{ position: "absolute", top: 8, right: 8 }}>
+                      <Button
+                        size="small"
+                        color="error"
+                        onClick={() => {
+                          setGroupToDelete(group);
+                          setDeleteDialogOpen(true);
+                          setDeleteError(null);
+                        }}
+                        sx={{ minWidth: 0, p: 0 }}
+                      >
+                        <DeleteIcon />
+                      </Button>
+                    </Box>
+                  )}
                 </Box>
               ))}
             </Box>
@@ -521,6 +540,21 @@ export default function GroupPage() {
           groupName={selectedGroupForChat.name}
         />
       )}
+
+      {/* Group Detail Dialog */}
+      <GroupDetailDialog
+        open={detailDialogOpen}
+        group={selectedGroupForDetail}
+        onClose={() => {
+          setDetailDialogOpen(false);
+          setSelectedGroupForDetail(null);
+        }}
+        onAddMember={(group) => {
+          setSelectedGroup(group);
+          setAddMemberDialogOpen(true);
+        }}
+        onRefresh={fetchGroups}
+      />
     </Container>
   );
 }

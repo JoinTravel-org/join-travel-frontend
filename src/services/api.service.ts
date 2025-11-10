@@ -267,6 +267,16 @@ class ApiService {
   }
 
   /**
+   * Obtiene los grupos donde un itinerario está asignado
+   * @param id - ID del itinerario
+   * @returns Promise con la lista de grupos
+   */
+  async getItineraryGroups(id: string) {
+    const response = await this.api.get(`/itineraries/${id}/groups`);
+    return response.data;
+  }
+
+  /**
    * Elimina un itinerario
    * @param id - ID del itinerario a eliminar
    * @returns Promise con la respuesta del servidor

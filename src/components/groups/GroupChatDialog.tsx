@@ -122,6 +122,17 @@ export const GroupChatDialog: React.FC<GroupChatDialogProps> = ({
       // Send via websocket if connected, otherwise fallback to HTTP
       if (socketService.isConnected()) {
         socketService.sendGroupMessage(groupId, messageToSend);
+        
+        // Add message optimistically (will show immediately)
+        const optimisticMessage: GroupMessage = {
+          id: `temp-${Date.now()}`, // Temporary ID
+          groupId: groupId,
+          senderId: currentUserId!,
+          senderEmail: authContext?.user?.email || "",
+          content: messageToSend,
+          createdAt: new Date().toISOString(),
+        };
+        setMessages((prev) => [...prev, optimisticMessage]);
       } else {
         const response = await groupMessageService.sendMessage(groupId, {
           content: messageToSend,

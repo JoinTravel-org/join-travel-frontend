@@ -1,4 +1,5 @@
 import type { User } from "./user";
+import type { Itinerary } from "./itinerary";
 
 export interface CreateGroupRequest {
   name: string;
@@ -14,6 +15,8 @@ export interface Group {
   createdAt: string;
   updatedAt: string;
   members?: User[]; // Array of full user objects
+  assignedItineraryId?: string | null;
+  assignedItinerary?: Itinerary; // Full itinerary object if populated
 }
 
 export interface GroupResponse {
