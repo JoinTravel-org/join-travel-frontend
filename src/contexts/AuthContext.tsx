@@ -2,6 +2,7 @@ import React, { createContext, useState, useEffect } from "react";
 import type { ReactNode } from "react";
 import authService from "../services/auth.service";
 import socketService from "../services/socket.service";
+import apiService from "../services/api.service";
 import type { User, UserStats } from "../types/user";
 
 interface AuthContextType {
@@ -30,35 +31,51 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     const storedRefreshToken = localStorage.getItem("refreshToken");
     const storedUser = localStorage.getItem("user");
 
-    if (storedAccessToken && storedRefreshToken && storedUser) {
-      // Validate tokens are not expired before restoring session
-      try {
-        const tokenPayload = JSON.parse(atob(storedAccessToken.split('.')[1]));
-        const currentTime = Math.floor(Date.now() / 1000);
+    // Function to validate tokens synchronously
+    const validateTokens = async () => {
+      if (!storedAccessToken || !storedRefreshToken || !storedUser) {
+        // Clear any partial auth state
+        localStorage.removeItem("accessToken");
+        localStorage.removeItem("refreshToken");
+        localStorage.removeItem("user");
+        return;
+      }
 
-        if (tokenPayload.exp && tokenPayload.exp > currentTime) {
-          setAccessToken(storedAccessToken);
+      try {
+        // First, try to validate the access token with a simple API call
+        await apiService.getUserStats(JSON.parse(atob(storedAccessToken.split('.')[1])).userId);
+        // If successful, tokens are valid, restore session
+        setAccessToken(storedAccessToken);
+        setUser(JSON.parse(storedUser));
+        socketService.connect(storedAccessToken);
+      } catch (accessTokenError) {
+        // Access token is invalid, try refresh token
+        try {
+          const refreshResponse = await apiService.getAxiosInstance().post("/auth/refresh", {
+            refreshToken: storedRefreshToken
+          });
+          const { accessToken: newAccessToken, refreshToken: newRefreshToken } = refreshResponse.data.data;
+
+          // Update tokens in localStorage
+          localStorage.setItem("accessToken", newAccessToken);
+          localStorage.setItem("refreshToken", newRefreshToken);
+
+          // Restore session with new tokens
+          setAccessToken(newAccessToken);
           setUser(JSON.parse(storedUser));
-          // Connect to socket when user is restored from localStorage
-          socketService.connect(storedAccessToken);
-        } else {
-          // Access token is expired, clear all auth state
+          socketService.connect(newAccessToken);
+        } catch (refreshError) {
+          // Both tokens are invalid, clear all auth state
+          console.warn("Both tokens invalid, clearing auth state:", refreshError);
           localStorage.removeItem("accessToken");
           localStorage.removeItem("refreshToken");
           localStorage.removeItem("user");
         }
-      } catch (error) {
-        // Invalid token format, clear all auth state
-        localStorage.removeItem("accessToken");
-        localStorage.removeItem("refreshToken");
-        localStorage.removeItem("user");
       }
-    } else {
-      // Clear any partial auth state
-      localStorage.removeItem("accessToken");
-      localStorage.removeItem("refreshToken");
-      localStorage.removeItem("user");
-    }
+    };
+
+    // Validate tokens on app load
+    validateTokens();
 
     // Listen for force logout events from API service
     const handleForceLogout = () => {

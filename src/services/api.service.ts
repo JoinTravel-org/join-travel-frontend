@@ -97,7 +97,10 @@ class ApiService {
 
             const refreshToken = localStorage.getItem("refreshToken");
             if (!refreshToken) {
-              // No refresh token available, logout user
+              // No refresh token available, clear tokens and logout user
+              localStorage.removeItem("accessToken");
+              localStorage.removeItem("refreshToken");
+              localStorage.removeItem("user");
               this.handleLogout();
               return Promise.reject(error.response.data);
             }
@@ -118,7 +121,10 @@ class ApiService {
                   resolve(this.api(originalRequest));
                 })
                 .catch((refreshError: any) => {
-                  // Refresh failed, logout user
+                  // Refresh failed, clear tokens and logout user
+                  localStorage.removeItem("accessToken");
+                  localStorage.removeItem("refreshToken");
+                  localStorage.removeItem("user");
                   this.processQueue(refreshError, null);
                   this.handleLogout();
                   reject(refreshError);
