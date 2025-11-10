@@ -81,9 +81,8 @@ export default function GroupExpenses({ groupId }: GroupExpensesProps) {
   };
 
   const canDeleteExpense = (expense: Expense): boolean => {
-    // User can delete their own expenses
-    // Note: Group admin check would require fetching group info, keeping it simple for now
-    return expense.userId === auth.user?.id;
+    // Only group admin can delete expenses
+    return isAdmin;
   };
 
   if (loading) {
@@ -108,7 +107,8 @@ export default function GroupExpenses({ groupId }: GroupExpensesProps) {
         Gastos del Grupo
       </Typography>
 
-      {groupId && (
+      {/* Only show add expense form if user is admin */}
+      {groupId && isAdmin && (
         <Box sx={{ mb: 3 }}>
           <AddExpenseForm
             groupId={groupId}
