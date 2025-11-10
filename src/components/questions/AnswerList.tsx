@@ -11,9 +11,10 @@ import questionService, { type Answer } from "../../services/question.service";
 
 interface AnswerListProps {
   questionId: string;
+  refreshTrigger?: number;
 }
 
-const AnswerList: React.FC<AnswerListProps> = ({ questionId }) => {
+const AnswerList: React.FC<AnswerListProps> = ({ questionId, refreshTrigger }) => {
   const [answers, setAnswers] = useState<Answer[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -38,7 +39,7 @@ const AnswerList: React.FC<AnswerListProps> = ({ questionId }) => {
 
   useEffect(() => {
     fetchAnswers();
-  }, [questionId]);
+  }, [questionId, refreshTrigger]);
 
   const handleVoteUpdate = (answerId: string, newVoteCount: number, userVote: 'up' | null) => {
     setAnswers(prevAnswers =>

@@ -59,6 +59,9 @@ const QuestionItem: React.FC<QuestionItemProps> = ({ question, onVoteUpdate }) =
   const handleAnswerCreated = () => {
     setShowAddAnswer(false);
     setExpanded(true); // Expand to show the new answer
+    // Force refresh of answers by updating the key
+    setExpanded(false);
+    setTimeout(() => setExpanded(true), 10);
   };
 
   const timeAgo = formatDistanceToNow(new Date(question.createdAt), {
@@ -168,7 +171,7 @@ const QuestionItem: React.FC<QuestionItemProps> = ({ question, onVoteUpdate }) =
       {/* Answers Section */}
       <Collapse in={expanded}>
         <Box sx={{ mt: 2 }}>
-          <AnswerList questionId={question.id} />
+          <AnswerList questionId={question.id} refreshTrigger={Date.now()} />
         </Box>
       </Collapse>
     </Box>
