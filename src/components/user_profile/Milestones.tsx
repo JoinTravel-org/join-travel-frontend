@@ -33,6 +33,7 @@ const Milestones: React.FC<MilestonesProps> = ({ milestones }) => {
           padding: { xs: '30px 10px', sm: '40px 20px' },
           minHeight: '120px',
           overflowX: 'auto',
+          overflowY: 'hidden',
           '&::-webkit-scrollbar': {
             height: '4px',
           },
