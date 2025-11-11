@@ -26,6 +26,7 @@
     "@types/react": "^19.1.13",
     "@vitejs/plugin-react": "^5.0.2",
     "axios": "^1.12.2",
+    "date-fns": "^4.1.0",
     "filepond": "^4.32.9",
     "filepond-plugin-file-validate-size": "^2.2.8",
     "filepond-plugin-image-preview": "^4.6.12",

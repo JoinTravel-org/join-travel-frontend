@@ -222,7 +222,9 @@ const AllReviewsList: React.FC = () => {
 
                   {/* Media preview */}
                   {review.media && review.media.length > 0 && (
-                    <Box sx={{ mt: 1, display: "flex", gap: 1, flexWrap: "wrap" }}>
+                    <Box
+                      sx={{ mt: 1, display: "flex", gap: 1, flexWrap: "wrap" }}
+                    >
                       {review.media.slice(0, 3).map((media) => (
                         <Box
                           key={media.id}
@@ -237,7 +239,9 @@ const AllReviewsList: React.FC = () => {
                         >
                           {media.mimeType.startsWith("image/") ? (
                             <img
-                              src={`${import.meta.env.VITE_BACKEND_URL || "http://localhost:8080"}/api/media/${media.id}`}
+                              src={`${
+                                import.meta.env.VITE_BACKEND_URL
+                              }/api/media/${media.id}`}
                               alt={media.originalFilename}
                               style={{
                                 width: "100%",
@@ -248,7 +252,9 @@ const AllReviewsList: React.FC = () => {
                             />
                           ) : media.mimeType.startsWith("video/") ? (
                             <video
-                              src={`${import.meta.env.VITE_BACKEND_URL || "http://localhost:8080"}/api/media/${media.id}`}
+                              src={`${
+                                import.meta.env.VITE_BACKEND_URL
+                              }/api/media/${media.id}`}
                               style={{
                                 width: "100%",
                                 height: "100%",
@@ -285,7 +291,9 @@ const AllReviewsList: React.FC = () => {
                   )}
 
                   {/* Like button */}
-                  <Box sx={{ display: 'flex', justifyContent: 'flex-end', mt: 1 }}>
+                  <Box
+                    sx={{ display: "flex", justifyContent: "flex-end", mt: 1 }}
+                  >
                     <LikeButton
                       reviewId={review.id}
                       initialLikeCount={review.likeCount || 0}

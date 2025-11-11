@@ -1,15 +1,23 @@
 import axios, { AxiosError } from "axios";
 import Logger from "../logger";
-import type { CreateItineraryRequest, CreateItineraryResponse } from "../types/itinerary";
+import type {
+  CreateItineraryRequest,
+  CreateItineraryResponse,
+} from "../types/itinerary";
 
 /**
  * Configuración del cliente API con axios
  */
 class ApiService {
   private api;
+  private isRefreshing = false;
+  private failedQueue: Array<{
+    resolve: (token: string) => void;
+    reject: (error: any) => void;
+  }> = [];
 
   constructor() {
-    const baseURL = import.meta.env.VITE_BACKEND_URL || "http://localhost:8080";
+    const baseURL = import.meta.env.VITE_BACKEND_URL;
 
     this.api = axios.create({
       baseURL: `${baseURL}/api`,
@@ -57,6 +65,8 @@ class ApiService {
         return response;
       },
       (error: AxiosError) => {
+        const originalRequest = error.config;
+
         if (error.response) {
           // El servidor respondió con un código de error
           Logger.getInstance().error(
@@ -67,6 +77,64 @@ class ApiService {
             }`,
             JSON.stringify(error.response.data)
           );
+
+          // Handle 401 Unauthorized - attempt token refresh
+          if (error.response.status === 401 && originalRequest && !(originalRequest as any)._retry) {
+            if (this.isRefreshing) {
+              // If refresh is already in progress, queue the request
+              return new Promise((resolve, reject) => {
+                this.failedQueue.push({ resolve, reject });
+              }).then(token => {
+                originalRequest.headers.Authorization = `Bearer ${token}`;
+                return this.api(originalRequest);
+              }).catch(err => {
+                return Promise.reject(err);
+              });
+            }
+
+            (originalRequest as any)._retry = true;
+            this.isRefreshing = true;
+
+            const refreshToken = localStorage.getItem("refreshToken");
+            if (!refreshToken) {
+              // No refresh token available, clear tokens and logout user
+              localStorage.removeItem("accessToken");
+              localStorage.removeItem("refreshToken");
+              localStorage.removeItem("user");
+              this.handleLogout();
+              return Promise.reject(error.response.data);
+            }
+
+            return new Promise((resolve, reject) => {
+              this.refreshToken(refreshToken)
+                .then((response: any) => {
+                  const { accessToken, refreshToken: newRefreshToken } = response.data.data;
+                  localStorage.setItem("accessToken", accessToken);
+                  localStorage.setItem("refreshToken", newRefreshToken);
+
+                  // Update Authorization header for original request
+                  originalRequest.headers.Authorization = `Bearer ${accessToken}`;
+
+                  // Process queued requests
+                  this.processQueue(null, accessToken);
+
+                  resolve(this.api(originalRequest));
+                })
+                .catch((refreshError: any) => {
+                  // Refresh failed, clear tokens and logout user
+                  localStorage.removeItem("accessToken");
+                  localStorage.removeItem("refreshToken");
+                  localStorage.removeItem("user");
+                  this.processQueue(refreshError, null);
+                  this.handleLogout();
+                  reject(refreshError);
+                })
+                .finally(() => {
+                  this.isRefreshing = false;
+                });
+            });
+          }
+
           throw error.response.data;
         } else if (error.request) {
           // La petición fue hecha pero no hubo respuesta
@@ -77,7 +145,8 @@ class ApiService {
           if (error.code === "ECONNABORTED") {
             throw {
               success: false,
-              message: "Error de conexión: La solicitud tardó demasiado tiempo.",
+              message:
+                "Error de conexión: La solicitud tardó demasiado tiempo.",
             };
           } else {
             throw {
@@ -98,6 +167,38 @@ class ApiService {
         }
       }
     );
+  }
+
+  /**
+   * Process queued requests after token refresh
+   */
+  private processQueue(error: any, token: string | null = null) {
+    this.failedQueue.forEach(({ resolve, reject }) => {
+      if (error) {
+        reject(error);
+      } else {
+        resolve(token!);
+      }
+    });
+
+    this.failedQueue = [];
+  }
+
+  /**
+   * Handle logout when refresh fails
+   */
+  private handleLogout() {
+    // Dispatch custom event to trigger force logout in AuthContext
+    window.dispatchEvent(new CustomEvent('forceLogout'));
+  }
+
+  /**
+   * Refresh access token using refresh token
+   * @param refreshToken - The refresh token
+   * @returns Promise with new tokens
+   */
+  private async refreshToken(refreshToken: string) {
+    return this.api.post("/auth/refresh", { refreshToken });
   }
 
   /**
@@ -131,11 +232,28 @@ class ApiService {
    * @returns Promise con la respuesta del servidor
    */
   async login(email: string, password: string) {
-    const response = await this.api.post("/auth/login", {
-      email,
-      password,
+    // Create a fresh axios instance without interceptors for login
+    const loginApi = axios.create({
+      baseURL: `${import.meta.env.VITE_BACKEND_URL}/api`,
+      headers: {
+        "Content-Type": "application/json",
+      },
+      timeout: 30000,
     });
-    return response.data;
+
+    try {
+      const response = await loginApi.post("/auth/login", {
+        email,
+        password,
+      });
+      return response.data;
+    } catch (error: any) {
+      // For login errors, throw the response data directly so the error message is preserved
+      if (error.response?.data) {
+        throw error.response.data;
+      }
+      throw error;
+    }
   }
 
   /**
@@ -225,7 +343,9 @@ class ApiService {
    * @param itinerary - Información del itinerario
    * @returns Promise con la respuesta del servidor
    */
-  async createItinerary(itinerary: CreateItineraryRequest): Promise<CreateItineraryResponse> {
+  async createItinerary(
+    itinerary: CreateItineraryRequest
+  ): Promise<CreateItineraryResponse> {
     const response = await this.api.post("/itineraries", itinerary);
     return response.data;
   }
@@ -257,6 +377,16 @@ class ApiService {
    */
   async updateItinerary(id: string, itinerary: CreateItineraryRequest) {
     const response = await this.api.put(`/itineraries/${id}`, itinerary);
+    return response.data;
+  }
+
+  /**
+   * Obtiene los grupos donde un itinerario está asignado
+   * @param id - ID del itinerario
+   * @returns Promise con la lista de grupos
+   */
+  async getItineraryGroups(id: string) {
+    const response = await this.api.get(`/itineraries/${id}/groups`);
     return response.data;
   }
 
@@ -295,11 +425,14 @@ class ApiService {
     conversationId?: string;
   }) {
     const params = new URLSearchParams();
-    if (options?.limit) params.append('limit', options.limit.toString());
-    if (options?.offset) params.append('offset', options.offset.toString());
-    if (options?.conversationId) params.append('conversationId', options.conversationId);
+    if (options?.limit) params.append("limit", options.limit.toString());
+    if (options?.offset) params.append("offset", options.offset.toString());
+    if (options?.conversationId)
+      params.append("conversationId", options.conversationId);
 
-    const response = await this.api.get(`/chat/messages/me?${params.toString()}`);
+    const response = await this.api.get(
+      `/chat/messages/me?${params.toString()}`
+    );
     return response.data;
   }
 
@@ -317,26 +450,27 @@ class ApiService {
    * @param conversationData - Datos de la conversación
    * @returns Promise con la conversación creada
    */
-  async createConversation(conversationData?: {
-    title?: string;
-  }) {
-    const response = await this.api.post("/chat/conversations", conversationData || {});
+  async createConversation(conversationData?: { title?: string }) {
+    const response = await this.api.post(
+      "/chat/conversations",
+      conversationData || {}
+    );
     return response.data;
   }
 
   /**
-    * Elimina la conversación actual del usuario autenticado
-    * @returns Promise con la respuesta del servidor
-    */
+   * Elimina la conversación actual del usuario autenticado
+   * @returns Promise con la respuesta del servidor
+   */
   async deleteCurrentConversation() {
     const response = await this.api.delete("/chat/conversations/current");
     return response.data;
   }
 
   /**
-    * Elimina todo el historial de chat del usuario autenticado
-    * @returns Promise con la respuesta del servidor
-    */
+   * Elimina todo el historial de chat del usuario autenticado
+   * @returns Promise con la respuesta del servidor
+   */
   async deleteAllChatHistory() {
     const response = await this.api.delete("/chat/messages");
     return response.data;
@@ -359,10 +493,14 @@ class ApiService {
    * @param metadata - Metadatos adicionales de la acción
    * @returns Promise con la respuesta del servidor
    */
-  async awardPoints(userId: string, action: string, metadata?: Record<string, unknown>) {
+  async awardPoints(
+    userId: string,
+    action: string,
+    metadata?: Record<string, unknown>
+  ) {
     const response = await this.api.post(`/users/${userId}/points`, {
       action,
-      metadata
+      metadata,
     });
     return response.data;
   }
@@ -372,7 +510,7 @@ class ApiService {
    * @returns Promise con la lista de insignias
    */
   async getAllBadges() {
-    const response = await this.api.get('/badges');
+    const response = await this.api.get("/badges");
     return response.data;
   }
 
@@ -381,7 +519,7 @@ class ApiService {
    * @returns Promise con la lista de niveles
    */
   async getAllLevels() {
-    const response = await this.api.get('/levels');
+    const response = await this.api.get("/levels");
     return response.data;
   }
 

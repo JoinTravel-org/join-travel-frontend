@@ -96,40 +96,34 @@ const Login: React.FC<LoginProps> = ({ onSwitchToRegister }) => {
 
     setLoading(true);
 
+    setLoading(true);
+    setError("");
+
     try {
       const response = await authService.login({
         email: trimmedEmail,
         password: trimmedPassword,
       });
 
-      if (response.success) {
-        // Ensure user data is available with valid userId
-        if (!response.data?.user?.id) {
-          setError("Error: No se pudo obtener la información del usuario. Inténtalo nuevamente.");
-          return;
-        }
-
-        auth.login(
-          response.data.user,
-          response.data.accessToken,
-          response.data.refreshToken
-        );
-
-        navigate("/");
-      } else {
-        setError(
-          response.message || "Error al iniciar sesión. Inténtalo nuevamente."
-        );
+      // Ensure user data is available with valid userId
+      if (!response.data?.user?.id) {
+        setError("Error: No se pudo obtener la información del usuario. Inténtalo nuevamente.");
+        setLoading(false);
+        return;
       }
-    } catch (err) {
+
+      auth.login(
+        response.data.user,
+        response.data.accessToken,
+        response.data.refreshToken
+      );
+
+      navigate("/");
+    } catch (err: any) {
+      console.log("Login error:", err);
       const errorMessage = getErrorMessage(err);
-      // Provide more specific error messages for login
-      if (errorMessage.includes("Error de conexión") || errorMessage.includes("Error interno")) {
-        setError("Error al iniciar sesión. Verifica tu conexión a internet e intenta nuevamente.");
-      } else {
-        setError(errorMessage);
-      }
-    } finally {
+      console.log("Error message:", errorMessage);
+      setError(errorMessage);
       setLoading(false);
     }
   };

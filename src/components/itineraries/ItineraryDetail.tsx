@@ -65,13 +65,23 @@ const ItineraryDetail: React.FC = () => {
   // Fetch itinerary details on component mount
   useEffect(() => {
     const fetchItinerary = async () => {
-      if (!auth.isAuthenticated || !id) return;
+      if (!id) {
+        console.log("ItineraryDetail: No id provided");
+        return;
+      }
 
+      if (!auth.isAuthenticated) {
+        console.log("ItineraryDetail: User not authenticated");
+        return;
+      }
+
+      console.log("ItineraryDetail: Fetching itinerary with id:", id);
       setLoading(true);
       setError(null);
 
       try {
         const response = await apiService.getItineraryById(id);
+        console.log("ItineraryDetail: Response received:", response);
 
         if (response.success && response.data) {
           setItinerary(response.data);
@@ -180,7 +190,7 @@ const ItineraryDetail: React.FC = () => {
           <Button variant="outlined" onClick={() => navigate("/itineraries")}>
             ← Volver a Itinerarios
           </Button>
-          {!loading && !error && itinerary && (
+          {!loading && !error && itinerary && itinerary.userId === auth.user?.id && (
             <Box sx={{ display: "flex", gap: 2 }}>
               <Button
                 variant="contained"

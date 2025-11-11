@@ -1,10 +1,11 @@
 import React, { useContext, useState, useEffect, useRef } from 'react';
 import { AuthContext } from '../../contexts/AuthContext';
-import { Box, Fab, Paper, Typography, TextField, Button, List, ListItem, ListItemText, Avatar, CircularProgress, IconButton, Tooltip, useMediaQuery } from '@mui/material';
+import { Box, Fab, Paper, Typography, TextField, Button, List, ListItem, ListItemText, Avatar, CircularProgress, IconButton, Tooltip, useMediaQuery, Dialog, DialogTitle, DialogContent, DialogActions } from '@mui/material';
 import { useTheme } from '@mui/material/styles';
 import AutoAwesomeIcon from '@mui/icons-material/AutoAwesome';
 import SendIcon from '@mui/icons-material/Send';
 import AddIcon from '@mui/icons-material/Add';
+import CloseIcon from '@mui/icons-material/Close';
 import apiService from '../../services/api.service';
 
 interface Message {
@@ -330,25 +331,29 @@ const ChatBubble: React.FC = () => {
 
       {/* Chat Interface */}
       {isOpen && (
-        <Paper
-          ref={chatRef}
-          elevation={8}
-          sx={{
-            position: 'fixed',
-            bottom: isMobile ? 16 : 80,
-            right: isMobile ? 16 : 16,
-            left: isMobile ? 16 : 'auto',
-            width: isMobile ? 'auto' : 400,
-            height: isMobile ? 'calc(100vh - 100px)' : 550,
-            borderRadius: 2,
-            zIndex: 1000,
-            display: 'flex',
-            flexDirection: 'column',
-            overflow: 'hidden',
+        <Dialog
+          open={isOpen}
+          onClose={() => setIsOpen(false)}
+          maxWidth="sm"
+          fullWidth
+          PaperProps={{
+            sx: {
+              height: "600px",
+              display: "flex",
+              flexDirection: "column",
+            },
           }}
         >
-          {/* Header */}
-          <Box sx={{ p: 2, borderBottom: 1, borderColor: 'divider', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          <DialogTitle
+            sx={{
+              display: "flex",
+              justifyContent: "space-between",
+              alignItems: "center",
+              borderBottom: 1,
+              borderColor: "divider",
+            }}
+            component="div"
+          >
             <Typography variant="h6">AI Chat Assistant</Typography>
             <Box sx={{ display: 'flex', gap: 1 }}>
               <Tooltip title="Start New Chat">
@@ -371,11 +376,21 @@ const ChatBubble: React.FC = () => {
                   <AddIcon />
                 </IconButton>
               </Tooltip>
+              <IconButton onClick={() => setIsOpen(false)} size="small">
+                <CloseIcon />
+              </IconButton>
             </Box>
-          </Box>
+          </DialogTitle>
 
-          {/* Messages or Login Prompt */}
-          <Box sx={{ flex: 1, overflow: 'auto', p: 2 }}>
+          <DialogContent
+            sx={{
+              flex: 1,
+              overflow: "auto",
+              p: 2,
+              display: "flex",
+              flexDirection: "column",
+            }}
+          >
             {authContext?.isAuthenticated && authContext?.user ? (
               <List>
                 {messages.map((message) => (
@@ -409,32 +424,42 @@ const ChatBubble: React.FC = () => {
                 </Typography>
               </Box>
             )}
-          </Box>
+          </DialogContent>
 
-          {/* Input */}
-          {authContext?.isAuthenticated && authContext?.user && (
-            <Box sx={{ p: 2, borderTop: 1, borderColor: 'divider', display: 'flex' }}>
-              <TextField
-                fullWidth
-                variant="outlined"
-                placeholder="Type your message..."
-                value={inputMessage}
-                onChange={(e: React.ChangeEvent<HTMLInputElement>) => setInputMessage(e.target.value)}
-                onKeyPress={handleKeyPress}
-                size="small"
-                inputRef={messageInputRef}
-              />
-              <Button
-                variant="contained"
-                onClick={handleSendMessage}
-                disabled={!inputMessage.trim() || isLoading}
-                sx={{ ml: 1 }}
-              >
-                {isLoading ? <CircularProgress size={20} color="inherit" /> : <SendIcon />}
-              </Button>
-            </Box>
-          )}
-        </Paper>
+          <DialogActions
+            sx={{
+              borderTop: 1,
+              borderColor: "divider",
+              p: 2,
+              gap: 1,
+            }}
+          >
+            {authContext?.isAuthenticated && authContext?.user && (
+              <>
+                <TextField
+                  fullWidth
+                  multiline
+                  maxRows={3}
+                  placeholder="Escribe un mensaje..."
+                  value={inputMessage}
+                  onChange={(e: React.ChangeEvent<HTMLInputElement>) => setInputMessage(e.target.value)}
+                  onKeyPress={handleKeyPress}
+                  size="small"
+                  inputRef={messageInputRef}
+                />
+                <Button
+                  variant="contained"
+                  onClick={handleSendMessage}
+                  disabled={!inputMessage.trim() || isLoading}
+                  endIcon={isLoading ? <CircularProgress size={20} /> : <SendIcon />}
+                  sx={{ minWidth: "100px" }}
+                >
+                  Enviar
+                </Button>
+              </>
+            )}
+          </DialogActions>
+        </Dialog>
       )}
     </>
   );

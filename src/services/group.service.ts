@@ -122,6 +122,57 @@ class GroupService {
             throw new Error('Error al eliminar el grupo. Por favor intente nuevamente.');
         }
     }
+
+    /**
+     * Asigna un itinerario a un grupo
+     * @param groupId - ID del grupo
+     * @param itineraryId - ID del itinerario a asignar
+     * @returns Promise con los datos actualizados del grupo
+     */
+    async assignItinerary(groupId: string, itineraryId: string): Promise<GroupResponse> {
+        try {
+            const response = await apiService
+                .getAxiosInstance()
+                .post(`/groups/${groupId}/itinerary`, { itineraryId });
+            return response.data;
+        } catch (error: any) {
+            if (error.response?.status === 404) {
+                throw new Error('Grupo o itinerario no encontrado.');
+            }
+            if (error.response?.status === 403) {
+                throw new Error('No tienes permisos para asignar itinerarios a este grupo.');
+            }
+            if (error.response?.status === 400) {
+                throw new Error(error.response.data.message || 'No se puede asignar el itinerario.');
+            }
+            throw new Error('Error al asignar el itinerario. Por favor intente nuevamente.');
+        }
+    }
+
+    /**
+     * Desasigna el itinerario de un grupo
+     * @param groupId - ID del grupo
+     * @returns Promise con los datos actualizados del grupo
+     */
+    async removeItinerary(groupId: string): Promise<GroupResponse> {
+        try {
+            const response = await apiService
+                .getAxiosInstance()
+                .delete(`/groups/${groupId}/itinerary`);
+            return response.data;
+        } catch (error: any) {
+            if (error.response?.status === 404) {
+                throw new Error('Grupo no encontrado.');
+            }
+            if (error.response?.status === 403) {
+                throw new Error('No tienes permisos para desasignar itinerarios de este grupo.');
+            }
+            if (error.response?.status === 400) {
+                throw new Error('El grupo no tiene un itinerario asignado.');
+            }
+            throw new Error('Error al desasignar el itinerario. Por favor intente nuevamente.');
+        }
+    }
 }
 
 export default new GroupService();

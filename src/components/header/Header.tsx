@@ -736,11 +736,19 @@ const Header: React.FC = () => {
               <>
                 <ListItemButton
                   component={RouterLink}
+                  to="/groups"
+                  selected={location.pathname === "/groups"}
+                  onClick={toggleDrawer(false)}
+                >
+                  <ListItemText primary="Grupos" />
+                </ListItemButton>
+                <ListItemButton
+                  component={RouterLink}
                   to="/chats"
                   selected={location.pathname === "/chats"}
                   onClick={toggleDrawer(false)}
                 >
-                  <ListItemText primary="Mensajes" />
+                  <ListItemText primary="Mensajes Directos" />
                 </ListItemButton>
                 <ListItemButton
                   component={RouterLink}
@@ -799,11 +807,27 @@ const Header: React.FC = () => {
           horizontal: "center",
         }}
       >
+        {/* User Email */}
         <Typography
           sx={{
             px: 2,
-            py: 1,
+            pt: 1.5,
+            pb: 0.5,
             fontSize: "0.875rem",
+            fontWeight: 500,
+            color: "text.primary",
+          }}
+        >
+          {auth.user?.email && auth.user.email.length > 10
+            ? `${auth.user.email.substring(0, 10)}...`
+            : auth.user?.email || "Usuario"}
+        </Typography>
+        {/* User Level */}
+        <Typography
+          sx={{
+            px: 2,
+            pb: 1,
+            fontSize: "0.75rem",
             color: "text.secondary",
           }}
         >

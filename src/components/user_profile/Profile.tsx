@@ -5,6 +5,7 @@ import UserStats from './UserStats';
 import Notification from './Notification';
 import Milestones from './Milestones';
 import UserGallery from '../user/UserGallery';
+import UserReviewList from '../user/UserReviewList';
 import userService from '../../services/user.service';
 import api from '../../services/api.service';
 import type { Milestone } from '../../types/user';
@@ -79,19 +80,29 @@ const Profile: React.FC = () => {
   }
 
   return (
-    <div style={{ padding: '20px', display: 'flex', gap: '20px', flexWrap: 'wrap' }}>
+    <Box sx={{
+      padding: { xs: 2, sm: 3, md: 4 },
+      display: 'flex',
+      gap: { xs: 2, sm: 3 },
+      flexDirection: { xs: 'column', md: 'row' },
+      flexWrap: 'wrap'
+    }}>
       {/* Left Sidebar - User Stats */}
-      <div style={{
-        flex: '0 0 300px',
-        minWidth: '250px',
+      <Box sx={{
+        flex: { xs: '1 1 100%', md: '0 0 300px' },
+        minWidth: { xs: '100%', md: '250px' },
         display: 'flex',
         flexDirection: 'column',
-        gap: '20px'
+        gap: { xs: 2, sm: 3 }
       }}>
-        <div>
-          <h1 style={{ marginBottom: '8px' }}>Perfil de Usuario</h1>
-          <p style={{ margin: 0, color: '#666' }}>Bienvenido, {user.email}</p>
-        </div>
+        <Box>
+          <Typography variant="h4" component="h1" sx={{ marginBottom: '8px' }}>
+            Perfil de Usuario
+          </Typography>
+          <Typography variant="body1" sx={{ margin: 0, color: 'text.secondary' }}>
+            Bienvenido, {user.email}
+          </Typography>
+        </Box>
 
         {stats && <UserStats stats={stats} />}
 
@@ -99,15 +110,15 @@ const Profile: React.FC = () => {
           notification={notification}
           onClose={clearNotification}
         />
-      </div>
+      </Box>
 
       {/* Main Content - Milestones */}
-      <div style={{
-        flex: '2',
-        minWidth: '600px',
+      <Box sx={{
+        flex: { xs: '1 1 100%', md: '2' },
+        minWidth: { xs: '100%', md: '600px' },
         display: 'flex',
         flexDirection: 'column',
-        gap: '20px'
+        gap: { xs: 2, sm: 3 }
       }}>
         {milestonesLoading ? (
           <div style={{ textAlign: 'center', padding: '40px' }}>
@@ -122,7 +133,7 @@ const Profile: React.FC = () => {
             <Milestones milestones={milestones.filter(m => m.category === 'badge')} />
 
             {/* Favorite Places Section */}
-            <Box sx={{ mt: 4 }}>
+            <Box sx={{ mt: { xs: 3, sm: 4 } }}>
               <Typography variant="h5" component="h2" gutterBottom>
                 Lugares Favoritos
               </Typography>
@@ -140,7 +151,14 @@ const Profile: React.FC = () => {
                   No tienes lugares favoritos aún. ¡Explora y marca algunos como favoritos!
                 </Typography>
               ) : (
-                <Box sx={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(250px, 1fr))', gap: 1.5 }}>
+                <Box sx={{
+                  display: 'grid',
+                  gridTemplateColumns: {
+                    xs: 'repeat(auto-fill, minmax(200px, 1fr))',
+                    sm: 'repeat(auto-fill, minmax(250px, 1fr))'
+                  },
+                  gap: { xs: 1, sm: 1.5 }
+                }}>
                   {favorites.map((place) => (
                     <Card
                       key={place.id}
@@ -177,7 +195,10 @@ const Profile: React.FC = () => {
             {/* Gallery Section */}
             {user?.id && <UserGallery userId={user.id} />}
 
-            <Box sx={{ mt: 4 }}>
+            {/* Reviews Section */}
+            {user?.id && <UserReviewList userId={user.id} />}
+
+            <Box sx={{ mt: { xs: 3, sm: 4 } }}>
               <Typography variant="h5" component="h2" gutterBottom>
                 Listas de lugares próximamente
               </Typography>
@@ -187,8 +208,8 @@ const Profile: React.FC = () => {
             </Box>
           </>
         )}
-      </div>
-    </div>
+      </Box>
+    </Box>
   );
 };
 

@@ -100,30 +100,50 @@ class ReviewService {
     * @returns Promise with reaction status
     */
    async toggleReaction(reviewId: string, type: 'like' | 'dislike'): Promise<{ reacted: boolean; reactionType: 'like' | 'dislike' | null; likeCount: number; dislikeCount: number; reviewId: string }> {
-     try {
-       const response = await apiService
-         .getAxiosInstance()
-         .post(`/places/reviews/${reviewId}/reaction`, { type });
-       return response.data.data;
-     } catch (error) {
-       throw error;
-     }
+     const response = await apiService
+       .getAxiosInstance()
+       .post(`/places/reviews/${reviewId}/reaction`, { type });
+     return response.data.data;
    }
 
    /**
-    * Get reaction status for a review
-    * @param reviewId - Review ID
-    * @returns Promise with reaction status
-    */
-   async getReactionStatus(reviewId: string): Promise<{ reactionType: 'like' | 'dislike' | null; likeCount: number; dislikeCount: number; reviewId: string }> {
-     try {
+      * Get reaction status for a review
+      * @param reviewId - Review ID
+      * @returns Promise with reaction status
+      */
+     async getReactionStatus(reviewId: string): Promise<{ reactionType: 'like' | 'dislike' | null; likeCount: number; dislikeCount: number; reviewId: string }> {
        const response = await apiService
          .getAxiosInstance()
          .get(`/places/reviews/${reviewId}/reaction`);
        return response.data.data;
-     } catch (error) {
-       throw error;
      }
+ 
+   /**
+    * Obtiene todas las reseñas de un usuario
+    * @param userId - ID del usuario
+    * @returns Promise con la lista de reseñas
+    */
+   async getReviewsByUserId(userId: string): Promise<ReviewListResponse> {
+     try {
+       const response = await apiService
+         .getAxiosInstance()
+         .get(`/users/${userId}/reviews`);
+       return response.data;
+     } catch (error) {
+       throw error as ReviewListResponse;
+     }
+   }
+ 
+   /**
+    * Obtiene las estadísticas de reseñas de un usuario
+    * @param userId - ID del usuario
+    * @returns Promise con las estadísticas
+    */
+   async getUserReviewStats(userId: string): Promise<ReviewStats> {
+     const response = await apiService
+       .getAxiosInstance()
+       .get(`/users/${userId}/reviews/stats`);
+     return response.data;
    }
 }
 

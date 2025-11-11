@@ -16,6 +16,7 @@ import api from "../../services/api.service";
 import UserGallery from "./UserGallery";
 import type { User } from "../../types/user";
 import type { Place } from "../../types/place";
+import UserReviewList from "./UserReviewList";
 import { DirectChatDialog } from "../users_chats/DirectChatDialog";
 
 const UserProfile: React.FC = () => {
@@ -88,13 +89,14 @@ const UserProfile: React.FC = () => {
     fetchFavorites();
   }, [userId]);
 
+
   if (loading) {
     return (
-      <div
-        style={{
-          padding: "20px",
+      <Box
+        sx={{
+          padding: { xs: 2, sm: 3, md: 4 },
           display: "flex",
-          gap: "20px",
+          gap: { xs: 2, sm: 3 },
           flexWrap: "wrap",
         }}
       >
@@ -108,51 +110,54 @@ const UserProfile: React.FC = () => {
         >
           <CircularProgress />
         </Box>
-      </div>
+      </Box>
     );
   }
 
   if (error || !user) {
     return (
-      <div
-        style={{
-          padding: "20px",
+      <Box
+        sx={{
+          padding: { xs: 2, sm: 3, md: 4 },
           display: "flex",
-          gap: "20px",
+          gap: { xs: 2, sm: 3 },
           flexWrap: "wrap",
         }}
       >
         <Alert severity="error" sx={{ mb: 2, width: "100%" }}>
           {error || "Usuario no encontrado"}
         </Alert>
-      </div>
+      </Box>
     );
   }
 
   return (
-    <div
-      style={{
-        padding: "20px",
+    <Box
+      sx={{
+        padding: { xs: 2, sm: 3, md: 4 },
         display: "flex",
-        gap: "20px",
+        gap: { xs: 2, sm: 3 },
+        flexDirection: { xs: "column", md: "row" },
         flexWrap: "wrap",
       }}
     >
       {/* Left Sidebar - User Stats */}
-      <div
-        style={{
-          flex: "0 0 300px",
-          minWidth: "250px",
+      <Box
+        sx={{
+          flex: { xs: "1 1 100%", md: "0 0 300px" },
+          minWidth: { xs: "100%", md: "250px" },
           display: "flex",
           flexDirection: "column",
-          gap: "20px",
+          gap: { xs: 2, sm: 3 },
         }}
       >
-        <div>
-          <h1 style={{ marginBottom: "8px" }}>Perfil de Usuario</h1>
-          <p style={{ margin: 0, color: "#666" }}>
+        <Box>
+          <Typography variant="h4" component="h1" sx={{ marginBottom: "8px" }}>
+            Perfil de Usuario
+          </Typography>
+          <Typography variant="body1" sx={{ margin: 0, color: "text.secondary" }}>
             {user.email || `Usuario ID: ${userId}`}
-          </p>
+          </Typography>
 
           {/* Mensaje button - only show if not viewing own profile */}
           {!isOwnProfile && userId && (
@@ -167,18 +172,19 @@ const UserProfile: React.FC = () => {
               </Button>
             </Box>
           )}
-        </div>
+        </Box>
 
         {user.stats && (
-          <div
-            style={{
-              padding: "12px",
+          <Box
+            sx={{
+              padding: { xs: "10px", sm: "12px" },
               backgroundColor: "#f9f9f9",
               borderRadius: "6px",
             }}
           >
-            <p
-              style={{ margin: "0 0 8px 0", fontSize: "0.9rem", color: "#666" }}
+            <Typography
+              variant="body2"
+              sx={{ margin: "0 0 8px 0", color: "text.secondary" }}
             >
               Nivel {user.stats.level} • {user.stats.points} puntos
               {user.stats.badges && user.stats.badges.length > 0 && (
@@ -188,23 +194,23 @@ const UserProfile: React.FC = () => {
                   {user.stats.badges.length !== 1 ? "s" : ""}
                 </span>
               )}
-            </p>
-          </div>
+            </Typography>
+          </Box>
         )}
-      </div>
+      </Box>
 
       {/* Main Content - Milestones and Favorites */}
-      <div
-        style={{
-          flex: "2",
-          minWidth: "600px",
+      <Box
+        sx={{
+          flex: { xs: "1 1 100%", md: "2" },
+          minWidth: { xs: "100%", md: "600px" },
           display: "flex",
           flexDirection: "column",
-          gap: "20px",
+          gap: { xs: 2, sm: 3 },
         }}
       >
         {/* Favorite Places Section */}
-        <Box sx={{ mt: 4 }}>
+        <Box sx={{ mt: { xs: 3, sm: 4 } }}>
           <Typography variant="h5" component="h2" gutterBottom>
             Lugares Favoritos
           </Typography>
@@ -225,8 +231,11 @@ const UserProfile: React.FC = () => {
             <Box
               sx={{
                 display: "grid",
-                gridTemplateColumns: "repeat(auto-fill, minmax(250px, 1fr))",
-                gap: 1.5,
+                gridTemplateColumns: {
+                  xs: "repeat(auto-fill, minmax(200px, 1fr))",
+                  sm: "repeat(auto-fill, minmax(250px, 1fr))"
+                },
+                gap: { xs: 1, sm: 1.5 },
               }}
             >
               {favorites.map((place) => (
@@ -274,9 +283,11 @@ const UserProfile: React.FC = () => {
         {/* Gallery Section */}
         {userId && <UserGallery userId={userId} />}
 
+        {/* Reviews Section */}
+        {userId && <UserReviewList userId={userId} />}
 
         {/* Listas de lugares próximamente Section */}
-        <Box sx={{ mt: 4 }}>
+        <Box sx={{ mt: { xs: 3, sm: 4 } }}>
           <Typography variant="h5" component="h2" gutterBottom>
             Listas de lugares próximamente
           </Typography>
@@ -284,19 +295,19 @@ const UserProfile: React.FC = () => {
             Próximamente podrás crear y compartir listas de lugares favoritos.
           </Typography>
         </Box>
-        </Box>
-      </div>
+      </Box>
+    </Box>
 
-      {/* Direct Chat Dialog */}
-      {!isOwnProfile && userId && user && (
-        <DirectChatDialog
-          open={chatOpen}
-          onClose={() => setChatOpen(false)}
-          otherUserId={userId}
-          otherUserEmail={user.email || `Usuario ${userId}`}
-        />
-      )}
-    </div>
+    {/* Direct Chat Dialog */}
+    {!isOwnProfile && userId && user && (
+      <DirectChatDialog
+        open={chatOpen}
+        onClose={() => setChatOpen(false)}
+        otherUserId={userId}
+        otherUserEmail={user.email || `Usuario ${userId}`}
+      />
+    )}
+  </Box>
   );
 };
 

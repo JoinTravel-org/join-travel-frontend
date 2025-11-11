@@ -1,234 +1,161 @@
 import { io, Socket } from "socket.io-client";
 import Logger from "../logger";
 import type { DirectMessage } from "./directMessage.service";
+import type { GroupMessage } from "../types/groupMessage";
 
-const API_URL = import.meta.env.VITE_BACKEND_URL || "http://localhost:3000";
+const SOCKET_URL = import.meta.env.VITE_BACKEND_URL || "http://localhost:3005";
+const logger = Logger.getInstance();
 
 class SocketService {
   private socket: Socket | null = null;
-  private messageListeners: Array<(message: DirectMessage) => void> = [];
-  private messageSentListeners: Array<(message: DirectMessage) => void> = [];
-  private messagesReadListeners: Array<(data: { userId: string }) => void> = [];
-  private isConnecting = false;
+  private messageListeners: Set<(message: DirectMessage) => void> = new Set();
+  private groupMessageListeners: Map<
+    string,
+    Set<(message: GroupMessage) => void>
+  > = new Map();
 
   /**
-   * Conectar al servidor WebSocket
+   * Conecta al servidor de websockets
    */
-  connect(token: string): void {
+  connect(token: string) {
     if (this.socket?.connected) {
-      Logger.getInstance().info("Socket already connected");
+      logger.info("Socket already connected");
       return;
     }
 
-    // Si ya hay una conexión en proceso, no crear otra
-    if (this.isConnecting) {
-      Logger.getInstance().info("Connection already in progress");
-      return;
-    }
+    this.socket = io(SOCKET_URL, {
+      auth: { token },
+      transports: ["websocket", "polling"],
+    });
 
-    this.isConnecting = true;
-    Logger.getInstance().info("Starting socket connection...");
+    this.socket.on("connect", () => {
+      logger.info("Socket connected");
+    });
 
-    try {
-      Logger.getInstance().info(`Connecting to ${API_URL} with auth token`);
+    this.socket.on("disconnect", () => {
+      logger.info("Socket disconnected");
+    });
 
-      this.socket = io(API_URL, {
-        auth: {
-          token,
-        },
-        transports: ["websocket", "polling"],
-      });
+    this.socket.on("new_message", (message) => {
+      logger.info(`New direct message received: ${message.id}`);
+      this.messageListeners.forEach((listener) => listener(message));
+    });
 
-      this.socket.on("connect", () => {
-        Logger.getInstance().info("Socket connected successfully");
-        this.isConnecting = false;
-      });
+    this.socket.on("new_group_message", (message) => {
+      logger.info(`New group message received: ${message.id}`);
+      const listeners = this.groupMessageListeners.get(message.groupId);
+      if (listeners) {
+        listeners.forEach((listener) => listener(message));
+      }
+    });
 
-      this.socket.on("disconnect", () => {
-        Logger.getInstance().info("Socket disconnected");
-        this.isConnecting = false;
-      });
-
-      this.socket.on("connect_error", (error) => {
-        Logger.getInstance().error("Socket connection error", error);
-        this.isConnecting = false;
-      });
-
-      this.socket.on("new_message", (message: DirectMessage) => {
-        Logger.getInstance().info("New message received via socket");
-        this.messageListeners.forEach((listener) => listener(message));
-      });
-
-      this.socket.on("message_sent", (message: DirectMessage) => {
-        Logger.getInstance().info("Message sent confirmation received");
-        this.messageSentListeners.forEach((listener) => listener(message));
-      });
-
-      this.socket.on("messages_read", (data: { userId: string }) => {
-        Logger.getInstance().info(
-          `Messages marked as read by user: ${data.userId}`
-        );
-        this.messagesReadListeners.forEach((listener) => listener(data));
-      });
-
-      this.socket.on("message_error", (error: { error: string }) => {
-        Logger.getInstance().error("Message error", error);
-      });
-    } catch (error) {
-      Logger.getInstance().error("Error connecting socket", error);
-      this.isConnecting = false;
-    }
+    this.socket.on("message_error", (error) => {
+      logger.error("Socket message error", error);
+    });
   }
 
   /**
-   * Desconectar del servidor WebSocket
+   * Desconecta del servidor de websockets
    */
-  disconnect(): void {
+  disconnect() {
     if (this.socket) {
       this.socket.disconnect();
       this.socket = null;
-      this.messageListeners = [];
-      this.messageSentListeners = [];
-      this.messagesReadListeners = [];
-      this.isConnecting = false;
-      Logger.getInstance().info("Socket disconnected and cleaned up");
+      this.messageListeners.clear();
+      this.groupMessageListeners.clear();
     }
   }
 
   /**
-   * Esperar a que el socket esté conectado
+   * Envía un mensaje directo
    */
-  private async ensureConnected(): Promise<void> {
-    if (!this.socket) {
-      throw new Error("Socket not initialized. Please login first.");
+  sendDirectMessage(receiverId: string, content: string) {
+    if (!this.socket?.connected) {
+      throw new Error("Socket not connected");
     }
+    this.socket.emit("send_message", { receiverId, content });
+  }
 
-    // Si ya está conectado, retornar inmediatamente
-    if (this.socket.connected) {
+  /**
+   * Marca mensajes como leídos
+   */
+  markAsRead(otherUserId: string) {
+    if (!this.socket?.connected) {
+      throw new Error("Socket not connected");
+    }
+    this.socket.emit("mark_as_read", { otherUserId });
+  }
+
+  /**
+   * Une a un grupo para recibir mensajes en tiempo real
+   */
+  joinGroup(groupId: string) {
+    if (!this.socket?.connected) {
+      throw new Error("Socket not connected");
+    }
+    this.socket.emit("join_group", { groupId });
+    logger.info(`Joined group ${groupId}`);
+  }
+
+  /**
+   * Sale de un grupo
+   */
+  leaveGroup(groupId: string) {
+    if (!this.socket?.connected) {
       return;
     }
-
-    // Esperar hasta 5 segundos a que se conecte
-    const socket = this.socket; // Guardar referencia para TypeScript
-
-    return new Promise((resolve, reject) => {
-      const timeout = setTimeout(() => {
-        reject(new Error("Socket connection timeout"));
-      }, 5000);
-
-      const onConnect = () => {
-        clearTimeout(timeout);
-        socket.off("connect_error", onError);
-        resolve();
-      };
-
-      const onError = (error: Error) => {
-        clearTimeout(timeout);
-        socket.off("connect", onConnect);
-        reject(error);
-      };
-
-      socket.once("connect", onConnect);
-      socket.once("connect_error", onError);
-
-      // Si ya está conectado mientras configuramos los listeners
-      if (socket.connected) {
-        clearTimeout(timeout);
-        socket.off("connect", onConnect);
-        socket.off("connect_error", onError);
-        resolve();
-      }
-    });
+    this.socket.emit("leave_group", { groupId });
+    logger.info(`Left group ${groupId}`);
   }
 
   /**
-   * Enviar un mensaje
+   * Envía un mensaje a un grupo
    */
-  async sendMessage(receiverId: string, content: string): Promise<void> {
-    await this.ensureConnected();
-
-    if (!this.socket) {
-      throw new Error("Socket not available");
+  sendGroupMessage(groupId: string, content: string) {
+    if (!this.socket?.connected) {
+      throw new Error("Socket not connected");
     }
-
-    this.socket.emit("send_message", {
-      receiverId,
-      content,
-    });
-
-    Logger.getInstance().info(`Message sent to user: ${receiverId}`);
+    this.socket.emit("send_group_message", { groupId, content });
   }
 
   /**
-   * Marcar mensajes como leídos
+   * Suscribe a nuevos mensajes directos
    */
-  async markAsRead(otherUserId: string): Promise<void> {
-    try {
-      await this.ensureConnected();
+  onNewMessage(callback: (message: DirectMessage) => void) {
+    this.messageListeners.add(callback);
+    return () => {
+      this.messageListeners.delete(callback);
+    };
+  }
 
-      if (!this.socket) {
-        return;
-      }
-
-      this.socket.emit("mark_as_read", {
-        otherUserId,
-      });
-
-      Logger.getInstance().info(
-        `Marked messages as read for user: ${otherUserId}`
-      );
-    } catch (error) {
-      Logger.getInstance().error("Error marking messages as read", error);
+  /**
+   * Suscribe a nuevos mensajes de un grupo
+   */
+  onNewGroupMessage(
+    groupId: string,
+    callback: (message: GroupMessage) => void
+  ) {
+    if (!this.groupMessageListeners.has(groupId)) {
+      this.groupMessageListeners.set(groupId, new Set());
     }
-  }
+    this.groupMessageListeners.get(groupId)!.add(callback);
 
-  /**
-   * Suscribirse a nuevos mensajes
-   */
-  onNewMessage(callback: (message: DirectMessage) => void): () => void {
-    this.messageListeners.push(callback);
-
-    // Retornar función para desuscribirse
     return () => {
-      this.messageListeners = this.messageListeners.filter(
-        (cb) => cb !== callback
-      );
+      const listeners = this.groupMessageListeners.get(groupId);
+      if (listeners) {
+        listeners.delete(callback);
+        if (listeners.size === 0) {
+          this.groupMessageListeners.delete(groupId);
+        }
+      }
     };
   }
 
   /**
-   * Suscribirse a confirmaciones de mensajes enviados
-   */
-  onMessageSent(callback: (message: DirectMessage) => void): () => void {
-    this.messageSentListeners.push(callback);
-
-    // Retornar función para desuscribirse
-    return () => {
-      this.messageSentListeners = this.messageSentListeners.filter(
-        (cb) => cb !== callback
-      );
-    };
-  }
-
-  /**
-   * Suscribirse a eventos de mensajes leídos
-   */
-  onMessagesRead(callback: (data: { userId: string }) => void): () => void {
-    this.messagesReadListeners.push(callback);
-
-    // Retornar función para desuscribirse
-    return () => {
-      this.messagesReadListeners = this.messagesReadListeners.filter(
-        (cb) => cb !== callback
-      );
-    };
-  }
-
-  /**
-   * Verificar si el socket está conectado
+   * Verifica si el socket está conectado
    */
   isConnected(): boolean {
-    return this.socket?.connected || false;
+    return this.socket?.connected ?? false;
   }
 }
 

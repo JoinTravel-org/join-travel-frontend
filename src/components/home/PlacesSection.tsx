@@ -201,13 +201,31 @@ const PlacesSection: React.FC<Props> = ({
         )}
 
         {!loading && (
-          <Box sx={{ display: "flex", justifyContent: "center", mt: 2 }}>
+          <Box sx={{ display: "flex", justifyContent: "center", mt: 2, px: 1 }}>
             <Pagination
               count={totalPages}
               page={page}
               onChange={onPageChange}
               color="primary"
               size="large"
+              siblingCount={0}
+              boundaryCount={1}
+              sx={{
+                "& .MuiPaginationItem-root": {
+                  minWidth: { xs: "24px", sm: "32px" },
+                  height: { xs: "24px", sm: "32px" },
+                  fontSize: { xs: "0.7rem", sm: "0.875rem" },
+                  padding: { xs: "4px", sm: "8px" },
+                },
+                "& .MuiPagination-ul": {
+                  flexWrap: "wrap",
+                  justifyContent: "center",
+                  gap: { xs: 0.25, sm: 1 },
+                  maxWidth: "100%",
+                  width: "fit-content",
+                  margin: "0 auto",
+                },
+              }}
             />
           </Box>
         )}

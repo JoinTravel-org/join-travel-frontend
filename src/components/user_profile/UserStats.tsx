@@ -1,4 +1,5 @@
 import React from 'react';
+import { Box, Typography } from '@mui/material';
 import type { UserStats as UserStatsType } from '../../types/user';
 import BadgeComponent from './Badge';
 
@@ -8,54 +9,75 @@ interface UserStatsProps {
 
 const UserStats: React.FC<UserStatsProps> = ({ stats }) => {
   return (
-    <div style={{ maxWidth: '600px', margin: '16px auto', padding: '16px', border: '1px solid #ccc', borderRadius: '8px' }}>
-      <div>
-        <h2 style={{ marginBottom: '16px' }}>
+    <Box sx={{
+      maxWidth: '600px',
+      margin: { xs: '8px auto', sm: '16px auto' },
+      padding: { xs: '12px', sm: '16px' },
+      border: '1px solid #ccc',
+      borderRadius: '8px'
+    }}>
+      <Box>
+        <Typography variant="h6" component="h2" sx={{ marginBottom: '16px' }}>
           Estadísticas de Usuario
-        </h2>
+        </Typography>
 
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
-          <div>
-            <div style={{ display: 'flex', alignItems: 'center', marginBottom: '8px' }}>
-              <span style={{ marginRight: '8px' }}>⭐</span>
-              <h3 style={{ margin: 0 }}>
+        <Box sx={{
+          display: 'grid',
+          gridTemplateColumns: { xs: '1fr', sm: '1fr 1fr' },
+          gap: { xs: '12px', sm: '16px' }
+        }}>
+          <Box>
+            <Box sx={{ display: 'flex', alignItems: 'center', marginBottom: '8px' }}>
+              <Typography sx={{ marginRight: '8px' }}>⭐</Typography>
+              <Typography variant="h6" component="h3" sx={{ margin: 0 }}>
                 Nivel {stats.level}: {stats.levelName}
-              </h3>
-            </div>
-            <p style={{ color: '#666', margin: 0 }}>
+              </Typography>
+            </Box>
+            <Typography variant="body2" sx={{ color: 'text.secondary', margin: 0 }}>
               {stats.points} puntos acumulados
-            </p>
-          </div>
+            </Typography>
+          </Box>
 
-          <div>
-            <div style={{ display: 'flex', alignItems: 'center', marginBottom: '8px' }}>
-              <span style={{ marginRight: '8px' }}>📈</span>
-              <p style={{ margin: 0 }}>
+          <Box>
+            <Box sx={{ display: 'flex', alignItems: 'center', marginBottom: '8px' }}>
+              <Typography sx={{ marginRight: '8px' }}>📈</Typography>
+              <Typography variant="body2" sx={{ margin: 0 }}>
                 Progreso al siguiente nivel
-              </p>
-            </div>
-            <div style={{ width: '100%', height: '8px', backgroundColor: '#e0e0e0', borderRadius: '4px', overflow: 'hidden' }}>
-              <div
-                style={{
+              </Typography>
+            </Box>
+            <Box sx={{
+              width: '100%',
+              height: '8px',
+              backgroundColor: 'grey.300',
+              borderRadius: '4px',
+              overflow: 'hidden'
+            }}>
+              <Box
+                sx={{
                   width: `${stats.progressToNext}%`,
                   height: '100%',
-                  backgroundColor: '#1976d2',
+                  backgroundColor: 'primary.main',
                   transition: 'width 0.3s ease'
                 }}
               />
-            </div>
-            <p style={{ fontSize: '12px', color: '#666', margin: '4px 0 0 0' }}>
+            </Box>
+            <Typography variant="caption" sx={{ color: 'text.secondary', margin: '4px 0 0 0' }}>
               {stats.progressToNext}% completado
-            </p>
-          </div>
-        </div>
+            </Typography>
+          </Box>
+        </Box>
 
         {stats.badges.length > 0 && (
-          <div style={{ marginTop: '16px' }}>
-            <h4 style={{ marginBottom: '8px' }}>
+          <Box sx={{ marginTop: '16px' }}>
+            <Typography variant="h6" component="h4" sx={{ marginBottom: '8px' }}>
               🏆 Insignias
-            </h4>
-            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
+            </Typography>
+            <Box sx={{
+              display: 'flex',
+              flexWrap: 'wrap',
+              gap: { xs: '6px', sm: '8px' },
+              justifyContent: { xs: 'center', sm: 'flex-start' }
+            }}>
               {stats.badges.map((badge, index) => (
                 <BadgeComponent
                   key={`${badge.name}-${index}`}
@@ -63,11 +85,11 @@ const UserStats: React.FC<UserStatsProps> = ({ stats }) => {
                   showShareButton={true}
                 />
               ))}
-            </div>
-          </div>
+            </Box>
+          </Box>
         )}
-      </div>
-    </div>
+      </Box>
+    </Box>
   );
 };
 

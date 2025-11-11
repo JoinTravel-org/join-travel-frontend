@@ -77,7 +77,7 @@ const ReviewList: React.FC<ReviewListProps> = ({ placeId, refreshTrigger }) => {
   return (
     <Box
       sx={{
-        height: "400px",
+        height: { xs: "300px", md: "400px" },
         display: "flex",
         flexDirection: "column",
       }}
@@ -98,7 +98,7 @@ const ReviewList: React.FC<ReviewListProps> = ({ placeId, refreshTrigger }) => {
         <Box
           sx={{
             flexGrow: 1,
-            maxHeight: "calc(100% - 40px)",
+            maxHeight: { xs: "calc(100% - 32px)", md: "calc(100% - 40px)" },
             overflowY: "auto",
             pr: 1,
             "&::-webkit-scrollbar": {

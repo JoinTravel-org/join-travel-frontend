@@ -11,91 +11,112 @@ import {
   Paper,
   CircularProgress,
   IconButton,
+  Alert,
 } from "@mui/material";
 import SendIcon from "@mui/icons-material/Send";
 import CloseIcon from "@mui/icons-material/Close";
 import { AuthContext } from "../../contexts/AuthContext";
-import directMessageService, {
-  type DirectMessage,
-} from "../../services/directMessage.service";
+import groupMessageService from "../../services/groupMessage.service";
 import socketService from "../../services/socket.service";
+import type { GroupMessage } from "../../types/groupMessage";
 
-interface DirectChatDialogProps {
+interface GroupChatDialogProps {
   open: boolean;
   onClose: () => void;
-  otherUserId: string;
-  otherUserEmail: string;
+  groupId: string;
+  groupName: string;
 }
 
-export const DirectChatDialog: React.FC<DirectChatDialogProps> = ({
+export const GroupChatDialog: React.FC<GroupChatDialogProps> = ({
   open,
   onClose,
-  otherUserId,
-  otherUserEmail,
+  groupId,
+  groupName,
 }) => {
   const authContext = useContext(AuthContext);
-  const [messages, setMessages] = useState<DirectMessage[]>([]);
+  const [messages, setMessages] = useState<GroupMessage[]>([]);
   const [newMessage, setNewMessage] = useState("");
   const [loading, setLoading] = useState(false);
   const [sending, setSending] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const messageInputRef = useRef<HTMLInputElement>(null);
 
-  // Obtener el ID del usuario actual del contexto de autenticación
   const currentUserId = authContext?.user?.id || null;
 
-  const loadConversationHistory = React.useCallback(
+  const loadMessages = React.useCallback(
     async (showLoading = true) => {
       if (showLoading) {
         setLoading(true);
       }
+      setError(null);
       try {
-        const response = await directMessageService.getConversationHistory(
-          otherUserId
-        );
+        const response = await groupMessageService.getMessages(groupId);
         if (response.success && response.data) {
           setMessages(response.data.messages);
         }
-      } catch (error) {
-        console.error("Error loading conversation:", error);
+      } catch (err: unknown) {
+        if (err instanceof Error) {
+          setError(err.message);
+        } else {
+          setError("Error al cargar los mensajes");
+        }
       } finally {
         if (showLoading) {
           setLoading(false);
         }
       }
     },
-    [otherUserId]
+    [groupId]
   );
 
-  // Load conversation history when dialog opens
+  // Load messages when dialog opens
   useEffect(() => {
-    if (open && otherUserId) {
-      loadConversationHistory();
+    if (open && groupId) {
+      loadMessages();
+      // Join the group room to receive real-time messages
+      socketService.joinGroup(groupId);
     }
-  }, [open, otherUserId, loadConversationHistory]);
 
-  // Subscribe to new direct messages via websocket
+    return () => {
+      // Leave the group room when dialog closes
+      if (groupId) {
+        socketService.leaveGroup(groupId);
+      }
+    };
+  }, [open, groupId, loadMessages]);
+
+  // Subscribe to new group messages via websocket
   useEffect(() => {
-    if (!open || !otherUserId) return;
+    if (!open || !groupId) return;
 
-    const unsubscribe = socketService.onNewMessage((message: DirectMessage) => {
-      // Only add messages from or to this conversation
-      if (
-        message.senderId === otherUserId ||
-        message.receiverId === otherUserId
-      ) {
-        setMessages((prev) => {
+    const unsubscribe = socketService.onNewGroupMessage(groupId, (message) => {
+      setMessages((prev) => {
+        // Check if this is a real message replacing an optimistic one
+        const optimisticIndex = prev.findIndex((m) =>
+          m.id.startsWith('temp-') &&
+          m.senderId === message.senderId &&
+          m.content === message.content &&
+          m.groupId === message.groupId
+        );
+
+        if (optimisticIndex !== -1) {
+          // Replace optimistic message with real message
+          const newMessages = [...prev];
+          newMessages[optimisticIndex] = message;
+          return newMessages;
+        } else {
+          // Only add if it's not already in the list (avoid duplicates)
           const exists = prev.some((m) => m.id === message.id);
           if (exists) return prev;
           return [...prev, message];
-        });
-      }
+        }
+      });
     });
 
     return unsubscribe;
-  }, [open, otherUserId]);
+  }, [open, groupId]);
 
-  // Auto-scroll to bottom when new messages arrive
   useEffect(() => {
     scrollToBottom();
   }, [messages]);
@@ -108,42 +129,46 @@ export const DirectChatDialog: React.FC<DirectChatDialogProps> = ({
     if (!newMessage.trim() || sending) return;
 
     setSending(true);
+    setError(null);
     const messageToSend = newMessage;
     setNewMessage("");
 
     try {
       // Send via websocket if connected, otherwise fallback to HTTP
       if (socketService.isConnected()) {
-        socketService.sendDirectMessage(otherUserId, messageToSend);
-        
+        socketService.sendGroupMessage(groupId, messageToSend);
+
         // Add message optimistically (will show immediately)
-        const optimisticMessage: DirectMessage = {
-          id: `temp-${Date.now()}`, // Temporary ID
+        const optimisticId = `temp-${Date.now()}-${Math.random()}`;
+        const optimisticMessage: GroupMessage = {
+          id: optimisticId, // Unique temporary ID
+          groupId: groupId,
           senderId: currentUserId!,
-          receiverId: otherUserId,
+          senderEmail: authContext?.user?.email || "",
           content: messageToSend,
-          isRead: false,
           createdAt: new Date().toISOString(),
         };
         setMessages((prev) => [...prev, optimisticMessage]);
       } else {
-        const response = await directMessageService.sendMessage(
-          otherUserId,
-          messageToSend
-        );
+        const response = await groupMessageService.sendMessage(groupId, {
+          content: messageToSend,
+        });
         if (response.success && response.data) {
           setMessages((prev) => [...prev, response.data!]);
         }
       }
-    } catch (error) {
-      console.error("Error sending message:", error);
-      // Restaurar el mensaje en caso de error
-      setNewMessage(messageToSend);
+    } catch (err: unknown) {
+      if (err instanceof Error) {
+        setError(err.message);
+        setNewMessage(messageToSend);
+      } else {
+        setError("Error al enviar el mensaje");
+        setNewMessage(messageToSend);
+      }
     } finally {
       setSending(false);
     }
 
-    // Mantener el foco en el input después de enviar
     requestAnimationFrame(() => {
       messageInputRef.current?.focus();
     });
@@ -181,7 +206,7 @@ export const DirectChatDialog: React.FC<DirectChatDialogProps> = ({
         component="div"
       >
         <Typography variant="h6" component="h2">
-          Chat con {otherUserEmail}
+          {groupName}
         </Typography>
         <IconButton onClick={onClose} size="small">
           <CloseIcon />
@@ -206,6 +231,15 @@ export const DirectChatDialog: React.FC<DirectChatDialogProps> = ({
           >
             <CircularProgress />
           </Box>
+        ) : error && messages.length === 0 ? (
+          <Box
+            display="flex"
+            justifyContent="center"
+            alignItems="center"
+            height="100%"
+          >
+            <Alert severity="error">{error}</Alert>
+          </Box>
         ) : messages.length === 0 ? (
           <Box
             display="flex"
@@ -220,22 +254,9 @@ export const DirectChatDialog: React.FC<DirectChatDialogProps> = ({
         ) : (
           <Box>
             {messages.map((message, index) => {
-              // Convertir ambos a string para comparar correctamente
               const isOwnMessage =
                 String(message.senderId) === String(currentUserId);
-              const senderName = isOwnMessage
-                ? "Tú"
-                : message.senderEmail || otherUserEmail;
-
-              // Debug: log para verificar la comparación
-              console.log("Message:", {
-                senderId: message.senderId,
-                senderIdType: typeof message.senderId,
-                currentUserId,
-                currentUserIdType: typeof currentUserId,
-                isOwnMessage,
-                content: message.content.substring(0, 20),
-              });
+              const senderName = isOwnMessage ? "Tú" : message.senderEmail;
 
               return (
                 <Box
@@ -263,9 +284,7 @@ export const DirectChatDialog: React.FC<DirectChatDialogProps> = ({
                     sx={{
                       p: 1.5,
                       maxWidth: "70%",
-                      backgroundColor: isOwnMessage
-                        ? "#1976d2" // Azul más fuerte para mensajes propios
-                        : "#e0e0e0", // Gris para mensajes recibidos
+                      backgroundColor: isOwnMessage ? "#1976d2" : "#e0e0e0",
                       color: isOwnMessage ? "#ffffff" : "#000000",
                       borderRadius: isOwnMessage
                         ? "12px 12px 2px 12px"
@@ -285,9 +304,7 @@ export const DirectChatDialog: React.FC<DirectChatDialogProps> = ({
                       sx={{
                         display: "flex",
                         justifyContent: "flex-end",
-                        alignItems: "center",
                         mt: 0.5,
-                        gap: 0.5,
                       }}
                     >
                       <Typography
@@ -305,17 +322,6 @@ export const DirectChatDialog: React.FC<DirectChatDialogProps> = ({
                           }
                         )}
                       </Typography>
-                      {isOwnMessage && (
-                        <Typography
-                          variant="caption"
-                          sx={{
-                            opacity: 0.8,
-                            fontSize: "0.65rem",
-                          }}
-                        >
-                          {message.isRead ? "✓✓" : "✓"}
-                        </Typography>
-                      )}
                     </Box>
                   </Paper>
                 </Box>
@@ -334,27 +340,30 @@ export const DirectChatDialog: React.FC<DirectChatDialogProps> = ({
           gap: 1,
         }}
       >
-        <TextField
-          fullWidth
-          multiline
-          maxRows={3}
-          placeholder="Escribe un mensaje..."
-          value={newMessage}
-          onChange={(e) => setNewMessage(e.target.value)}
-          onKeyPress={handleKeyPress}
-          disabled={sending}
-          size="small"
-          inputRef={messageInputRef}
-        />
-        <Button
-          variant="contained"
-          onClick={handleSendMessage}
-          disabled={!newMessage.trim() || sending}
-          endIcon={sending ? <CircularProgress size={20} /> : <SendIcon />}
-          sx={{ minWidth: "100px" }}
-        >
-          Enviar
-        </Button>
+        {error && <Alert severity="error">{error}</Alert>}
+        <Box sx={{ display: "flex", gap: 1 }}>
+          <TextField
+            fullWidth
+            multiline
+            maxRows={3}
+            placeholder="Escribe un mensaje..."
+            value={newMessage}
+            onChange={(e) => setNewMessage(e.target.value)}
+            onKeyPress={handleKeyPress}
+            disabled={sending}
+            size="small"
+            inputRef={messageInputRef}
+          />
+          <Button
+            variant="contained"
+            onClick={handleSendMessage}
+            disabled={!newMessage.trim() || sending}
+            endIcon={sending ? <CircularProgress size={20} /> : <SendIcon />}
+            sx={{ minWidth: "100px" }}
+          >
+            Enviar
+          </Button>
+        </Box>
       </DialogActions>
     </Dialog>
   );
