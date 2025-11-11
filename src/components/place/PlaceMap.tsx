@@ -85,7 +85,7 @@ const MapComponent: React.FC<{ place: Place }> = ({ place }) => {
       ref={mapRef}
       sx={{
         width: '100%',
-        height: '300px',
+        height: { xs: '250px', md: '300px' },
         borderRadius: 2,
         overflow: 'hidden',
         border: '2px solid #e0e0e0',
@@ -100,7 +100,7 @@ const LoadingComponent: React.FC = () => (
       display: 'flex',
       justifyContent: 'center',
       alignItems: 'center',
-      height: '300px',
+      height: { xs: '250px', md: '300px' },
       border: '2px solid #e0e0e0',
       borderRadius: 2,
     }}
@@ -112,7 +112,7 @@ const LoadingComponent: React.FC = () => (
 const ErrorComponent: React.FC<{ error: string }> = ({ error }) => (
   <Box
     sx={{
-      height: '300px',
+      height: { xs: '250px', md: '300px' },
       border: '2px solid #e0e0e0',
       borderRadius: 2,
       display: 'flex',
@@ -176,7 +176,7 @@ const PlaceMap: React.FC<PlaceMapProps> = ({ place }) => {
     return (
       <Box
         sx={{
-          height: '300px',
+          height: { xs: '250px', md: '300px' },
           border: '2px solid #e0e0e0',
           borderRadius: 2,
           display: 'flex',
@@ -193,7 +193,7 @@ const PlaceMap: React.FC<PlaceMapProps> = ({ place }) => {
     return (
       <Box
         sx={{
-          height: '300px',
+          height: { xs: '250px', md: '300px' },
           border: '2px solid #e0e0e0',
           borderRadius: 2,
           display: 'flex',
