@@ -81,8 +81,15 @@ const QuestionList: React.FC<QuestionListProps> = ({ placeId, refreshTrigger }) 
 
   return (
     <Box sx={{ mt: 4 }}>
-      <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", mb: 2 }}>
-        <Typography variant="h6" fontWeight={600}>
+      <Box sx={{
+        display: "flex",
+        justifyContent: "space-between",
+        alignItems: "center",
+        mb: 2,
+        flexDirection: { xs: "column", sm: "row" },
+        gap: { xs: 1, sm: 0 }
+      }}>
+        <Typography variant="h6" fontWeight={600} sx={{ fontSize: { xs: "1.125rem", md: "1.25rem" } }}>
           Preguntas y Respuestas
         </Typography>
         {auth.isAuthenticated && (
@@ -91,6 +98,7 @@ const QuestionList: React.FC<QuestionListProps> = ({ placeId, refreshTrigger }) 
             startIcon={<AddIcon />}
             onClick={() => setShowAddForm(!showAddForm)}
             size="small"
+            fullWidth
           >
             {showAddForm ? "Cancelar" : "Hacer Pregunta"}
           </Button>

@@ -127,7 +127,7 @@ const ReviewForm: React.FC<ReviewFormProps> = ({
     <Paper
       elevation={3}
       sx={{
-        p: 3,
+        p: { xs: 2, md: 3 },
         borderRadius: 3,
         display: "flex",
         flexDirection: "column",
@@ -193,7 +193,7 @@ const ReviewForm: React.FC<ReviewFormProps> = ({
               onChange={(e) => setContent(e.target.value)}
               disabled={loading}
               helperText={`${content.length} caracteres`}
-              sx={{ mb: 2 }}
+              sx={{ mb: 2, fontSize: { xs: "0.875rem", md: "1rem" } }}
             />
             <MediaUploader
               onFilesChange={(files) => {

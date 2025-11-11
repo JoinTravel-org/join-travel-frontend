@@ -198,14 +198,14 @@ const PlaceDetail: React.FC = () => {
   };
 
   return (
-    <Container maxWidth="lg" sx={{ py: 5 }}>
+    <Container maxWidth="lg" sx={{ py: { xs: 2, md: 5 } }}>
       {/* ===== Main Two-Column Layout ===== */}
       <Box
         sx={{
           display: "flex",
           flexDirection: { xs: "column", md: "row" },
           alignItems: "flex-start",
-          gap: 4,
+          gap: { xs: 2, md: 4 },
         }}
       >
         {/* ===== LEFT COLUMN: Place Info ===== */}
@@ -217,11 +217,12 @@ const PlaceDetail: React.FC = () => {
             overflow: "hidden",
             display: "flex",
             flexDirection: "column",
+            width: "100%",
           }}
         >
           <Box
             sx={{
-              height: 500,
+              height: { xs: 300, md: 500 },
               backgroundImage: `url(${
                 place.image || "/placeholder-image.jpg"
               })`,
@@ -229,13 +230,20 @@ const PlaceDetail: React.FC = () => {
               backgroundPosition: "center",
             }}
           />
-          <CardContent sx={{ textAlign: "left" }}>
-            <Box sx={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+          <CardContent sx={{ textAlign: "left", p: { xs: 2, md: 3 } }}>
+            <Box sx={{
+              display: "flex",
+              alignItems: "flex-start",
+              justifyContent: "space-between",
+              flexDirection: { xs: "column", sm: "row" },
+              gap: 1
+            }}>
               <Typography
                 variant="h4"
                 component="h1"
                 fontWeight={700}
                 gutterBottom
+                sx={{ fontSize: { xs: "1.5rem", md: "2.125rem" } }}
               >
                 {place.name}
               </Typography>
@@ -248,13 +256,14 @@ const PlaceDetail: React.FC = () => {
                     color: isFavorite ? 'error.dark' : 'error.main',
                   },
                   transition: 'color 0.2s ease',
+                  alignSelf: { xs: "flex-end", sm: "auto" },
                 }}
                 aria-label={isFavorite ? 'Quitar de favoritos' : 'Agregar a favoritos'}
               >
                 {isFavorite ? <FavoriteIcon /> : <FavoriteBorderIcon />}
               </IconButton>
             </Box>
-            <Typography variant="h6" color="text.secondary" fontWeight={300}>
+            <Typography variant="h6" color="text.secondary" fontWeight={300} sx={{ fontSize: { xs: "1rem", md: "1.25rem" } }}>
               {place.city || INFO_NOT_AVAILABLE}
             </Typography>
             <Box sx={{ display: "flex", alignItems: "center", mt: 1 }}>
@@ -281,6 +290,7 @@ const PlaceDetail: React.FC = () => {
                     fullWidth
                     helperText={`${description.length}/1000 caracteres`}
                     error={!!descriptionError}
+                    sx={{ fontSize: { xs: "0.875rem", md: "1rem" } }}
                   />
                   {descriptionError && (
                     <Alert severity="error" sx={{ mb: 2 }}>
@@ -292,7 +302,7 @@ const PlaceDetail: React.FC = () => {
                       ¡Descripción guardada exitosamente!
                     </Alert>
                   )}
-                  <Stack direction="row" spacing={2}>
+                  <Stack direction={{ xs: "column", sm: "row" }} spacing={2}>
                     <Button
                       variant="contained"
                       onClick={handleSaveDescription}
@@ -301,6 +311,7 @@ const PlaceDetail: React.FC = () => {
                       startIcon={
                         descriptionSuccess ? <CheckCircleIcon /> : undefined
                       }
+                      fullWidth
                     >
                       {savingDescription ? (
                         <CircularProgress size={20} />
@@ -314,6 +325,7 @@ const PlaceDetail: React.FC = () => {
                       variant="outlined"
                       onClick={handleCancelEdit}
                       disabled={savingDescription}
+                      fullWidth
                     >
                       Cancelar
                     </Button>
@@ -321,13 +333,13 @@ const PlaceDetail: React.FC = () => {
                 </Stack>
               ) : (
                 <Box>
-                  <Typography variant="body1">
+                  <Typography variant="body1" sx={{ fontSize: { xs: "0.875rem", md: "1rem" } }}>
                     {place.description || "Lorem ipsum description"}
                   </Typography>
                   <Button
                     variant="text"
                     onClick={handleEditDescription}
-                    sx={{ mt: 1, textTransform: "none" }}
+                    sx={{ mt: 1, textTransform: "none", fontSize: { xs: "0.875rem", md: "1rem" } }}
                   >
                     {place.description
                       ? "Editar descripción"
@@ -345,12 +357,13 @@ const PlaceDetail: React.FC = () => {
             flex: { xs: "1 1 100%", md: "1 1 55%" },
             display: "flex",
             flexDirection: "column",
-            gap: 3,
+            gap: { xs: 2, md: 3 },
+            width: "100%",
           }}
         >
           {/* --- Interactive Map --- */}
           <Box>
-            <Typography variant="h6" fontWeight={700} gutterBottom>
+            <Typography variant="h6" fontWeight={700} gutterBottom sx={{ fontSize: { xs: "1.125rem", md: "1.25rem" } }}>
               Ubicación
             </Typography>
             <PlaceMap place={place} />
