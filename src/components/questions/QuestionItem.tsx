@@ -75,27 +75,51 @@ const QuestionItem: React.FC<QuestionItemProps> = ({ question, onVoteUpdate }) =
         border: 1,
         borderColor: "divider",
         borderRadius: 2,
-        p: 2,
+        p: { xs: 1.5, md: 2 },
         bgcolor: "background.paper",
+        overflow: "hidden",
+        wordWrap: "break-word",
       }}
     >
       {/* Question Header */}
-      <Box sx={{ display: "flex", alignItems: "flex-start", gap: 2, mb: 1 }}>
-        <Avatar sx={{ width: 32, height: 32 }}>
+      <Box sx={{ display: "flex", alignItems: "flex-start", gap: { xs: 1.5, md: 2 }, mb: 1 }}>
+        <Avatar sx={{ width: { xs: 28, md: 32 }, height: { xs: 28, md: 32 } }}>
           {question.userEmail?.charAt(0).toUpperCase()}
         </Avatar>
-        <Box sx={{ flex: 1 }}>
-          <Typography variant="body1" fontWeight={500}>
+        <Box sx={{ flex: 1, minWidth: 0 }}>
+          <Typography
+            variant="body1"
+            fontWeight={500}
+            sx={{
+              fontSize: { xs: "0.875rem", md: "1rem" },
+              wordBreak: "break-word",
+              hyphens: "auto",
+            }}
+          >
             {question.content}
           </Typography>
-          <Typography variant="caption" color="text.secondary">
+          <Typography
+            variant="caption"
+            color="text.secondary"
+            sx={{
+              fontSize: { xs: "0.75rem", md: "0.875rem" },
+              wordBreak: "break-word",
+            }}
+          >
             {question.userEmail} • {timeAgo}
           </Typography>
         </Box>
       </Box>
 
       {/* Vote and Actions */}
-      <Box sx={{ display: "flex", alignItems: "center", justifyContent: "space-between", mt: 2 }}>
+      <Box sx={{
+        display: "flex",
+        alignItems: { xs: "flex-start", sm: "center" },
+        justifyContent: "space-between",
+        mt: 2,
+        flexDirection: { xs: "column", sm: "row" },
+        gap: { xs: 1, sm: 0 }
+      }}>
         <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
           <IconButton
             size="small"
@@ -116,18 +140,26 @@ const QuestionItem: React.FC<QuestionItemProps> = ({ question, onVoteUpdate }) =
               <ThumbUpOutlinedIcon fontSize="small" />
             )}
           </IconButton>
-          <Typography variant="body2" color="text.secondary">
+          <Typography variant="body2" color="text.secondary" sx={{ fontSize: { xs: "0.875rem", md: "1rem" } }}>
             {question.voteCount} {question.voteCount === 1 ? 'voto' : 'votos'}
           </Typography>
         </Box>
 
-        <Stack direction="row" spacing={1}>
+        <Stack
+          direction="row"
+          spacing={1}
+          sx={{
+            width: { xs: "100%", sm: "auto" },
+            justifyContent: { xs: "space-between", sm: "flex-end" }
+          }}
+        >
           {auth.isAuthenticated && (
             <Button
               size="small"
               startIcon={<AddIcon />}
               onClick={() => setShowAddAnswer(!showAddAnswer)}
               variant="text"
+              sx={{ fontSize: { xs: "0.75rem", md: "0.875rem" } }}
             >
               Responder
             </Button>
@@ -144,6 +176,7 @@ const QuestionItem: React.FC<QuestionItemProps> = ({ question, onVoteUpdate }) =
             }
             onClick={() => setExpanded(!expanded)}
             variant="text"
+            sx={{ fontSize: { xs: "0.75rem", md: "0.875rem" } }}
           >
             Ver respuestas
           </Button>

@@ -58,20 +58,36 @@ const AnswerItem: React.FC<AnswerItemProps> = ({ answer, onVoteUpdate }) => {
         border: 1,
         borderColor: "divider",
         borderRadius: 1,
-        p: 2,
+        p: { xs: 1.5, md: 2 },
         bgcolor: "background.default",
+        overflow: "hidden",
+        wordWrap: "break-word",
       }}
     >
       {/* Answer Header */}
-      <Box sx={{ display: "flex", alignItems: "flex-start", gap: 2, mb: 1 }}>
-        <Avatar sx={{ width: 28, height: 28 }}>
+      <Box sx={{ display: "flex", alignItems: "flex-start", gap: { xs: 1.5, md: 2 }, mb: 1 }}>
+        <Avatar sx={{ width: { xs: 24, md: 28 }, height: { xs: 24, md: 28 } }}>
           {answer.userEmail?.charAt(0).toUpperCase()}
         </Avatar>
-        <Box sx={{ flex: 1 }}>
-          <Typography variant="body2">
+        <Box sx={{ flex: 1, minWidth: 0 }}>
+          <Typography
+            variant="body2"
+            sx={{
+              fontSize: { xs: "0.875rem", md: "1rem" },
+              wordBreak: "break-word",
+              hyphens: "auto",
+            }}
+          >
             {answer.content}
           </Typography>
-          <Typography variant="caption" color="text.secondary">
+          <Typography
+            variant="caption"
+            color="text.secondary"
+            sx={{
+              fontSize: { xs: "0.75rem", md: "0.875rem" },
+              wordBreak: "break-word",
+            }}
+          >
             {answer.userEmail} • {timeAgo}
           </Typography>
         </Box>
@@ -98,7 +114,11 @@ const AnswerItem: React.FC<AnswerItemProps> = ({ answer, onVoteUpdate }) => {
             <ThumbUpOutlinedIcon fontSize="small" />
           )}
         </IconButton>
-        <Typography variant="caption" color="text.secondary">
+        <Typography
+          variant="caption"
+          color="text.secondary"
+          sx={{ fontSize: { xs: "0.75rem", md: "0.875rem" } }}
+        >
           {answer.voteCount} {answer.voteCount === 1 ? 'voto' : 'votos'}
         </Typography>
       </Box>
