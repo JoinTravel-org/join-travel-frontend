@@ -4,6 +4,17 @@ import type {
   CreateItineraryRequest,
   CreateItineraryResponse,
 } from "../types/itinerary";
+import type {
+  List,
+  CreateListRequest,
+  UpdateListRequest,
+  CreateListResponse,
+  UpdateListResponse,
+  DeleteListResponse,
+  GetUserListsResponse,
+  GetListResponse,
+  ModifyListPlaceResponse,
+} from "../types/list";
 
 /**
  * Configuración del cliente API con axios
@@ -583,6 +594,78 @@ class ApiService {
     const response = await this.api.get("/media/recent", {
       params: { page, limit },
     });
+    return response.data;
+  }
+
+  /**
+   * Crea una nueva lista
+   * @param listData - Datos de la lista
+   * @returns Promise con la respuesta del servidor
+   */
+  async createList(listData: CreateListRequest): Promise<CreateListResponse> {
+    const response = await this.api.post("/lists", listData);
+    return response.data;
+  }
+
+  /**
+   * Obtiene todas las listas del usuario autenticado
+   * @returns Promise con las listas del usuario
+   */
+  async getUserLists(): Promise<GetUserListsResponse> {
+    const response = await this.api.get("/lists");
+    return response.data;
+  }
+
+  /**
+   * Obtiene una lista específica por ID
+   * @param id - ID de la lista
+   * @returns Promise con la lista
+   */
+  async getListById(id: string): Promise<GetListResponse> {
+    const response = await this.api.get(`/lists/${id}`);
+    return response.data;
+  }
+
+  /**
+   * Actualiza una lista existente
+   * @param id - ID de la lista
+   * @param listData - Datos a actualizar
+   * @returns Promise con la respuesta del servidor
+   */
+  async updateList(id: string, listData: UpdateListRequest): Promise<UpdateListResponse> {
+    const response = await this.api.put(`/lists/${id}`, listData);
+    return response.data;
+  }
+
+  /**
+   * Elimina una lista
+   * @param id - ID de la lista
+   * @returns Promise con la respuesta del servidor
+   */
+  async deleteList(id: string): Promise<DeleteListResponse> {
+    const response = await this.api.delete(`/lists/${id}`);
+    return response.data;
+  }
+
+  /**
+   * Agrega un lugar a una lista
+   * @param listId - ID de la lista
+   * @param placeId - ID del lugar
+   * @returns Promise con la respuesta del servidor
+   */
+  async addPlaceToList(listId: string, placeId: string): Promise<ModifyListPlaceResponse> {
+    const response = await this.api.post(`/lists/${listId}/places/${placeId}`);
+    return response.data;
+  }
+
+  /**
+   * Remueve un lugar de una lista
+   * @param listId - ID de la lista
+   * @param placeId - ID del lugar
+   * @returns Promise con la respuesta del servidor
+   */
+  async removePlaceFromList(listId: string, placeId: string): Promise<ModifyListPlaceResponse> {
+    const response = await this.api.delete(`/lists/${listId}/places/${placeId}`);
     return response.data;
   }
 

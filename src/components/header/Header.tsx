@@ -40,6 +40,7 @@ import { useAuth } from "../../hooks/useAuth";
 import { useUserStats } from "../../hooks/useUserStats";
 import { useChatNotifications } from "../../hooks/useChatNotifications";
 import Notification from "../user_profile/Notification";
+import CollectionsMenu from "../collections/CollectionsModal";
 
 /**
  * Accessible, responsive site header:
@@ -61,6 +62,7 @@ const Header: React.FC = () => {
   const [isLoggingOut, setIsLoggingOut] = React.useState(false);
   const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
   const [noNotificationsDialogOpen, setNoNotificationsDialogOpen] = React.useState(false);
+  const [collectionsMenuAnchorEl, setCollectionsMenuAnchorEl] = React.useState<null | HTMLElement>(null);
   const { clearNotification } = useUserStats();
 
   // Search states
@@ -201,9 +203,7 @@ const Header: React.FC = () => {
       </Button>
       <Button
         color="inherit"
-        component={RouterLink}
-        to="/itineraries"
-        aria-current={location.pathname === "/itineraries" ? "page" : undefined}
+        onClick={(e) => setCollectionsMenuAnchorEl(e.currentTarget)}
         sx={{
           textDecoration: "none",
           position: "relative",
@@ -231,7 +231,7 @@ const Header: React.FC = () => {
           },
         }}
       >
-        Itinerarios
+        Colecciones
       </Button>
       {auth.isAuthenticated ? (
         <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
@@ -725,12 +725,12 @@ const Header: React.FC = () => {
               <ListItemText primary="Agregar Lugar" />
             </ListItemButton>
             <ListItemButton
-              component={RouterLink}
-              to="/itineraries"
-              selected={location.pathname === "/itineraries"}
-              onClick={toggleDrawer(false)}
+              onClick={(e) => {
+                setCollectionsMenuAnchorEl(e.currentTarget);
+                toggleDrawer(false)();
+              }}
             >
-              <ListItemText primary="Itinerarios" />
+              <ListItemText primary="Colecciones" />
             </ListItemButton>
             {auth.isAuthenticated ? (
               <>
@@ -887,6 +887,12 @@ const Header: React.FC = () => {
           <Button onClick={() => setNoNotificationsDialogOpen(false)}>Cerrar</Button>
         </DialogActions>
       </Dialog>
+
+      <CollectionsMenu
+        anchorEl={collectionsMenuAnchorEl}
+        open={Boolean(collectionsMenuAnchorEl)}
+        onClose={() => setCollectionsMenuAnchorEl(null)}
+      />
     </AppBar>
   );
 };
