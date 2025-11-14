@@ -201,9 +201,7 @@ const Header: React.FC = () => {
       </Button>
       <Button
         color="inherit"
-        component={RouterLink}
-        to="/itineraries"
-        aria-current={location.pathname === "/itineraries" ? "page" : undefined}
+        onClick={() => navigate('/collections')}
         sx={{
           textDecoration: "none",
           position: "relative",
@@ -231,7 +229,7 @@ const Header: React.FC = () => {
           },
         }}
       >
-        Itinerarios
+        Colecciones
       </Button>
       {auth.isAuthenticated ? (
         <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
@@ -725,12 +723,12 @@ const Header: React.FC = () => {
               <ListItemText primary="Agregar Lugar" />
             </ListItemButton>
             <ListItemButton
-              component={RouterLink}
-              to="/itineraries"
-              selected={location.pathname === "/itineraries"}
-              onClick={toggleDrawer(false)}
+              onClick={() => {
+                navigate('/collections');
+                toggleDrawer(false)();
+              }}
             >
-              <ListItemText primary="Itinerarios" />
+              <ListItemText primary="Colecciones" />
             </ListItemButton>
             {auth.isAuthenticated ? (
               <>
@@ -887,6 +885,7 @@ const Header: React.FC = () => {
           <Button onClick={() => setNoNotificationsDialogOpen(false)}>Cerrar</Button>
         </DialogActions>
       </Dialog>
+
     </AppBar>
   );
 };
