@@ -66,15 +66,44 @@ const ListCard: React.FC<ListCardProps> = ({ list, onEdit, onDelete, onView }) =
           </IconButton>
         </Box>
 
-        <Box display="flex" justifyContent="space-between" alignItems="center" mt={2}>
-          <Chip
-            label={`${list.places.length} lugares`}
-            size="small"
-            color="primary"
-            variant="outlined"
-          />
+        <Box sx={{ mt: 2 }}>
+          <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
+            {list.places.length} lugar{list.places.length !== 1 ? 'es' : ''}
+          </Typography>
+
+          {list.places.length > 0 && (
+            <Box sx={{ mb: 2 }}>
+              <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mb: 1 }}>
+                Lugares:
+              </Typography>
+              <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
+                {list.places.slice(0, 5).map((place) => (
+                  <Chip
+                    key={place.id}
+                    label={place.name}
+                    size="small"
+                    sx={{ fontSize: '0.75rem' }}
+                  />
+                ))}
+                {list.places.length > 5 && (
+                  <Chip
+                    label={`+${list.places.length - 5} más`}
+                    size="small"
+                    color="primary"
+                    variant="outlined"
+                    sx={{ fontSize: '0.75rem' }}
+                  />
+                )}
+              </Box>
+            </Box>
+          )}
+
           <Typography variant="caption" color="text.secondary">
-            {new Date(list.createdAt).toLocaleDateString()}
+            Creado: {new Date(list.createdAt).toLocaleDateString('es-ES', {
+              year: 'numeric',
+              month: 'short',
+              day: 'numeric'
+            })}
           </Typography>
         </Box>
 

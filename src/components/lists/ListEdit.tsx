@@ -92,7 +92,7 @@ const ListEdit: React.FC = () => {
       });
 
       // Update local state
-      setList(prev => prev ? { ...prev, title: title.trim(), description: description.trim() || undefined } : null);
+      setList(prev => prev ? { ...prev, title: title.trim(), description: description.trim() || null } : null);
 
       // Show success message
       setError(null);

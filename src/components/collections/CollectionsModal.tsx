@@ -1,10 +1,12 @@
 import React from "react";
 import {
-  Menu,
-  MenuItem,
-  ListItemIcon,
-  ListItemText,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  Button,
   Typography,
+  Box,
 } from "@mui/material";
 import {
   FormatListBulleted as FormatListBulletedIcon,
@@ -12,75 +14,81 @@ import {
 } from "@mui/icons-material";
 import { useNavigate } from "react-router-dom";
 
-interface CollectionsMenuProps {
-  anchorEl: HTMLElement | null;
+interface CollectionsModalProps {
   open: boolean;
   onClose: () => void;
 }
 
-const CollectionsMenu: React.FC<CollectionsMenuProps> = ({ anchorEl, open, onClose }) => {
+const CollectionsModal: React.FC<CollectionsModalProps> = ({ open, onClose }) => {
   const navigate = useNavigate();
 
-  const handleNavigateToLists = () => {
+  const handleNavigateToCollections = () => {
     onClose();
-    navigate("/lists");
-  };
-
-  const handleNavigateToItineraries = () => {
-    onClose();
-    navigate("/itineraries");
+    navigate("/collections");
   };
 
   return (
-    <Menu
-      anchorEl={anchorEl}
+    <Dialog
       open={open}
       onClose={onClose}
-      anchorOrigin={{
-        vertical: "bottom",
-        horizontal: "center",
-      }}
-      transformOrigin={{
-        vertical: "top",
-        horizontal: "center",
-      }}
+      maxWidth="sm"
+      fullWidth
       PaperProps={{
         sx: {
-          minWidth: 200,
           borderRadius: 2,
-          mt: 1,
         },
       }}
     >
-      <MenuItem onClick={handleNavigateToLists} sx={{ py: 1.5 }}>
-        <ListItemIcon>
-          <FormatListBulletedIcon color="primary" />
-        </ListItemIcon>
-        <ListItemText>
-          <Typography variant="body1" fontWeight={500}>
-            Listas
-          </Typography>
-          <Typography variant="caption" color="text.secondary">
-            Organiza tus lugares favoritos
-          </Typography>
-        </ListItemText>
-      </MenuItem>
+      <DialogTitle sx={{ textAlign: "center", pb: 1 }}>
+        <Typography variant="h5" component="h2" fontWeight={600}>
+          Colecciones
+        </Typography>
+        <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
+          Organiza tus lugares favoritos y planifica tus viajes
+        </Typography>
+      </DialogTitle>
 
-      <MenuItem onClick={handleNavigateToItineraries} sx={{ py: 1.5 }}>
-        <ListItemIcon>
-          <MapIcon color="secondary" />
-        </ListItemIcon>
-        <ListItemText>
-          <Typography variant="body1" fontWeight={500}>
-            Itinerarios
+      <DialogContent sx={{ pb: 3, textAlign: "center" }}>
+        <Box sx={{ py: 4 }}>
+          <Box
+            sx={{
+              bgcolor: "primary.main",
+              borderRadius: "50%",
+              width: 80,
+              height: 80,
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              mx: "auto",
+              mb: 3,
+            }}
+          >
+            <FormatListBulletedIcon sx={{ fontSize: 40, color: "white" }} />
+          </Box>
+          <Typography variant="h6" component="h3" gutterBottom fontWeight={600}>
+            Gestiona tus Colecciones
           </Typography>
-          <Typography variant="caption" color="text.secondary">
-            Planifica tus viajes
+          <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
+            Crea listas de lugares favoritos y planifica itinerarios detallados para tus viajes
           </Typography>
-        </ListItemText>
-      </MenuItem>
-    </Menu>
+        </Box>
+      </DialogContent>
+
+      <DialogActions sx={{ justifyContent: "center", pb: 3 }}>
+        <Button onClick={onClose} variant="outlined" size="large" sx={{ mr: 2 }}>
+          Cancelar
+        </Button>
+        <Button
+          onClick={handleNavigateToCollections}
+          variant="contained"
+          size="large"
+          startIcon={<MapIcon />}
+        >
+          Ver Colecciones
+        </Button>
+      </DialogActions>
+    </Dialog>
   );
 };
 
-export default CollectionsMenu;
+export default CollectionsModal;

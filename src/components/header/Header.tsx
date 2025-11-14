@@ -40,7 +40,6 @@ import { useAuth } from "../../hooks/useAuth";
 import { useUserStats } from "../../hooks/useUserStats";
 import { useChatNotifications } from "../../hooks/useChatNotifications";
 import Notification from "../user_profile/Notification";
-import CollectionsMenu from "../collections/CollectionsModal";
 
 /**
  * Accessible, responsive site header:
@@ -62,7 +61,6 @@ const Header: React.FC = () => {
   const [isLoggingOut, setIsLoggingOut] = React.useState(false);
   const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
   const [noNotificationsDialogOpen, setNoNotificationsDialogOpen] = React.useState(false);
-  const [collectionsMenuAnchorEl, setCollectionsMenuAnchorEl] = React.useState<null | HTMLElement>(null);
   const { clearNotification } = useUserStats();
 
   // Search states
@@ -203,7 +201,7 @@ const Header: React.FC = () => {
       </Button>
       <Button
         color="inherit"
-        onClick={(e) => setCollectionsMenuAnchorEl(e.currentTarget)}
+        onClick={() => navigate('/collections')}
         sx={{
           textDecoration: "none",
           position: "relative",
@@ -725,8 +723,8 @@ const Header: React.FC = () => {
               <ListItemText primary="Agregar Lugar" />
             </ListItemButton>
             <ListItemButton
-              onClick={(e) => {
-                setCollectionsMenuAnchorEl(e.currentTarget);
+              onClick={() => {
+                navigate('/collections');
                 toggleDrawer(false)();
               }}
             >
@@ -888,11 +886,6 @@ const Header: React.FC = () => {
         </DialogActions>
       </Dialog>
 
-      <CollectionsMenu
-        anchorEl={collectionsMenuAnchorEl}
-        open={Boolean(collectionsMenuAnchorEl)}
-        onClose={() => setCollectionsMenuAnchorEl(null)}
-      />
     </AppBar>
   );
 };

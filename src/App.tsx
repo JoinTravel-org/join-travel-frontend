@@ -31,6 +31,7 @@ import Notification from "./components/user_profile/Notification";
 import SearchResults from "./components/search/SearchResults";
 import Lists from "./components/lists/Lists";
 import ListEdit from "./components/lists/ListEdit";
+import Collections from "./components/collections/Collections";
 import UserProfile from "./components/user/UserProfile";
 import GroupPage from "./components/groups/Groups";
 
@@ -106,6 +107,7 @@ function App() {
                 <Route path="/groups" element={<GroupPage />} />
                 <Route path="/lists" element={<Lists />} />
                 <Route path="/list/:id" element={<ListEdit />} />
+                <Route path="/collections" element={<Collections />} />
                 <Route path="/search" element={<SearchResults />} />
                 <Route path="/groups" element={<GroupPage />} />
               </Routes>
