@@ -11,7 +11,6 @@ import { Add as AddIcon } from '@mui/icons-material';
 import { useNavigate } from 'react-router-dom';
 import apiService from '../../services/api.service';
 import ListCard from './ListCard';
-import CreateListDialog from './CreateListDialog';
 import type { List } from '../../types/list';
 
 const Lists: React.FC = () => {
@@ -19,7 +18,7 @@ const Lists: React.FC = () => {
   const [lists, setLists] = useState<List[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [createDialogOpen, setCreateDialogOpen] = useState(false);
+  // Removed createDialogOpen state
 
   const fetchLists = async () => {
     try {
@@ -76,14 +75,22 @@ const Lists: React.FC = () => {
 
   return (
     <Box sx={{ p: 3 }}>
-      <Box display="flex" justifyContent="space-between" alignItems="center" mb={3}>
+      <Box
+        display="flex"
+        justifyContent="space-between"
+        alignItems="center"
+        mb={3}
+        flexDirection={{ xs: "column", sm: "row" }}
+        gap={2}
+      >
         <Typography variant="h4" component="h1">
           Mis Listas
         </Typography>
         <Button
           variant="contained"
           startIcon={<AddIcon />}
-          onClick={() => setCreateDialogOpen(true)}
+          onClick={() => navigate('/create-list')}
+          sx={{ width: { xs: "100%", sm: "auto" } }}
         >
           Crear Lista
         </Button>
@@ -106,7 +113,8 @@ const Lists: React.FC = () => {
           <Button
             variant="contained"
             startIcon={<AddIcon />}
-            onClick={() => setCreateDialogOpen(true)}
+            onClick={() => navigate('/create-list')}
+            sx={{ width: { xs: "100%", sm: "auto" } }}
           >
             Crear Primera Lista
           </Button>
@@ -145,16 +153,11 @@ const Lists: React.FC = () => {
           right: 16,
           display: { xs: 'flex', md: 'none' },
         }}
-        onClick={() => setCreateDialogOpen(true)}
+        onClick={() => navigate('/create-list')}
       >
         <AddIcon />
       </Fab>
 
-      <CreateListDialog
-        open={createDialogOpen}
-        onClose={() => setCreateDialogOpen(false)}
-        onSuccess={handleCreateSuccess}
-      />
     </Box>
   );
 };

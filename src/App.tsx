@@ -30,7 +30,9 @@ import Profile from "./components/user_profile/Profile";
 import Notification from "./components/user_profile/Notification";
 import SearchResults from "./components/search/SearchResults";
 import Lists from "./components/lists/Lists";
+import ListDetail from "./components/lists/ListDetail";
 import ListEdit from "./components/lists/ListEdit";
+import CreateList from "./components/lists/CreateList";
 import Collections from "./components/collections/Collections";
 import UserProfile from "./components/user/UserProfile";
 import GroupPage from "./components/groups/Groups";
@@ -106,7 +108,9 @@ function App() {
                 <Route path="/user/:userId" element={<UserProfile />} />
                 <Route path="/groups" element={<GroupPage />} />
                 <Route path="/lists" element={<Lists />} />
-                <Route path="/list/:id" element={<ListEdit />} />
+                <Route path="/list/:id" element={<ListDetail />} />
+                <Route path="/list/:id/edit" element={<ListEdit />} />
+                <Route path="/create-list" element={<CreateList />} />
                 <Route path="/collections" element={<Collections />} />
                 <Route path="/search" element={<SearchResults />} />
                 <Route path="/groups" element={<GroupPage />} />

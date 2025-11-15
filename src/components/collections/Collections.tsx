@@ -14,7 +14,6 @@ import { Add as AddIcon } from '@mui/icons-material';
 import { useNavigate } from 'react-router-dom';
 import Lists from '../lists/Lists';
 import ItineraryList from '../itineraries/ItineraryList';
-import CreateListDialog from '../lists/CreateListDialog';
 import { useAuth } from '../../hooks/useAuth';
 
 interface TabPanelProps {
@@ -53,7 +52,6 @@ const Collections: React.FC = () => {
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
 
   const [tabValue, setTabValue] = useState(0);
-  const [createListDialogOpen, setCreateListDialogOpen] = useState(false);
 
   // Redirect to login if not authenticated
   useEffect(() => {
@@ -66,10 +64,6 @@ const Collections: React.FC = () => {
     setTabValue(newValue);
   };
 
-  const handleCreateListSuccess = () => {
-    setCreateListDialogOpen(false);
-    // The Lists component will handle refreshing its data
-  };
 
   const handleCreateItinerary = () => {
     navigate('/itineraries/create');
@@ -107,7 +101,7 @@ const Collections: React.FC = () => {
           <Fab
             color={tabValue === 0 ? "primary" : "secondary"}
             aria-label={tabValue === 0 ? "add list" : "add itinerary"}
-            onClick={tabValue === 0 ? () => setCreateListDialogOpen(true) : handleCreateItinerary}
+            onClick={tabValue === 0 ? () => navigate('/create-list') : handleCreateItinerary}
             sx={{
               display: { xs: 'flex', md: 'none' }, // Show on mobile
             }}
@@ -156,12 +150,6 @@ const Collections: React.FC = () => {
         </TabPanel>
       </Box>
 
-      {/* Create List Dialog */}
-      <CreateListDialog
-        open={createListDialogOpen}
-        onClose={() => setCreateListDialogOpen(false)}
-        onSuccess={handleCreateListSuccess}
-      />
     </Container>
   );
 };
