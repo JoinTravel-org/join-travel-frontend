@@ -11,6 +11,7 @@ import {
   CircularProgress,
   Alert,
   Fab,
+  Autocomplete,
 } from '@mui/material';
 import {
   ArrowBack as ArrowBackIcon,
@@ -37,12 +38,14 @@ const ListEdit: React.FC = () => {
   // Form state
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
+  const [validationErrors, setValidationErrors] = useState<{title?: string; description?: string}>({});
 
   // Places management
   const [availablePlaces, setAvailablePlaces] = useState<Place[]>([]);
   const [searchLoading, setSearchLoading] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [showSearch, setShowSearch] = useState(false);
+  const [selectedPlace, setSelectedPlace] = useState<Place | null>(null);
 
   const fetchList = async () => {
     if (!id) return;
@@ -79,8 +82,27 @@ const ListEdit: React.FC = () => {
     }
   };
 
+  const validateForm = () => {
+    const errors: {title?: string; description?: string} = {};
+
+    if (!title.trim()) {
+      errors.title = 'El título es requerido';
+    } else if (title.length < 3) {
+      errors.title = 'El título debe tener al menos 3 caracteres';
+    }
+
+    if (description.length > 500) {
+      errors.description = 'Límite superado.';
+    }
+
+    setValidationErrors(errors);
+    return Object.keys(errors).length === 0;
+  };
+
   const handleSave = async () => {
-    if (!list || !title.trim()) return;
+    if (!list) return;
+
+    if (!validateForm()) return;
 
     try {
       setSaving(true);
@@ -104,19 +126,25 @@ const ListEdit: React.FC = () => {
     }
   };
 
-  const handleAddPlace = async (place: Place) => {
-    if (!list) return;
+  const handlePlaceSelect = (_e: any, place: Place | null) => {
+    setSelectedPlace(place);
+    setError(null);
+  };
+
+  const handleAddPlace = async () => {
+    if (!list || !selectedPlace) return;
 
     try {
-      await apiService.addPlaceToList(list.id, place.id);
+      await apiService.addPlaceToList(list.id, selectedPlace.id);
 
       // Update local state
       setList(prev => prev ? {
         ...prev,
-        places: [...prev.places, place]
+        places: [...prev.places, selectedPlace]
       } : null);
 
       // Reset search state
+      setSelectedPlace(null);
       setSearchQuery('');
       setAvailablePlaces([]);
       setShowSearch(false);
@@ -173,11 +201,24 @@ const ListEdit: React.FC = () => {
   return (
     <Box sx={{ p: 3, maxWidth: 800, mx: 'auto' }}>
       {/* Header */}
-      <Box display="flex" alignItems="center" mb={3}>
-        <IconButton onClick={() => navigate('/lists')} sx={{ mr: 2 }}>
+      <Box
+        display="flex"
+        alignItems="center"
+        mb={3}
+        flexDirection={{ xs: "column", sm: "row" }}
+        textAlign={{ xs: "center", sm: "left" }}
+      >
+        <IconButton
+          onClick={() => navigate('/lists')}
+          sx={{ mr: { xs: 0, sm: 2 }, mb: { xs: 1, sm: 0 } }}
+        >
           <ArrowBackIcon />
         </IconButton>
-        <Typography variant="h4" component="h1">
+        <Typography
+          variant="h4"
+          component="h1"
+          sx={{ fontSize: { xs: '1.8rem', sm: '2.125rem' } }}
+        >
           Editar Lista
         </Typography>
       </Box>
@@ -199,18 +240,34 @@ const ListEdit: React.FC = () => {
               fullWidth
               label="Título"
               value={title}
-              onChange={(e) => setTitle(e.target.value)}
+              onChange={(e) => {
+                setTitle(e.target.value);
+                if (validationErrors.title) {
+                  setValidationErrors(prev => ({ ...prev, title: undefined }));
+                }
+              }}
               sx={{ mb: 2 }}
               required
+              error={!!validationErrors.title}
+              helperText={validationErrors.title || `${title.length}/100 caracteres`}
+              inputProps={{ maxLength: 100 }}
             />
             <TextField
               fullWidth
               label="Descripción"
               value={description}
-              onChange={(e) => setDescription(e.target.value)}
+              onChange={(e) => {
+                setDescription(e.target.value);
+                if (validationErrors.description) {
+                  setValidationErrors(prev => ({ ...prev, description: undefined }));
+                }
+              }}
               multiline
               rows={3}
               placeholder="Describe qué hace especial a esta colección de lugares..."
+              error={!!validationErrors.description}
+              helperText={validationErrors.description || `${description.length}/500 caracteres`}
+              inputProps={{ maxLength: 500 }}
             />
           </Box>
         </CardContent>
@@ -237,49 +294,43 @@ const ListEdit: React.FC = () => {
           {/* Inline Search for Adding Places */}
           {showSearch && list.places.length < 20 && (
             <Box sx={{ mb: 3, p: 2, bgcolor: 'grey.50', borderRadius: 1 }}>
-              <TextField
-                fullWidth
-                placeholder="Buscar lugares para agregar..."
-                value={searchQuery}
-                onChange={(e) => {
-                  setSearchQuery(e.target.value);
-                  searchPlaces(e.target.value);
-                }}
-                InputProps={{
-                  endAdornment: searchLoading ? (
-                    <CircularProgress size={20} />
-                  ) : null,
-                }}
-                autoFocus
+              <Autocomplete
+                options={availablePlaces}
+                getOptionLabel={(option) => option.name}
+                value={selectedPlace}
+                onChange={handlePlaceSelect}
+                loading={searchLoading}
+                renderInput={(params) => (
+                  <TextField
+                    {...params}
+                    placeholder="Buscar lugares para agregar..."
+                    onChange={(e) => {
+                      setSearchQuery(e.target.value);
+                      searchPlaces(e.target.value);
+                    }}
+                    autoFocus
+                  />
+                )}
+                sx={{ mb: 2 }}
               />
 
-              {availablePlaces.length > 0 && (
-                <Box sx={{ mt: 2, maxHeight: 200, overflow: 'auto' }}>
-                  {availablePlaces.slice(0, 5).map((place) => (
-                    <Box
-                      key={place.id}
-                      sx={{
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'space-between',
-                        p: 1,
-                        borderRadius: 1,
-                        cursor: 'pointer',
-                        '&:hover': { bgcolor: 'grey.100' },
-                      }}
-                      onClick={() => handleAddPlace(place)}
-                    >
-                      <Box>
-                        <Typography variant="body2" fontWeight={500}>
-                          {place.name}
-                        </Typography>
-                        <Typography variant="caption" color="text.secondary">
-                          {place.address}
-                        </Typography>
-                      </Box>
-                      <AddIcon color="primary" />
-                    </Box>
-                  ))}
+              {selectedPlace && (
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 2 }}>
+                  <Typography variant="body2" color="text.secondary">
+                    Lugar seleccionado:
+                  </Typography>
+                  <Chip
+                    label={selectedPlace.name}
+                    variant="outlined"
+                    color="primary"
+                  />
+                  <Button
+                    variant="contained"
+                    size="small"
+                    onClick={handleAddPlace}
+                  >
+                    Agregar Lugar
+                  </Button>
                 </Box>
               )}
 
@@ -292,6 +343,7 @@ const ListEdit: React.FC = () => {
               <Box sx={{ mt: 2, display: 'flex', justifyContent: 'flex-end' }}>
                 <Button size="small" onClick={() => {
                   setShowSearch(false);
+                  setSelectedPlace(null);
                   setSearchQuery('');
                   setAvailablePlaces([]);
                 }}>
@@ -328,10 +380,17 @@ const ListEdit: React.FC = () => {
       </Card>
 
       {/* Action Buttons */}
-      <Box display="flex" justifyContent="space-between" alignItems="center">
+      <Box
+        display="flex"
+        justifyContent="space-between"
+        alignItems="center"
+        flexDirection={{ xs: "column-reverse", sm: "row" }}
+        gap={2}
+      >
         <Button
           variant="outlined"
           onClick={() => navigate('/lists')}
+          sx={{ width: { xs: "100%", sm: "auto" } }}
         >
           Cancelar
         </Button>
@@ -339,7 +398,8 @@ const ListEdit: React.FC = () => {
           variant="contained"
           startIcon={saving ? <CircularProgress size={16} /> : <SaveIcon />}
           onClick={handleSave}
-          disabled={saving || !title.trim()}
+          disabled={saving || !title.trim() || title.length < 3 || description.length > 500}
+          sx={{ width: { xs: "100%", sm: "auto" } }}
         >
           {saving ? 'Guardando...' : 'Guardar Cambios'}
         </Button>
@@ -357,7 +417,7 @@ const ListEdit: React.FC = () => {
           display: { xs: 'flex', md: 'none' },
         }}
         onClick={handleSave}
-        disabled={saving || !title.trim()}
+        disabled={saving || !title.trim() || title.length < 3 || description.length > 500}
       >
         <SaveIcon />
       </Fab>

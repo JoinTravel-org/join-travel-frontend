@@ -23,7 +23,8 @@ const ListCard: React.FC<ListCardProps> = ({ list, onEdit, onDelete, onView }) =
 
   const handleEdit = () => {
     handleMenuClose();
-    onEdit(list);
+    // Navigate to edit page
+    window.location.href = `/list/${list.id}/edit`;
   };
 
   const handleDelete = () => {
@@ -46,11 +47,36 @@ const ListCard: React.FC<ListCardProps> = ({ list, onEdit, onDelete, onView }) =
       <CardContent>
         <Box display="flex" justifyContent="space-between" alignItems="flex-start">
           <Box flex={1}>
-            <Typography variant="h6" component="h2" gutterBottom>
+            <Typography
+              variant="h6"
+              component="h2"
+              gutterBottom
+              sx={{
+                fontWeight: 600,
+                fontSize: { xs: '1rem', sm: '1.1rem' },
+                lineHeight: 1.2,
+                mb: 1,
+                wordBreak: 'break-word'
+              }}
+            >
               {list.title}
             </Typography>
             {list.description && (
-              <Typography variant="body2" color="text.secondary" gutterBottom>
+              <Typography
+                variant="body2"
+                color="text.secondary"
+                gutterBottom
+                sx={{
+                  display: '-webkit-box',
+                  WebkitLineClamp: 2,
+                  WebkitBoxOrient: 'vertical',
+                  overflow: 'hidden',
+                  textOverflow: 'ellipsis',
+                  lineHeight: 1.4,
+                  maxHeight: '2.8em', // 2 lines * 1.4 lineHeight
+                  wordBreak: 'break-word'
+                }}
+              >
                 {list.description}
               </Typography>
             )}
