@@ -67,11 +67,11 @@ const ItineraryList: React.FC = () => {
     useEffect(() => {
         if (!hasCheckedAuth.current) {
             hasCheckedAuth.current = true;
-            if (!auth.isAuthenticated) {
+            if (!auth.isLoading && !auth.isAuthenticated) {
                 navigate('/login');
             }
         }
-    }, [auth.isAuthenticated, navigate]);
+    }, [auth.isAuthenticated, auth.isLoading, navigate]);
 
     // Fetch user itineraries on component mount
     useEffect(() => {

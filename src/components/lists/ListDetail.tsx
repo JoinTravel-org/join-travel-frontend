@@ -34,11 +34,11 @@ const ListDetail: React.FC = () => {
   useEffect(() => {
     if (!hasCheckedAuth.current) {
       hasCheckedAuth.current = true;
-      if (!auth.isAuthenticated) {
+      if (!auth.isLoading && !auth.isAuthenticated) {
         navigate("/login");
       }
     }
-  }, [auth.isAuthenticated, navigate]);
+  }, [auth.isAuthenticated, auth.isLoading, navigate]);
 
   // Fetch list details on component mount
   useEffect(() => {

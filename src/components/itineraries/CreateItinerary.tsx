@@ -59,13 +59,13 @@ const CreateItinerary: React.FC = () => {
     const isEditMode = Boolean(id);
 
     useEffect(() => {
-        if (!hasCheckedAuth.current) {
-            hasCheckedAuth.current = true;
-            if (!auth.isAuthenticated) {
-                navigate('/login');
-            }
+      if (!hasCheckedAuth.current) {
+        hasCheckedAuth.current = true;
+        if (!auth.isLoading && !auth.isAuthenticated) {
+          navigate('/login');
         }
-    }, [auth.isAuthenticated, navigate]);
+      }
+    }, [auth.isAuthenticated, auth.isLoading, navigate]);
 
     // Fetch existing itinerary data in edit mode
     useEffect(() => {

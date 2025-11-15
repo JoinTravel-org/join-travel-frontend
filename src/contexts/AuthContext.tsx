@@ -8,6 +8,7 @@ import type { User, UserStats } from "../types/user";
 interface AuthContextType {
   user: User | null;
   isAuthenticated: boolean;
+  isLoading: boolean;
   login: (user: User, accessToken: string, refreshToken: string) => void;
   logout: () => void;
   forceLogout: () => void;
@@ -24,6 +25,7 @@ interface AuthProviderProps {
 export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);
   const [accessToken, setAccessToken] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     // Check for stored tokens on app load
@@ -75,7 +77,9 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     };
 
     // Validate tokens on app load
-    validateTokens();
+    validateTokens().finally(() => {
+      setIsLoading(false);
+    });
 
     // Listen for force logout events from API service
     const handleForceLogout = () => {
@@ -147,6 +151,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const value: AuthContextType = {
     user,
     isAuthenticated: !!user,
+    isLoading,
     login,
     logout,
     forceLogout,

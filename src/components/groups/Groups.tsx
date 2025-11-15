@@ -57,14 +57,14 @@ export default function GroupPage() {
   useEffect(() => {
     if (!hasCheckedAuth.current) {
       hasCheckedAuth.current = true;
-      if (!auth.isAuthenticated) {
+      if (!auth.isLoading && !auth.isAuthenticated) {
         navigate("/login");
         return;
       }
       // Fetch groups when component mounts and user is authenticated
       fetchGroups();
     }
-  }, [auth.isAuthenticated, navigate]);
+  }, [auth.isAuthenticated, auth.isLoading, navigate]);
 
   const fetchGroups = async () => {
     try {

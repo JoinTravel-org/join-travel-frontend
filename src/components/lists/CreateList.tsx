@@ -49,7 +49,7 @@ const CreateList: React.FC = () => {
   const [successMessage, setSuccessMessage] = useState("");
 
   useEffect(() => {
-    if (!auth.isAuthenticated) {
+    if (!auth.isLoading && !auth.isAuthenticated) {
       navigate('/login');
       return;
     }
@@ -77,7 +77,7 @@ const CreateList: React.FC = () => {
     };
 
     fetchPlaces();
-  }, [auth.isAuthenticated, navigate]);
+  }, [auth.isAuthenticated, auth.isLoading, navigate]);
 
   const validateForm = () => {
     const errors: {title?: string; description?: string} = {};

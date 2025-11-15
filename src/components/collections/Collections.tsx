@@ -11,7 +11,7 @@ import {
   useMediaQuery,
 } from '@mui/material';
 import { Add as AddIcon } from '@mui/icons-material';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import Lists from '../lists/Lists';
 import ItineraryList from '../itineraries/ItineraryList';
 import { useAuth } from '../../hooks/useAuth';
@@ -47,21 +47,42 @@ function a11yProps(index: number) {
 
 const Collections: React.FC = () => {
   const navigate = useNavigate();
+  const [searchParams, setSearchParams] = useSearchParams();
   const auth = useAuth();
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
 
-  const [tabValue, setTabValue] = useState(0);
+  // Initialize tab value based on URL parameter
+  const getInitialTabValue = () => {
+    const type = searchParams.get('type');
+    if (type === 'itineraries') return 1;
+    return 0; // default to lists
+  };
 
-  // Redirect to login if not authenticated
+  const [tabValue, setTabValue] = useState(getInitialTabValue);
+
+  // Redirect to login if not authenticated and not loading
   useEffect(() => {
-    if (!auth.isAuthenticated) {
+    if (!auth.isLoading && !auth.isAuthenticated) {
       navigate('/login');
     }
-  }, [auth.isAuthenticated, navigate]);
+  }, [auth.isAuthenticated, auth.isLoading, navigate]);
+
+  // Update tab value when URL parameter changes
+  useEffect(() => {
+    const type = searchParams.get('type');
+    if (type === 'itineraries') {
+      setTabValue(1);
+    } else if (type === 'lists') {
+      setTabValue(0);
+    }
+  }, [searchParams]);
 
   const handleTabChange = (_event: React.SyntheticEvent, newValue: number) => {
     setTabValue(newValue);
+    // Update URL parameter based on selected tab
+    const newType = newValue === 0 ? 'lists' : 'itineraries';
+    setSearchParams({ type: newType });
   };
 
 
@@ -69,7 +90,7 @@ const Collections: React.FC = () => {
     navigate('/itineraries/create');
   };
 
-  if (!auth.isAuthenticated) {
+  if (auth.isLoading || !auth.isAuthenticated) {
     return (
       <Box display="flex" justifyContent="center" alignItems="center" minHeight="200px">
         <CircularProgress />
