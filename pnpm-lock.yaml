@@ -74,6 +74,9 @@ importers:
       react-filepond:
         specifier: ^7.1.3
         version: 7.1.3(filepond@4.32.9)(react-dom@19.1.1(react@19.1.1))(react@19.1.1)
+      react-markdown:
+        specifier: ^10.1.0
+        version: 10.1.0(@types/react@19.1.13)(react@19.1.1)
       react-router-dom:
         specifier: ^7.9.4
         version: 7.9.4(react-dom@19.1.1(react@19.1.1))(react@19.1.1)

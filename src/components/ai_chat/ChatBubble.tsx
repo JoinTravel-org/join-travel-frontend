@@ -5,6 +5,7 @@ import AutoAwesomeIcon from '@mui/icons-material/AutoAwesome';
 import SendIcon from '@mui/icons-material/Send';
 import AddIcon from '@mui/icons-material/Add';
 import CloseIcon from '@mui/icons-material/Close';
+import ReactMarkdown from 'react-markdown';
 import apiService from '../../services/api.service';
 
 interface Message {
@@ -396,7 +397,21 @@ const ChatBubble: React.FC = () => {
                       {message.sender === 'ai' ? 'AI' : 'U'}
                     </Avatar>
                     <ListItemText
-                      primary={message.text}
+                      primary={
+                        message.sender === 'ai' ? (
+                          <ReactMarkdown
+                            components={{
+                              p: ({ children }) => <Typography variant="body1" sx={{ margin: 0 }}>{children}</Typography>,
+                              strong: ({ children }) => <Typography component="span" sx={{ fontWeight: 'bold' }}>{children}</Typography>,
+                              em: ({ children }) => <Typography component="span" sx={{ fontStyle: 'italic' }}>{children}</Typography>,
+                            }}
+                          >
+                            {message.text}
+                          </ReactMarkdown>
+                        ) : (
+                          message.text
+                        )
+                      }
                       secondary={new Date(message.timestamp).toLocaleTimeString()}
                       sx={{
                         '& .MuiListItemText-primary': {
