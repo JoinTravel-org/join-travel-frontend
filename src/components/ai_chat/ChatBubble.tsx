@@ -39,6 +39,7 @@ const ChatBubble: React.FC = () => {
   const lastTimestampRef = useRef<number>(0);
   const pollingIntervalRef = useRef<number | null>(null);
 
+
   // Welcome message
   const welcomeMessage: Message = {
     id: 'welcome',
@@ -309,6 +310,7 @@ const ChatBubble: React.FC = () => {
     }
   };
 
+
   return (
     <>
       {/* Chat Bubble Button */}
@@ -396,32 +398,34 @@ const ChatBubble: React.FC = () => {
                     <Avatar sx={{ mr: 1, bgcolor: message.sender === 'ai' ? 'primary.main' : 'secondary.main' }}>
                       {message.sender === 'ai' ? 'AI' : 'U'}
                     </Avatar>
-                    <ListItemText
-                      primary={
-                        message.sender === 'ai' ? (
-                          <ReactMarkdown
-                            components={{
-                              p: ({ children }) => <Typography variant="body1" sx={{ margin: 0 }}>{children}</Typography>,
-                              strong: ({ children }) => <Typography component="span" sx={{ fontWeight: 'bold' }}>{children}</Typography>,
-                              em: ({ children }) => <Typography component="span" sx={{ fontStyle: 'italic' }}>{children}</Typography>,
-                            }}
-                          >
-                            {message.text}
-                          </ReactMarkdown>
-                        ) : (
-                          message.text
-                        )
-                      }
-                      secondary={new Date(message.timestamp).toLocaleTimeString()}
-                      sx={{
-                        '& .MuiListItemText-primary': {
-                          bgcolor: message.sender === 'ai' ? 'grey.100' : 'primary.light',
-                          p: 1,
-                          borderRadius: 1,
-                          color: message.sender === 'ai' ? 'text.primary' : 'white',
-                        },
-                      }}
-                    />
+                    <Box sx={{ flex: 1 }}>
+                      <ListItemText
+                        primary={
+                          message.sender === 'ai' ? (
+                            <ReactMarkdown
+                              components={{
+                                p: ({ children }) => <Typography variant="body1" sx={{ margin: 0 }}>{children}</Typography>,
+                                strong: ({ children }) => <Typography component="span" sx={{ fontWeight: 'bold' }}>{children}</Typography>,
+                                em: ({ children }) => <Typography component="span" sx={{ fontStyle: 'italic' }}>{children}</Typography>,
+                              }}
+                            >
+                              {message.text}
+                            </ReactMarkdown>
+                          ) : (
+                            message.text
+                          )
+                        }
+                        secondary={new Date(message.timestamp).toLocaleTimeString()}
+                        sx={{
+                          '& .MuiListItemText-primary': {
+                            bgcolor: message.sender === 'ai' ? 'grey.100' : 'primary.light',
+                            p: 1,
+                            borderRadius: 1,
+                            color: message.sender === 'ai' ? 'text.primary' : 'white',
+                          },
+                        }}
+                      />
+                    </Box>
                   </ListItem>
                 ))}
 
