@@ -1,7 +1,6 @@
 import React, { useContext, useState, useEffect, useRef } from 'react';
 import { AuthContext } from '../../contexts/AuthContext';
-import { Box, Fab, Paper, Typography, TextField, Button, List, ListItem, ListItemText, Avatar, CircularProgress, IconButton, Tooltip, useMediaQuery, Dialog, DialogTitle, DialogContent, DialogActions } from '@mui/material';
-import { useTheme } from '@mui/material/styles';
+import { Box, Fab, Typography, TextField, Button, List, ListItem, ListItemText, Avatar, CircularProgress, IconButton, Tooltip, Dialog, DialogTitle, DialogContent, DialogActions } from '@mui/material';
 import AutoAwesomeIcon from '@mui/icons-material/AutoAwesome';
 import SendIcon from '@mui/icons-material/Send';
 import AddIcon from '@mui/icons-material/Add';
@@ -27,8 +26,6 @@ interface ChatMessage {
 
 const ChatBubble: React.FC = () => {
   const authContext = useContext(AuthContext);
-  const theme = useTheme();
-  const isMobile = useMediaQuery(theme.breakpoints.down('md'));
   const [isOpen, setIsOpen] = useState(false);
   const [messages, setMessages] = useState<Message[]>([]);
   const [inputMessage, setInputMessage] = useState('');
@@ -412,6 +409,68 @@ const ChatBubble: React.FC = () => {
                     />
                   </ListItem>
                 ))}
+
+                {/* AI Thinking Indicator */}
+                {isLoading && (
+                  <ListItem sx={{ alignItems: 'flex-start', px: 0 }}>
+                    <Avatar sx={{ mr: 1, bgcolor: 'primary.main' }}>
+                      AI
+                    </Avatar>
+                    <Box sx={{
+                      bgcolor: 'grey.100',
+                      p: 1,
+                      borderRadius: 1,
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: 1,
+                      '@keyframes bounce': {
+                        '0%, 80%, 100%': {
+                          transform: 'scale(0)',
+                        },
+                        '40%': {
+                          transform: 'scale(1)',
+                        },
+                      },
+                    }}>
+                      <Typography variant="body2" color="text.secondary">
+                        Pensando
+                      </Typography>
+                      <Box sx={{ display: 'flex', gap: 0.5 }}>
+                        <Box
+                          sx={{
+                            width: 4,
+                            height: 4,
+                            bgcolor: 'primary.main',
+                            borderRadius: '50%',
+                            animation: 'bounce 1.4s ease-in-out infinite both',
+                            animationDelay: '0s',
+                          }}
+                        />
+                        <Box
+                          sx={{
+                            width: 4,
+                            height: 4,
+                            bgcolor: 'primary.main',
+                            borderRadius: '50%',
+                            animation: 'bounce 1.4s ease-in-out infinite both',
+                            animationDelay: '0.16s',
+                          }}
+                        />
+                        <Box
+                          sx={{
+                            width: 4,
+                            height: 4,
+                            bgcolor: 'primary.main',
+                            borderRadius: '50%',
+                            animation: 'bounce 1.4s ease-in-out infinite both',
+                            animationDelay: '0.32s',
+                          }}
+                        />
+                      </Box>
+                    </Box>
+                  </ListItem>
+                )}
+
                 <div ref={messagesEndRef} />
               </List>
             ) : (
