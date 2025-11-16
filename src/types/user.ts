@@ -21,6 +21,8 @@ export interface User {
   createdAt: string;
   updatedAt: string;
   stats?: UserStats;
+  followersCount?: number;
+  followingCount?: number;
 }
 
 export interface LevelUpNotification {
@@ -69,5 +71,24 @@ export interface UserMedia {
 export interface UserMediaResponse {
   success: boolean;
   data?: UserMedia[];
+  message?: string;
+}
+
+export interface FollowStats {
+  followersCount: number;
+  followingCount: number;
+}
+
+export interface FollowStatsResponse {
+  success: boolean;
+  data?: FollowStats;
+  message?: string;
+}
+
+export interface IsFollowingResponse {
+  success: boolean;
+  data?: {
+    isFollowing: boolean;
+  };
   message?: string;
 }

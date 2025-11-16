@@ -129,6 +129,140 @@ class UserService {
       throw error as UserMediaResponse;
     }
   }
+
+  /**
+   * Sigue a un usuario
+   * @param userId - ID del usuario a seguir
+   * @returns Promise con resultado de la operación
+   */
+  async followUser(
+    userId: string
+  ): Promise<{ success: boolean; data?: unknown; message?: string }> {
+    try {
+      const response = await apiService
+        .getAxiosInstance()
+        .post(`/users/${userId}/follow`);
+      return response.data;
+    } catch (error: unknown) {
+      if (error instanceof Error) {
+        throw new Error(error.message || "Error al seguir al usuario");
+      }
+      throw new Error("Error al seguir al usuario");
+    }
+  }
+
+  /**
+   * Deja de seguir a un usuario
+   * @param userId - ID del usuario a dejar de seguir
+   * @returns Promise con resultado de la operación
+   */
+  async unfollowUser(
+    userId: string
+  ): Promise<{ success: boolean; data?: unknown; message?: string }> {
+    try {
+      const response = await apiService
+        .getAxiosInstance()
+        .delete(`/users/${userId}/follow`);
+      return response.data;
+    } catch (error: unknown) {
+      if (error instanceof Error) {
+        throw new Error(error.message || "Error al dejar de seguir al usuario");
+      }
+      throw new Error("Error al dejar de seguir al usuario");
+    }
+  }
+
+  /**
+   * Verifica si el usuario actual está siguiendo a otro usuario
+   * @param userId - ID del usuario a verificar
+   * @returns Promise con resultado de la verificación
+   */
+  async isFollowing(userId: string): Promise<{ success: boolean; data?: { isFollowing: boolean }; message?: string }> {
+    try {
+      const response = await apiService
+        .getAxiosInstance()
+        .get(`/users/${userId}/is-following`);
+      return response.data;
+    } catch (error: unknown) {
+      if (error instanceof Error) {
+        throw new Error(error.message || "Error al verificar seguimiento");
+      }
+      throw new Error("Error al verificar seguimiento");
+    }
+  }
+
+  /**
+   * Obtiene las estadísticas de seguidores de un usuario
+   * @param userId - ID del usuario
+   * @returns Promise con las estadísticas de seguidores/seguidos
+   */
+  async getFollowStats(userId: string): Promise<{ success: boolean; data?: { followersCount: number; followingCount: number }; message?: string }> {
+    try {
+      const response = await apiService
+        .getAxiosInstance()
+        .get(`/users/${userId}/follow-stats`);
+      return response.data;
+    } catch (error: unknown) {
+      if (error instanceof Error) {
+        throw new Error(error.message || "Error al obtener estadísticas de seguimiento");
+      }
+      throw new Error("Error al obtener estadísticas de seguimiento");
+    }
+  }
+
+  /**
+   * Obtiene la lista de seguidores de un usuario
+   * @param userId - ID del usuario
+   * @param limit - Límite de resultados
+   * @param offset - Offset para paginación
+   * @returns Promise con la lista de seguidores
+   */
+  async getFollowers(
+    userId: string,
+    limit = 20,
+    offset = 0
+  ): Promise<{ success: boolean; data?: User[]; message?: string }> {
+    try {
+      const response = await apiService
+        .getAxiosInstance()
+        .get(`/users/${userId}/followers`, {
+          params: { limit, offset },
+        });
+      return response.data;
+    } catch (error: unknown) {
+      if (error instanceof Error) {
+        throw new Error(error.message || "Error al obtener seguidores");
+      }
+      throw new Error("Error al obtener seguidores");
+    }
+  }
+
+  /**
+   * Obtiene la lista de usuarios seguidos por un usuario
+   * @param userId - ID del usuario
+   * @param limit - Límite de resultados
+   * @param offset - Offset para paginación
+   * @returns Promise con la lista de usuarios seguidos
+   */
+  async getFollowing(
+    userId: string,
+    limit = 20,
+    offset = 0
+  ): Promise<{ success: boolean; data?: User[]; message?: string }> {
+    try {
+      const response = await apiService
+        .getAxiosInstance()
+        .get(`/users/${userId}/following`, {
+          params: { limit, offset },
+        });
+      return response.data;
+    } catch (error: unknown) {
+      if (error instanceof Error) {
+        throw new Error(error.message || "Error al obtener usuarios seguidos");
+      }
+      throw new Error("Error al obtener usuarios seguidos");
+    }
+  }
 }
 
 export default new UserService();

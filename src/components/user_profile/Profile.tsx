@@ -29,6 +29,8 @@ const Profile: React.FC = () => {
   const [favorites, setFavorites] = useState<Place[]>([]);
   const [favoritesLoading, setFavoritesLoading] = useState(false);
   const [favoritesError, setFavoritesError] = useState<string | null>(null);
+  const [followersCount, setFollowersCount] = useState(0);
+  const [followingCount, setFollowingCount] = useState(0);
   const navigate = useNavigate();
 
   console.log('[DEBUG] Profile component rendering, user:', user, 'stats:', stats, 'notification:', notification);
@@ -75,6 +77,25 @@ const Profile: React.FC = () => {
     fetchFavorites();
   }, [user?.id]);
 
+  useEffect(() => {
+    const fetchFollowStats = async () => {
+      if (!user?.id) return;
+
+      try {
+        const response = await userService.getFollowStats(user.id);
+        if (response.success && response.data) {
+          setFollowersCount(response.data.followersCount);
+          setFollowingCount(response.data.followingCount);
+        }
+      } catch (error) {
+        console.error('Error fetching follow stats:', error);
+        // Mantener el último valor sincronizado (0 por defecto)
+      }
+    };
+
+    fetchFollowStats();
+  }, [user?.id]);
+
   if (!user) {
     return <div>Debe iniciar sesión para ver su perfil.</div>;
   }
@@ -102,6 +123,26 @@ const Profile: React.FC = () => {
           <Typography variant="body1" sx={{ margin: 0, color: 'text.secondary' }}>
             Bienvenido, {user.email}
           </Typography>
+
+          {/* Follower/Following counts */}
+          <Box sx={{ mt: 2, display: 'flex', gap: 3 }}>
+            <Box>
+              <Typography variant="h6" component="div" sx={{ fontWeight: 600 }}>
+                {followersCount}
+              </Typography>
+              <Typography variant="body2" color="text.secondary">
+                {followersCount === 1 ? 'Seguidor' : 'Seguidores'}
+              </Typography>
+            </Box>
+            <Box>
+              <Typography variant="h6" component="div" sx={{ fontWeight: 600 }}>
+                {followingCount}
+              </Typography>
+              <Typography variant="body2" color="text.secondary">
+                Siguiendo
+              </Typography>
+            </Box>
+          </Box>
         </Box>
 
         {stats && <UserStats stats={stats} />}

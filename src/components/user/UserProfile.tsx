@@ -9,8 +9,11 @@ import {
   CardContent,
   CardMedia,
   Button,
+  Snackbar,
 } from "@mui/material";
 import MessageIcon from "@mui/icons-material/Message";
+import PersonAddIcon from "@mui/icons-material/PersonAdd";
+import PersonRemoveIcon from "@mui/icons-material/PersonRemove";
 import userService from "../../services/user.service";
 import api from "../../services/api.service";
 import UserGallery from "./UserGallery";
@@ -29,6 +32,12 @@ const UserProfile: React.FC = () => {
   const [favoritesLoading, setFavoritesLoading] = useState(false);
   const [favoritesError, setFavoritesError] = useState<string | null>(null);
   const [chatOpen, setChatOpen] = useState(false);
+  const [isFollowing, setIsFollowing] = useState(false);
+  const [followersCount, setFollowersCount] = useState(0);
+  const [followingCount, setFollowingCount] = useState(0);
+  const [followLoading, setFollowLoading] = useState(false);
+  const [snackbarOpen, setSnackbarOpen] = useState(false);
+  const [snackbarMessage, setSnackbarMessage] = useState("");
 
   const currentUserId = localStorage.getItem("userId");
   const isOwnProfile = currentUserId === userId;
@@ -88,6 +97,74 @@ const UserProfile: React.FC = () => {
 
     fetchFavorites();
   }, [userId]);
+
+  // Fetch follow stats
+  useEffect(() => {
+    const fetchFollowStats = async () => {
+      if (!userId) return;
+
+      try {
+        const response = await userService.getFollowStats(userId);
+        if (response.success && response.data) {
+          setFollowersCount(response.data.followersCount);
+          setFollowingCount(response.data.followingCount);
+        }
+      } catch (error) {
+        console.error("Error fetching follow stats:", error);
+      }
+    };
+
+    fetchFollowStats();
+  }, [userId]);
+
+  // Check if current user is following this user
+  useEffect(() => {
+    const checkFollowStatus = async () => {
+      if (!userId || isOwnProfile) return;
+
+      try {
+        const response = await userService.isFollowing(userId);
+        if (response.success && response.data) {
+          setIsFollowing(response.data.isFollowing);
+        }
+      } catch (error) {
+        console.error("Error checking follow status:", error);
+      }
+    };
+
+    checkFollowStatus();
+  }, [userId, isOwnProfile]);
+
+  const handleFollowToggle = async () => {
+    if (!userId || followLoading) return;
+
+    setFollowLoading(true);
+    try {
+      if (isFollowing) {
+        const response = await userService.unfollowUser(userId);
+        if (response.success) {
+          setIsFollowing(false);
+          setFollowersCount((prev) => Math.max(0, prev - 1));
+          setSnackbarMessage("Has dejado de seguir a este usuario");
+          setSnackbarOpen(true);
+        }
+      } else {
+        const response = await userService.followUser(userId);
+        if (response.success) {
+          setIsFollowing(true);
+          setFollowersCount((prev) => prev + 1);
+          setSnackbarMessage("Ahora sigues a este usuario");
+          setSnackbarOpen(true);
+        }
+      }
+    } catch (error) {
+      console.error("Error toggling follow:", error);
+      setSnackbarMessage("Error al actualizar el seguimiento");
+      setSnackbarOpen(true);
+    } finally {
+      setFollowLoading(false);
+    }
+  };
 
 
   if (loading) {
@@ -159,11 +236,44 @@ const UserProfile: React.FC = () => {
             {user.email || `Usuario ID: ${userId}`}
           </Typography>
 
-          {/* Mensaje button - only show if not viewing own profile */}
+          {/* Follower/Following counts */}
+          <Box sx={{ mt: 2, display: "flex", gap: 3 }}>
+            <Box>
+              <Typography variant="h6" component="div" sx={{ fontWeight: 600 }}>
+                {followersCount}
+              </Typography>
+              <Typography variant="body2" color="text.secondary">
+                {followersCount === 1 ? "Seguidor" : "Seguidores"}
+              </Typography>
+            </Box>
+            <Box>
+              <Typography variant="h6" component="div" sx={{ fontWeight: 600 }}>
+                {followingCount}
+              </Typography>
+              <Typography variant="body2" color="text.secondary">
+                Siguiendo
+              </Typography>
+            </Box>
+          </Box>
+
+          {/* Follow and Message buttons - only show if not viewing own profile */}
           {!isOwnProfile && userId && (
-            <Box sx={{ mt: 2 }}>
+            <Box sx={{ mt: 2, display: "flex", flexDirection: "column", gap: 1 }}>
               <Button
-                variant="contained"
+                variant={isFollowing ? "outlined" : "contained"}
+                startIcon={isFollowing ? <PersonRemoveIcon /> : <PersonAddIcon />}
+                onClick={handleFollowToggle}
+                disabled={followLoading}
+                fullWidth
+              >
+                {followLoading
+                  ? "Cargando..."
+                  : isFollowing
+                  ? "Siguiendo"
+                  : "Seguir"}
+              </Button>
+              <Button
+                variant="outlined"
                 startIcon={<MessageIcon />}
                 onClick={() => setChatOpen(true)}
                 fullWidth
@@ -307,6 +417,14 @@ const UserProfile: React.FC = () => {
         otherUserEmail={user.email || `Usuario ${userId}`}
       />
     )}
+
+    {/* Snackbar for notifications */}
+    <Snackbar
+      open={snackbarOpen}
+      autoHideDuration={3000}
+      onClose={() => setSnackbarOpen(false)}
+      message={snackbarMessage}
+    />
   </Box>
   );
 };
