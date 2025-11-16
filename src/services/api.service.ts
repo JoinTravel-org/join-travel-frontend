@@ -317,6 +317,27 @@ class ApiService {
     return response.data;
   }
 
+  /**
+   * Solicita recuperación de contraseña
+   * @param email - Email del usuario
+   * @returns Promise con la respuesta del servidor
+   */
+  async forgotPassword(email: string) {
+    const response = await this.api.post("/auth/forgot-password", { email });
+    return response.data;
+  }
+
+  /**
+   * Restablece la contraseña usando un token
+   * @param token - Token de reseteo
+   * @param password - Nueva contraseña
+   * @returns Promise con la respuesta del servidor
+   */
+  async resetPassword(token: string, password: string) {
+    const response = await this.api.post("/auth/reset-password", { token, password });
+    return response.data;
+  }
+
   /*
    * Obtiene una lista de lugares con paginación
    * @param page - Número de página
@@ -613,6 +634,16 @@ class ApiService {
    */
   async getUserLists(): Promise<GetUserListsResponse> {
     const response = await this.api.get("/lists");
+    return response.data;
+  }
+
+  /**
+   * Obtiene todas las listas de un usuario específico
+   * @param userId - ID del usuario
+   * @returns Promise con las listas del usuario
+   */
+  async getUserListsByUserId(userId: string): Promise<GetUserListsResponse> {
+    const response = await this.api.get(`/users/${userId}/lists`);
     return response.data;
   }
 
