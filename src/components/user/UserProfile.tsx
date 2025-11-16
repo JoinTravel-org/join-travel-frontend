@@ -22,6 +22,7 @@ import type { Place } from "../../types/place";
 import UserReviewList from "./UserReviewList";
 import { DirectChatDialog } from "../users_chats/DirectChatDialog";
 import FollowersModal from "../user_profile/FollowersModal";
+import ProfileHeader from "../user_profile/ProfileHeader";
 
 const UserProfile: React.FC = () => {
   const { userId } = useParams<{ userId: string }>();
@@ -232,15 +233,29 @@ const UserProfile: React.FC = () => {
         }}
       >
         <Box>
-          <Typography variant="h4" component="h1" sx={{ marginBottom: "8px" }}>
+          <Typography variant="h4" component="h1" sx={{ marginBottom: 2 }}>
             Perfil de Usuario
           </Typography>
-          <Typography variant="body1" sx={{ margin: 0, color: "text.secondary" }}>
-            {user.email || `Usuario ID: ${userId}`}
-          </Typography>
+
+          {/* Profile Header with Avatar, Name, Email, Age (non-editable) */}
+          <ProfileHeader
+            user={user}
+            onUpdate={() => {
+              // No-op since this is not editable
+            }}
+            editable={false}
+          />
 
           {/* Follower/Following counts */}
-          <Box sx={{ mt: 2, display: "flex", gap: 3 }}>
+          <Box 
+            sx={{ 
+              mt: 3, 
+              display: "flex", 
+              gap: { xs: 2, sm: 4 },
+              justifyContent: 'center',
+              flexWrap: 'wrap',
+            }}
+          >
             <Box
               onClick={() => {
                 setModalType('followers');
@@ -248,6 +263,8 @@ const UserProfile: React.FC = () => {
               }}
               sx={{
                 cursor: 'pointer',
+                textAlign: 'center',
+                minWidth: { xs: '80px', sm: '100px' },
                 '&:hover': {
                   opacity: 0.7,
                 },
@@ -268,6 +285,8 @@ const UserProfile: React.FC = () => {
               }}
               sx={{
                 cursor: 'pointer',
+                textAlign: 'center',
+                minWidth: { xs: '80px', sm: '100px' },
                 '&:hover': {
                   opacity: 0.7,
                 },

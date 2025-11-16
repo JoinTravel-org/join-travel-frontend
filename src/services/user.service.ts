@@ -263,6 +263,75 @@ class UserService {
       throw new Error("Error al obtener usuarios seguidos");
     }
   }
+
+  /**
+   * Actualiza el perfil del usuario (nombre y edad)
+   * @param name - Nombre del usuario
+   * @param age - Edad del usuario
+   * @returns Promise con resultado de la operación
+   */
+  async updateProfile(
+    name?: string,
+    age?: number | null
+  ): Promise<{ success: boolean; data?: User; message?: string }> {
+    try {
+      const response = await apiService
+        .getAxiosInstance()
+        .put(`/users/profile`, { name, age });
+      return response.data;
+    } catch (error: unknown) {
+      if (error instanceof Error) {
+        throw new Error(error.message || "Error al actualizar perfil");
+      }
+      throw new Error("Error al actualizar perfil");
+    }
+  }
+
+  /**
+   * Sube o actualiza el avatar del usuario
+   * @param file - Archivo de imagen
+   * @returns Promise con resultado de la operación
+   */
+  async uploadAvatar(
+    file: File
+  ): Promise<{ success: boolean; data?: { profilePicture: string; url: string }; message?: string }> {
+    try {
+      const formData = new FormData();
+      formData.append("avatar", file);
+
+      const response = await apiService
+        .getAxiosInstance()
+        .post(`/users/profile/avatar`, formData, {
+          headers: {
+            "Content-Type": "multipart/form-data",
+          },
+        });
+      return response.data;
+    } catch (error: unknown) {
+      if (error instanceof Error) {
+        throw new Error(error.message || "Error al subir avatar");
+      }
+      throw new Error("Error al subir avatar");
+    }
+  }
+
+  /**
+   * Elimina el avatar del usuario
+   * @returns Promise con resultado de la operación
+   */
+  async deleteAvatar(): Promise<{ success: boolean; message?: string }> {
+    try {
+      const response = await apiService
+        .getAxiosInstance()
+        .delete(`/users/profile/avatar`);
+      return response.data;
+    } catch (error: unknown) {
+      if (error instanceof Error) {
+        throw new Error(error.message || "Error al eliminar avatar");
+      }
+      throw new Error("Error al eliminar avatar");
+    }
+  }
 }
 
 export default new UserService();

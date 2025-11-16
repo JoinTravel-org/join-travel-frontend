@@ -17,6 +17,8 @@ export interface User {
   id: string;
   email: string;
   name?: string;
+  age?: number;
+  profilePicture?: string;
   isEmailConfirmed: boolean;
   createdAt: string;
   updatedAt: string;

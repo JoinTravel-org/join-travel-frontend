@@ -7,6 +7,7 @@ import Milestones from './Milestones';
 import UserGallery from '../user/UserGallery';
 import UserReviewList from '../user/UserReviewList';
 import FollowersModal from './FollowersModal';
+import ProfileHeader from './ProfileHeader';
 import userService from '../../services/user.service';
 import api from '../../services/api.service';
 import type { Milestone } from '../../types/user';
@@ -34,9 +35,32 @@ const Profile: React.FC = () => {
   const [followingCount, setFollowingCount] = useState(0);
   const [modalOpen, setModalOpen] = useState(false);
   const [modalType, setModalType] = useState<'followers' | 'following'>('followers');
+  const [userProfileData, setUserProfileData] = useState(user);
+  const [loadingProfile, setLoadingProfile] = useState(false);
   const navigate = useNavigate();
 
   console.log('[DEBUG] Profile component rendering, user:', user, 'stats:', stats, 'notification:', notification);
+
+  // Fetch fresh user data on mount
+  useEffect(() => {
+    const fetchUserProfile = async () => {
+      if (!user?.id) return;
+
+      setLoadingProfile(true);
+      try {
+        const response = await userService.getUserById(user.id);
+        if (response.success && response.data) {
+          setUserProfileData(response.data);
+        }
+      } catch (error) {
+        console.error('Error fetching user profile:', error);
+      } finally {
+        setLoadingProfile(false);
+      }
+    };
+
+    fetchUserProfile();
+  }, [user?.id]);
 
   useEffect(() => {
     const fetchMilestones = async () => {
@@ -120,15 +144,37 @@ const Profile: React.FC = () => {
         gap: { xs: 2, sm: 3 }
       }}>
         <Box>
-          <Typography variant="h4" component="h1" sx={{ marginBottom: '8px' }}>
+          <Typography variant="h4" component="h1" sx={{ marginBottom: 2 }}>
             Perfil de Usuario
           </Typography>
-          <Typography variant="body1" sx={{ margin: 0, color: 'text.secondary' }}>
-            Bienvenido, {user.email}
-          </Typography>
+
+          {/* Profile Header with Avatar, Name, Email, Age */}
+          {userProfileData && (
+            <ProfileHeader
+              user={userProfileData}
+              onUpdate={async () => {
+                // Refresh user data after update
+                if (user?.id) {
+                  const response = await userService.getUserById(user.id);
+                  if (response.success && response.data) {
+                    setUserProfileData(response.data);
+                  }
+                }
+              }}
+              editable={true}
+            />
+          )}
 
           {/* Follower/Following counts */}
-          <Box sx={{ mt: 2, display: 'flex', gap: 3 }}>
+          <Box 
+            sx={{ 
+              mt: 3, 
+              display: 'flex', 
+              gap: { xs: 2, sm: 4 },
+              justifyContent: 'center',
+              flexWrap: 'wrap',
+            }}
+          >
             <Box
               onClick={() => {
                 setModalType('followers');
@@ -136,6 +182,8 @@ const Profile: React.FC = () => {
               }}
               sx={{
                 cursor: 'pointer',
+                textAlign: 'center',
+                minWidth: { xs: '80px', sm: '100px' },
                 '&:hover': {
                   opacity: 0.7,
                 },
@@ -156,6 +204,8 @@ const Profile: React.FC = () => {
               }}
               sx={{
                 cursor: 'pointer',
+                textAlign: 'center',
+                minWidth: { xs: '80px', sm: '100px' },
                 '&:hover': {
                   opacity: 0.7,
                 },

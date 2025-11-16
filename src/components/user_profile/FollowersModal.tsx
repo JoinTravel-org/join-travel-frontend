@@ -71,6 +71,14 @@ const FollowersModal: React.FC<FollowersModalProps> = ({
     navigate(`/user/${clickedUserId}`);
   };
 
+  const getAvatarUrl = (profilePicture?: string) => {
+    if (profilePicture) {
+      const baseUrl = import.meta.env.VITE_BACKEND_URL || 'http://localhost:3000';
+      return `${baseUrl}/uploads/avatars/${profilePicture}`;
+    }
+    return undefined;
+  };
+
   const title = type === 'followers' ? 'Seguidores' : 'Siguiendo';
 
   return (
@@ -115,16 +123,28 @@ const FollowersModal: React.FC<FollowersModalProps> = ({
                   onClick={() => handleUserClick(user.id)}
                 >
                   <ListItemAvatar>
-                    <Avatar>
-                      <PersonIcon />
+                    <Avatar src={getAvatarUrl(user.profilePicture)}>
+                      {!user.profilePicture && <PersonIcon />}
                     </Avatar>
                   </ListItemAvatar>
                   <ListItemText
-                    primary={user.email}
+                    primary={user.name || user.email}
                     secondary={
-                      user.stats
-                        ? `Nivel ${user.stats.level} - ${user.stats.levelName}`
-                        : 'Usuario'
+                      <>
+                        {user.name && (
+                          <>
+                            <Typography component="span" variant="body2" color="text.secondary">
+                              {user.email}
+                            </Typography>
+                            <br />
+                          </>
+                        )}
+                        {user.stats && (
+                          <Typography component="span" variant="body2" color="text.secondary">
+                            Nivel {user.stats.level} - {user.stats.levelName}
+                          </Typography>
+                        )}
+                      </>
                     }
                     primaryTypographyProps={{
                       fontWeight: 500,
