@@ -13,6 +13,10 @@ export interface DirectMessage {
   createdAt: string;
   senderEmail?: string;
   receiverEmail?: string;
+  senderName?: string;
+  senderProfilePicture?: string;
+  receiverName?: string;
+  receiverProfilePicture?: string;
 }
 
 /**
@@ -23,6 +27,8 @@ export interface Conversation {
   otherUser: {
     id: string;
     email: string;
+    name?: string;
+    profilePicture?: string;
   };
   lastMessage: {
     content: string;

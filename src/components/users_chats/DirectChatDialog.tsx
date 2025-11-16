@@ -19,12 +19,15 @@ import directMessageService, {
   type DirectMessage,
 } from "../../services/directMessage.service";
 import socketService from "../../services/socket.service";
+import UserAvatar from "../common/UserAvatar";
 
 interface DirectChatDialogProps {
   open: boolean;
   onClose: () => void;
   otherUserId: string;
   otherUserEmail: string;
+  otherUserName?: string;
+  otherUserProfilePicture?: string;
 }
 
 export const DirectChatDialog: React.FC<DirectChatDialogProps> = ({
@@ -32,6 +35,8 @@ export const DirectChatDialog: React.FC<DirectChatDialogProps> = ({
   onClose,
   otherUserId,
   otherUserEmail,
+  otherUserName,
+  otherUserProfilePicture,
 }) => {
   const authContext = useContext(AuthContext);
   const [messages, setMessages] = useState<DirectMessage[]>([]);
@@ -177,12 +182,23 @@ export const DirectChatDialog: React.FC<DirectChatDialogProps> = ({
           alignItems: "center",
           borderBottom: 1,
           borderColor: "divider",
+          py: 2,
         }}
         component="div"
       >
-        <Typography variant="h6" component="h2">
-          Chat con {otherUserEmail}
-        </Typography>
+        <Box sx={{ display: "flex", alignItems: "center", gap: 1.5 }}>
+          <UserAvatar
+            user={{
+              email: otherUserEmail,
+              name: otherUserName,
+              profilePicture: otherUserProfilePicture,
+            }}
+            size={40}
+          />
+          <Typography variant="h6" component="h2">
+            Chat con {otherUserName || otherUserEmail}
+          </Typography>
+        </Box>
         <IconButton onClick={onClose} size="small">
           <CloseIcon />
         </IconButton>

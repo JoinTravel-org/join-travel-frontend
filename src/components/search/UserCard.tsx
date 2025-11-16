@@ -3,12 +3,11 @@ import {
   Card,
   CardContent,
   Typography,
-  Avatar,
   Box,
   Chip,
 } from "@mui/material";
-import { Person as PersonIcon } from "@mui/icons-material";
 import type { User } from "../../types/user";
+import UserAvatar from "../common/UserAvatar";
 
 interface UserCardProps {
   user: User;
@@ -28,9 +27,7 @@ const UserCard: React.FC<UserCardProps> = ({ user, onClick }) => {
       onClick={onClick}
     >
       <CardContent sx={{ display: "flex", alignItems: "center", gap: 2 }}>
-        <Avatar sx={{ bgcolor: "primary.main" }}>
-          <PersonIcon />
-        </Avatar>
+        <UserAvatar user={user} size={40} />
         <Box sx={{ flex: 1 }}>
           <Typography variant="subtitle1" sx={{ fontWeight: 600 }}>
             {user.email}
