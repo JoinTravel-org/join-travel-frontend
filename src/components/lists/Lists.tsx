@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import {
   Box,
   Typography,
@@ -6,6 +6,8 @@ import {
   CircularProgress,
   Alert,
   Fab,
+  TextField,
+  MenuItem,
 } from '@mui/material';
 import { Add as AddIcon } from '@mui/icons-material';
 import { useNavigate } from 'react-router-dom';
@@ -18,6 +20,9 @@ const Lists: React.FC = () => {
   const [lists, setLists] = useState<List[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  // filter states: search by list name or by place location
+  const [filterQuery, setFilterQuery] = useState("");
+  const [filterType, setFilterType] = useState<"name" | "location">("name");
   // Removed createDialogOpen state
 
   const fetchLists = async () => {
@@ -25,7 +30,7 @@ const Lists: React.FC = () => {
       setLoading(true);
       setError(null);
       const response = await apiService.getUserLists();
-      setLists(response.data);
+      setLists(response.data || []);
     } catch (err: any) {
       console.error('Error fetching lists:', err);
       setError(err.message || 'Error al cargar las listas');
@@ -37,6 +42,8 @@ const Lists: React.FC = () => {
   useEffect(() => {
     fetchLists();
   }, []);
+
+  // no author dependency; keep original behavior: fetch current user's lists once
 
   const handleCreateSuccess = () => {
     fetchLists();
@@ -65,6 +72,24 @@ const Lists: React.FC = () => {
     navigate(`/list/${list.id}`);
   };
 
+  // compute filtered lists locally by name or by place location
+  const filteredLists = useMemo(() => {
+    if (!filterQuery || filterQuery.trim() === "") return lists;
+    const q = filterQuery.trim().toLowerCase();
+    if (filterType === "name") {
+      return lists.filter((l) => (l.title || "").toLowerCase().includes(q));
+    }
+    // location filter: check any place city or place name
+    return lists.filter((l) => {
+      if (!l.places || l.places.length === 0) return false;
+      return l.places.some((p) => {
+        const city = (p.city || "").toLowerCase();
+        const pname = (p.name || "").toLowerCase();
+        return city.includes(q) || pname.includes(q);
+      });
+    });
+  }, [lists, filterQuery, filterType]);
+
   if (loading) {
     return (
       <Box display="flex" justifyContent="center" alignItems="center" minHeight="200px">
@@ -75,6 +100,28 @@ const Lists: React.FC = () => {
 
   return (
     <Box sx={{ p: 3 }}>
+      <Box display="flex" gap={2} alignItems="center" mb={2} flexDirection={{ xs: 'column', sm: 'row' }}>
+        <TextField
+          label="Buscar"
+          placeholder={filterType === 'name' ? 'Buscar por nombre de lista' : 'Buscar por ubicación (ciudad o nombre del lugar)'}
+          value={filterQuery}
+          onChange={(e) => setFilterQuery(e.target.value)}
+          sx={{ width: { xs: '100%', sm: 360 } }}
+        />
+
+        <TextField
+          select
+          label="Filtro"
+          value={filterType}
+          onChange={(e) => setFilterType(e.target.value as 'name' | 'location')}
+          sx={{ width: 160 }}
+        >
+          <MenuItem value="name">Nombre</MenuItem>
+          <MenuItem value="location">Ubicación</MenuItem>
+        </TextField>
+
+        <Box flex="1" />
+      </Box>
       <Box
         display="flex"
         justifyContent="space-between"
@@ -119,6 +166,12 @@ const Lists: React.FC = () => {
             Crear Primera Lista
           </Button>
         </Box>
+      ) : filteredLists.length === 0 ? (
+        <Box textAlign="center" py={8}>
+          <Typography variant="h6" color="text.secondary" gutterBottom>
+            No hay listas que coincidan con la búsqueda.
+          </Typography>
+        </Box>
       ) : (
         <Box
           sx={{
@@ -131,7 +184,7 @@ const Lists: React.FC = () => {
             gap: 3,
           }}
         >
-          {lists.map((list) => (
+          {filteredLists.map((list) => (
             <ListCard
               key={list.id}
               list={list}

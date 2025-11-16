@@ -648,6 +648,15 @@ class ApiService {
   }
 
   /**
+   * Obtiene las listas públicas de un autor por su ID (ruta pública)
+   * @param authorId - ID del autor
+   */
+  async getListsByAuthor(authorId: string): Promise<GetUserListsResponse> {
+    const response = await this.api.get(`/lists/author/${authorId}`);
+    return response.data;
+  }
+
+  /**
    * Obtiene una lista específica por ID
    * @param id - ID de la lista
    * @returns Promise con la lista
