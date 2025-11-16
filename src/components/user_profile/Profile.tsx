@@ -6,6 +6,7 @@ import Notification from './Notification';
 import Milestones from './Milestones';
 import UserGallery from '../user/UserGallery';
 import UserReviewList from '../user/UserReviewList';
+import FollowersModal from './FollowersModal';
 import userService from '../../services/user.service';
 import api from '../../services/api.service';
 import type { Milestone } from '../../types/user';
@@ -31,6 +32,8 @@ const Profile: React.FC = () => {
   const [favoritesError, setFavoritesError] = useState<string | null>(null);
   const [followersCount, setFollowersCount] = useState(0);
   const [followingCount, setFollowingCount] = useState(0);
+  const [modalOpen, setModalOpen] = useState(false);
+  const [modalType, setModalType] = useState<'followers' | 'following'>('followers');
   const navigate = useNavigate();
 
   console.log('[DEBUG] Profile component rendering, user:', user, 'stats:', stats, 'notification:', notification);
@@ -126,7 +129,19 @@ const Profile: React.FC = () => {
 
           {/* Follower/Following counts */}
           <Box sx={{ mt: 2, display: 'flex', gap: 3 }}>
-            <Box>
+            <Box
+              onClick={() => {
+                setModalType('followers');
+                setModalOpen(true);
+              }}
+              sx={{
+                cursor: 'pointer',
+                '&:hover': {
+                  opacity: 0.7,
+                },
+                transition: 'opacity 0.2s',
+              }}
+            >
               <Typography variant="h6" component="div" sx={{ fontWeight: 600 }}>
                 {followersCount}
               </Typography>
@@ -134,7 +149,19 @@ const Profile: React.FC = () => {
                 {followersCount === 1 ? 'Seguidor' : 'Seguidores'}
               </Typography>
             </Box>
-            <Box>
+            <Box
+              onClick={() => {
+                setModalType('following');
+                setModalOpen(true);
+              }}
+              sx={{
+                cursor: 'pointer',
+                '&:hover': {
+                  opacity: 0.7,
+                },
+                transition: 'opacity 0.2s',
+              }}
+            >
               <Typography variant="h6" component="div" sx={{ fontWeight: 600 }}>
                 {followingCount}
               </Typography>
@@ -250,6 +277,16 @@ const Profile: React.FC = () => {
           </>
         )}
       </Box>
+
+      {/* Followers/Following Modal */}
+      {user?.id && (
+        <FollowersModal
+          open={modalOpen}
+          onClose={() => setModalOpen(false)}
+          userId={user.id}
+          type={modalType}
+        />
+      )}
     </Box>
   );
 };

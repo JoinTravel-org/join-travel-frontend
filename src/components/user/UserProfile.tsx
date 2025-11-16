@@ -21,6 +21,7 @@ import type { User } from "../../types/user";
 import type { Place } from "../../types/place";
 import UserReviewList from "./UserReviewList";
 import { DirectChatDialog } from "../users_chats/DirectChatDialog";
+import FollowersModal from "../user_profile/FollowersModal";
 
 const UserProfile: React.FC = () => {
   const { userId } = useParams<{ userId: string }>();
@@ -38,6 +39,8 @@ const UserProfile: React.FC = () => {
   const [followLoading, setFollowLoading] = useState(false);
   const [snackbarOpen, setSnackbarOpen] = useState(false);
   const [snackbarMessage, setSnackbarMessage] = useState("");
+  const [modalOpen, setModalOpen] = useState(false);
+  const [modalType, setModalType] = useState<'followers' | 'following'>('followers');
 
   const currentUserId = localStorage.getItem("userId");
   const isOwnProfile = currentUserId === userId;
@@ -238,7 +241,19 @@ const UserProfile: React.FC = () => {
 
           {/* Follower/Following counts */}
           <Box sx={{ mt: 2, display: "flex", gap: 3 }}>
-            <Box>
+            <Box
+              onClick={() => {
+                setModalType('followers');
+                setModalOpen(true);
+              }}
+              sx={{
+                cursor: 'pointer',
+                '&:hover': {
+                  opacity: 0.7,
+                },
+                transition: 'opacity 0.2s',
+              }}
+            >
               <Typography variant="h6" component="div" sx={{ fontWeight: 600 }}>
                 {followersCount}
               </Typography>
@@ -246,7 +261,19 @@ const UserProfile: React.FC = () => {
                 {followersCount === 1 ? "Seguidor" : "Seguidores"}
               </Typography>
             </Box>
-            <Box>
+            <Box
+              onClick={() => {
+                setModalType('following');
+                setModalOpen(true);
+              }}
+              sx={{
+                cursor: 'pointer',
+                '&:hover': {
+                  opacity: 0.7,
+                },
+                transition: 'opacity 0.2s',
+              }}
+            >
               <Typography variant="h6" component="div" sx={{ fontWeight: 600 }}>
                 {followingCount}
               </Typography>
@@ -415,6 +442,16 @@ const UserProfile: React.FC = () => {
         onClose={() => setChatOpen(false)}
         otherUserId={userId}
         otherUserEmail={user.email || `Usuario ${userId}`}
+      />
+    )}
+
+    {/* Followers/Following Modal */}
+    {userId && (
+      <FollowersModal
+        open={modalOpen}
+        onClose={() => setModalOpen(false)}
+        userId={userId}
+        type={modalType}
       />
     )}
 
