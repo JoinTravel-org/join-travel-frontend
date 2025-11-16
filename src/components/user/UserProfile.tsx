@@ -95,12 +95,14 @@ const UserProfile: React.FC = () => {
 
   useEffect(() => {
     const fetchLists = async () => {
-      if (!isOwnProfile) return;
+      if (!userId) return;
 
       setListsLoading(true);
       setListsError(null);
       try {
-        const response = await api.getUserLists();
+        const response = isOwnProfile
+          ? await api.getUserLists()
+          : await api.getUserListsByUserId(userId);
         if (response.success && response.data) {
           setLists(response.data);
         }
@@ -113,7 +115,7 @@ const UserProfile: React.FC = () => {
     };
 
     fetchLists();
-  }, [isOwnProfile]);
+  }, [isOwnProfile, userId]);
 
 
   if (loading) {
@@ -318,62 +320,56 @@ const UserProfile: React.FC = () => {
             Listas de lugares
           </Typography>
 
-          {isOwnProfile ? (
-            listsLoading ? (
-              <Box sx={{ display: 'flex', justifyContent: 'center', py: 4 }}>
-                <CircularProgress />
-              </Box>
-            ) : listsError ? (
-              <Alert severity="error" sx={{ mb: 2 }}>
-                {listsError}
-              </Alert>
-            ) : lists.length === 0 ? (
-              <Typography variant="body1" color="text.secondary">
-                No tienes listas aún. ¡Crea tu primera lista de lugares favoritos!
-              </Typography>
-            ) : (
-              <Box sx={{
-                display: 'grid',
-                gridTemplateColumns: {
-                  xs: 'repeat(auto-fill, minmax(250px, 1fr))',
-                  sm: 'repeat(auto-fill, minmax(300px, 1fr))'
-                },
-                gap: { xs: 2, sm: 3 }
-              }}>
-                {lists.map((list) => (
-                  <Card
-                    key={list.id}
-                    sx={{
-                      cursor: 'pointer',
-                      '&:hover': { boxShadow: 3 },
-                      transition: 'box-shadow 0.2s ease',
-                      height: '100%',
-                      display: 'flex',
-                      flexDirection: 'column'
-                    }}
-                    onClick={() => navigate(`/list/${list.id}`)}
-                  >
-                    <CardContent sx={{ flexGrow: 1, p: 3 }}>
-                      <Typography variant="h6" component="h3" sx={{ fontWeight: 600, mb: 1 }}>
-                        {list.title}
-                      </Typography>
-                      {list.description && (
-                        <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
-                          {list.description}
-                        </Typography>
-                      )}
-                      <Typography variant="body2" color="text.secondary">
-                        {list.places.length} lugar{list.places.length !== 1 ? 'es' : ''}
-                      </Typography>
-                    </CardContent>
-                  </Card>
-                ))}
-              </Box>
-            )
-          ) : (
+          {listsLoading ? (
+            <Box sx={{ display: 'flex', justifyContent: 'center', py: 4 }}>
+              <CircularProgress />
+            </Box>
+          ) : listsError ? (
+            <Alert severity="error" sx={{ mb: 2 }}>
+              {listsError}
+            </Alert>
+          ) : lists.length === 0 ? (
             <Typography variant="body1" color="text.secondary">
-              Las listas de este usuario son privadas.
+              {isOwnProfile ? 'No tienes listas aún. ¡Crea tu primera lista de lugares favoritos!' : 'Este usuario no tiene listas aún.'}
             </Typography>
+          ) : (
+            <Box sx={{
+              display: 'grid',
+              gridTemplateColumns: {
+                xs: 'repeat(auto-fill, minmax(250px, 1fr))',
+                sm: 'repeat(auto-fill, minmax(300px, 1fr))'
+              },
+              gap: { xs: 2, sm: 3 }
+            }}>
+              {lists.map((list) => (
+                <Card
+                  key={list.id}
+                  sx={{
+                    cursor: 'pointer',
+                    '&:hover': { boxShadow: 3 },
+                    transition: 'box-shadow 0.2s ease',
+                    height: '100%',
+                    display: 'flex',
+                    flexDirection: 'column'
+                  }}
+                  onClick={() => navigate(`/list/${list.id}`)}
+                >
+                  <CardContent sx={{ flexGrow: 1, p: 3 }}>
+                    <Typography variant="h6" component="h3" sx={{ fontWeight: 600, mb: 1 }}>
+                      {list.title}
+                    </Typography>
+                    {list.description && (
+                      <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+                        {list.description}
+                      </Typography>
+                    )}
+                    <Typography variant="body2" color="text.secondary">
+                      {list.places.length} lugar{list.places.length !== 1 ? 'es' : ''}
+                    </Typography>
+                  </CardContent>
+                </Card>
+              ))}
+            </Box>
           )}
         </Box>
       </Box>

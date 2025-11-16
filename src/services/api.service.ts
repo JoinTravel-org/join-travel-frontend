@@ -638,6 +638,16 @@ class ApiService {
   }
 
   /**
+   * Obtiene todas las listas de un usuario específico
+   * @param userId - ID del usuario
+   * @returns Promise con las listas del usuario
+   */
+  async getUserListsByUserId(userId: string): Promise<GetUserListsResponse> {
+    const response = await this.api.get(`/users/${userId}/lists`);
+    return response.data;
+  }
+
+  /**
    * Obtiene una lista específica por ID
    * @param id - ID de la lista
    * @returns Promise con la lista
