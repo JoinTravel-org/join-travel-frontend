@@ -243,6 +243,25 @@ const Login: React.FC<LoginProps> = ({ onSwitchToRegister }) => {
           >
             {loading ? "Iniciando sesión…" : "Iniciar sesión"}
           </Button>
+
+          <Box sx={{ textAlign: "center", mb: 2 }}>
+            <Typography variant="body2">
+              <Link
+                href="/forgot-password"
+                sx={{
+                  cursor: "pointer",
+                  color: "var(--color-link)",
+                  textDecoration: "none",
+                  "&:hover": { 
+                    color: "var(--color-link-hover)",
+                    textDecoration: "underline"
+                  },
+                }}
+              >
+                ¿Olvidaste tu contraseña?
+              </Link>
+            </Typography>
+          </Box>
         </Box>
 
         <Box sx={{ textAlign: "center", mt: 2 }}>

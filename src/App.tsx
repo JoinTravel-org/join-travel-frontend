@@ -20,6 +20,8 @@ import { useAnalytics } from "./hooks/useAnalytics";
 import Login from "./components/auth/Login";
 import Register from "./components/auth/Register";
 import ConfirmEmail from "./components/auth/ConfirmEmail";
+import ForgotPassword from "./components/auth/ForgotPassword";
+import ResetPassword from "./components/auth/ResetPassword";
 import AddPlace from "./components/add_place/AddPlace";
 import PlaceDetail from "./components/place/PlaceDetail";
 import CreateItinerary from "./components/itineraries/CreateItinerary";
@@ -94,6 +96,8 @@ function App() {
                   }
                 />
                 <Route path="/confirm-email" element={<ConfirmEmail />} />
+                <Route path="/forgot-password" element={<ForgotPassword />} />
+                <Route path="/reset-password" element={<ResetPassword />} />
                 <Route path="/add-place" element={<AddPlace />} />
                 <Route path="/itineraries" element={<ItineraryList />} />
                 <Route path="/itinerary/:id" element={<ItineraryDetail />} />

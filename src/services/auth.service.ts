@@ -146,6 +146,44 @@ class AuthService {
       throw error as ApiError;
     }
   }
+
+  /**
+   * Solicita recuperación de contraseña
+   * @param email - Email del usuario
+   * @returns Promise con la respuesta
+   */
+  async forgotPassword(email: string): Promise<{ success: boolean; message: string }> {
+    try {
+      Logger.getInstance().info(`Attempting password recovery for email: ${email}`);
+      const response = await apiService.forgotPassword(email);
+      Logger.getInstance().info(`Password recovery email sent for: ${email}`);
+      return response;
+    } catch (error) {
+      Logger.getInstance().error(`Password recovery failed for email: ${email}`, error);
+      throw error as ApiError;
+    }
+  }
+
+  /**
+   * Restablece la contraseña usando un token
+   * @param token - Token de reseteo
+   * @param password - Nueva contraseña
+   * @returns Promise con la respuesta
+   */
+  async resetPassword(
+    token: string,
+    password: string
+  ): Promise<{ success: boolean; message: string }> {
+    try {
+      Logger.getInstance().info(`Attempting password reset with token: ${token.substring(0, 10)}...`);
+      const response = await apiService.resetPassword(token, password);
+      Logger.getInstance().info(`Password reset successful for token: ${token.substring(0, 10)}...`);
+      return response;
+    } catch (error) {
+      Logger.getInstance().error(`Password reset failed for token: ${token.substring(0, 10)}...`, error);
+      throw error as ApiError;
+    }
+  }
 }
 
 export default new AuthService();
