@@ -13,6 +13,8 @@ export interface Question {
   createdAt: string;
   updatedAt: string;
   userEmail?: string;
+  userName?: string;
+  userProfilePicture?: string;
   userVote?: 'up' | null;
 }
 
@@ -28,6 +30,8 @@ export interface Answer {
   createdAt: string;
   updatedAt: string;
   userEmail?: string;
+  userName?: string;
+  userProfilePicture?: string;
   userVote?: 'up' | null;
 }
 

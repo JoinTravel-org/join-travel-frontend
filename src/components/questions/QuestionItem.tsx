@@ -4,7 +4,6 @@ import {
   Typography,
   Button,
   Stack,
-  Avatar,
   IconButton,
   Collapse,
   CircularProgress,
@@ -18,6 +17,7 @@ import questionService, { type Question } from "../../services/question.service"
 import AnswerList from "./AnswerList";
 import AddAnswerForm from "./AddAnswerForm";
 import { useAuth } from "../../hooks/useAuth";
+import UserAvatar from "../common/UserAvatar";
 // import { formatDistanceToNow } from "date-fns";
 // import { es } from "date-fns/locale";
 
@@ -96,9 +96,15 @@ const QuestionItem: React.FC<QuestionItemProps> = ({ question, onVoteUpdate }) =
     >
       {/* Question Header */}
       <Box sx={{ display: "flex", alignItems: "flex-start", gap: { xs: 1.5, md: 2 }, mb: 1 }}>
-        <Avatar sx={{ width: { xs: 28, md: 32 }, height: { xs: 28, md: 32 } }}>
-          {question.userEmail?.charAt(0).toUpperCase()}
-        </Avatar>
+        <UserAvatar
+          user={{
+            name: question.userName,
+            email: question.userEmail,
+            profilePicture: question.userProfilePicture,
+          }}
+          size={32}
+          sx={{ width: { xs: 28, md: 32 }, height: { xs: 28, md: 32 } }}
+        />
         <Box sx={{ flex: 1, minWidth: 0 }}>
           <Typography
             variant="body1"

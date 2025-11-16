@@ -12,7 +12,6 @@ import {
   ListItemButton,
   ListItemText,
   ListItemAvatar,
-  Avatar,
   Chip,
   Divider,
   IconButton,
@@ -28,6 +27,7 @@ import CloseIcon from "@mui/icons-material/Close";
 import PersonAddIcon from "@mui/icons-material/PersonAdd";
 import AssignmentIcon from "@mui/icons-material/Assignment";
 import PeopleIcon from "@mui/icons-material/People";
+import UserAvatar from "../common/UserAvatar";
 import MapIcon from "@mui/icons-material/Map";
 import { useAuth } from "../../hooks/useAuth";
 import groupService from "../../services/group.service";
@@ -382,7 +382,7 @@ export const GroupDetailDialog: React.FC<GroupDetailDialogProps> = ({
                 }}
               >
                 <ListItemAvatar>
-                  <Avatar>{member.name?.charAt(0) || member.email.charAt(0)}</Avatar>
+                  <UserAvatar user={member} size={40} />
                 </ListItemAvatar>
                 <ListItemText
                   primary={member.name || member.email}

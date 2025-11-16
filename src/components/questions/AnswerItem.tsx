@@ -3,7 +3,6 @@ import {
   Box,
   Typography,
   IconButton,
-  Avatar,
   CircularProgress,
   Alert,
 } from "@mui/material";
@@ -11,6 +10,7 @@ import ThumbUpIcon from "@mui/icons-material/ThumbUp";
 import ThumbUpOutlinedIcon from "@mui/icons-material/ThumbUpOutlined";
 import questionService, { type Answer } from "../../services/question.service";
 import { useAuth } from "../../hooks/useAuth";
+import UserAvatar from "../common/UserAvatar";
 // Custom time formatting without date-fns dependency
 
 interface AnswerItemProps {
@@ -78,9 +78,14 @@ const AnswerItem: React.FC<AnswerItemProps> = ({ answer, onVoteUpdate }) => {
     >
       {/* Answer Header */}
       <Box sx={{ display: "flex", alignItems: "flex-start", gap: { xs: 1.5, md: 2 }, mb: 1 }}>
-        <Avatar sx={{ width: { xs: 24, md: 28 }, height: { xs: 24, md: 28 } }}>
-          {answer.userEmail?.charAt(0).toUpperCase()}
-        </Avatar>
+        <UserAvatar
+          user={{
+            email: answer.userEmail,
+            name: answer.userName,
+            profilePicture: answer.userProfilePicture,
+          }}
+          size={28}
+        />
         <Box sx={{ flex: 1, minWidth: 0 }}>
           <Typography
             variant="body2"
