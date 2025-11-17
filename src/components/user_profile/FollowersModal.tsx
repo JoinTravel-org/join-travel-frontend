@@ -83,7 +83,7 @@ const FollowersModal: React.FC<FollowersModalProps> = ({
 
   return (
     <Dialog open={open} onClose={onClose} maxWidth="sm" fullWidth>
-      <DialogTitle sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+      <DialogTitle component="div" sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
         <Typography variant="h6">{title}</Typography>
         <IconButton edge="end" color="inherit" onClick={onClose} aria-label="cerrar">
           <CloseIcon />

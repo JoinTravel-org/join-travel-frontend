@@ -216,12 +216,16 @@ class ApiService {
    * Registra un nuevo usuario
    * @param email - Email del usuario
    * @param password - Contraseña del usuario
+   * @param name - Nombre del usuario (opcional)
+   * @param age - Edad del usuario (opcional)
    * @returns Promise con la respuesta del servidor
    */
-  async register(email: string, password: string) {
+  async register(email: string, password: string, name?: string, age?: number) {
     const response = await this.api.post("/auth/register", {
       email,
       password,
+      ...(name && { name }),
+      ...(age && { age }),
     });
     return response.data;
   }

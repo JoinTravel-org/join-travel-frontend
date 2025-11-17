@@ -7,6 +7,8 @@ import Logger from "../logger";
 export interface RegisterData {
   email: string;
   password: string;
+  name?: string;
+  age?: number;
 }
 
 /**
@@ -82,13 +84,13 @@ export interface ApiError {
 class AuthService {
   /**
    * Registra un nuevo usuario
-   * @param data - Datos de registro (email y password)
+   * @param data - Datos de registro (email, password, name y age opcionales)
    * @returns Promise con la respuesta del registro
    */
   async register(data: RegisterData): Promise<RegisterResponse> {
     try {
       Logger.getInstance().info(`Attempting to register user with email: ${data.email}`);
-      const response = await apiService.register(data.email, data.password);
+      const response = await apiService.register(data.email, data.password, data.name, data.age);
       Logger.getInstance().info(`User registration successful for email: ${data.email}`);
       return response;
     } catch (error) {
