@@ -58,72 +58,137 @@ export default function ExpenseTable({
 
   return (
     <Box>
-      <Typography variant="h6" sx={{ mb: 2 }}>
-        {showGroupColumn ? "Todos mis Gastos" : "Gastos del Grupo"}
-      </Typography>
-
       {expenses.length === 0 ? (
-        <Typography variant="body2" color="text.secondary">
-          No hay gastos registrados aún.
-        </Typography>
+        <Box sx={{ 
+          textAlign: "center", 
+          py: 4, 
+          bgcolor: "background.paper",
+          borderRadius: 2,
+          border: "1px dashed",
+          borderColor: "divider"
+        }}>
+          <Typography variant="body1" color="text.secondary">
+            {showGroupColumn 
+              ? "No tienes gastos asignados en ningún grupo aún."
+              : "No hay gastos registrados en este grupo aún."}
+          </Typography>
+          {!showGroupColumn && isAdmin && (
+            <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
+              Usa el formulario de arriba para agregar el primer gasto
+            </Typography>
+          )}
+        </Box>
       ) : (
         <>
-          <TableContainer component={Paper} sx={{ mb: 2 }}>
+          <TableContainer 
+            component={Paper} 
+            sx={{ 
+              mb: 2,
+              boxShadow: 3,
+              border: showGroupColumn ? "2px solid" : "1px solid",
+              borderColor: showGroupColumn ? "success.main" : "divider",
+            }}
+          >
             <Table>
-              <TableHead>
+              <TableHead sx={{ bgcolor: showGroupColumn ? "success.light" : "primary.light" }}>
                 <TableRow>
-                  <TableCell>Concepto</TableCell>
-                  {showGroupColumn && <TableCell>Grupo</TableCell>}
-                  <TableCell align="right">Monto</TableCell>
-                  <TableCell>Registrado por</TableCell>
-                  <TableCell>Pagado por</TableCell>
-                  <TableCell align="center">Acciones</TableCell>
+                  <TableCell sx={{ fontWeight: 600, color: showGroupColumn ? "inherit" : "primary.contrastText" }}>Concepto</TableCell>
+                  {showGroupColumn && <TableCell sx={{ fontWeight: 600, color: "inherit" }}>Grupo</TableCell>}
+                  <TableCell align="right" sx={{ fontWeight: 600, color: showGroupColumn ? "inherit" : "primary.contrastText" }}>Monto</TableCell>
+                  <TableCell sx={{ fontWeight: 600, color: showGroupColumn ? "inherit" : "primary.contrastText" }}>Registrado por</TableCell>
+                  <TableCell sx={{ fontWeight: 600, color: showGroupColumn ? "inherit" : "primary.contrastText" }}>
+                    {showGroupColumn ? "Asignado a" : "Pagado por"}
+                  </TableCell>
+                  {!showGroupColumn && <TableCell align="center" sx={{ fontWeight: 600, color: "primary.contrastText" }}>Acciones</TableCell>}
                 </TableRow>
               </TableHead>
               <TableBody>
-                {expenses.map((expense) => (
-                  <TableRow key={expense.id}>
-                    <TableCell>{expense.concept}</TableCell>
-                    {showGroupColumn && (
-                      <TableCell>
-                        {expense.group?.name || "Grupo desconocido"}
+                {expenses.map((expense) => {
+                  const currentUserId = localStorage.getItem("userId");
+                  const isAssignedToMe = expense.paidById === currentUserId;
+                  
+                  return (
+                    <TableRow 
+                      key={expense.id}
+                      sx={{
+                        bgcolor: showGroupColumn && isAssignedToMe 
+                          ? "rgba(46, 125, 50, 0.08)" 
+                          : "background.paper",
+                        "&:hover": {
+                          bgcolor: showGroupColumn && isAssignedToMe
+                            ? "rgba(46, 125, 50, 0.15)"
+                            : "action.hover",
+                        }
+                      }}
+                    >
+                      <TableCell>{expense.concept}</TableCell>
+                      {showGroupColumn && (
+                        <TableCell>
+                          <strong>{expense.group?.name || "Grupo desconocido"}</strong>
+                        </TableCell>
+                      )}
+                      <TableCell align="right">
+                        <strong style={{ fontSize: "1.1rem" }}>${expense.amount}</strong>
                       </TableCell>
-                    )}
-                    <TableCell align="right">${expense.amount}</TableCell>
-                    <TableCell>
-                      {expense.user?.email || "Usuario desconocido"}
-                    </TableCell>
-                    <TableCell>
-                      {expense.paidBy
-                        ? expense.paidBy.email
-                        : "Sin especificar"}
-                    </TableCell>
-                    <TableCell align="center">
-                      {isAdmin && (
-                        <Tooltip title="Asignar gasto">
-                          <IconButton
-                            size="small"
-                            color="primary"
-                            onClick={() => handleOpenAssignDialog(expense)}
-                          >
-                            <AssignmentIndIcon fontSize="small" />
-                          </IconButton>
-                        </Tooltip>
+                      <TableCell>
+                        {expense.user?.email || "Usuario desconocido"}
+                      </TableCell>
+                      <TableCell>
+                        {expense.paidBy ? (
+                          <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+                            {expense.paidBy.email}
+                            {showGroupColumn && isAssignedToMe && (
+                              <Box
+                                component="span"
+                                sx={{
+                                  bgcolor: "success.main",
+                                  color: "white",
+                                  px: 1,
+                                  py: 0.25,
+                                  borderRadius: 1,
+                                  fontSize: "0.75rem",
+                                  fontWeight: 600,
+                                }}
+                              >
+                                TÚ
+                              </Box>
+                            )}
+                          </Box>
+                        ) : (
+                          <Box component="span" sx={{ color: "text.secondary", fontStyle: "italic" }}>
+                            Sin asignar
+                          </Box>
+                        )}
+                      </TableCell>
+                      {!showGroupColumn && (
+                        <TableCell align="center">
+                          {isAdmin && (
+                            <Tooltip title="Asignar gasto">
+                              <IconButton
+                                size="small"
+                                color="primary"
+                                onClick={() => handleOpenAssignDialog(expense)}
+                              >
+                                <AssignmentIndIcon fontSize="small" />
+                              </IconButton>
+                            </Tooltip>
+                          )}
+                          {canDeleteExpense(expense) && (
+                            <Tooltip title="Eliminar gasto">
+                              <IconButton
+                                size="small"
+                                color="error"
+                                onClick={() => onDeleteExpense(expense.id)}
+                              >
+                                <DeleteIcon fontSize="small" />
+                              </IconButton>
+                            </Tooltip>
+                          )}
+                        </TableCell>
                       )}
-                      {canDeleteExpense(expense) && (
-                        <Tooltip title="Eliminar gasto">
-                          <IconButton
-                            size="small"
-                            color="error"
-                            onClick={() => onDeleteExpense(expense.id)}
-                          >
-                            <DeleteIcon fontSize="small" />
-                          </IconButton>
-                        </Tooltip>
-                      )}
-                    </TableCell>
-                  </TableRow>
-                ))}
+                    </TableRow>
+                  );
+                })}
               </TableBody>
             </Table>
           </TableContainer>
@@ -133,6 +198,9 @@ export default function ExpenseTable({
               display: "flex",
               justifyContent: "flex-end",
               alignItems: "center",
+              p: 2,
+              bgcolor: showGroupColumn ? "rgba(46, 125, 50, 0.08)" : "rgba(5, 68, 94, 0.08)",
+              borderRadius: 1,
             }}
           >
             <Typography variant="h6" sx={{ fontWeight: "bold" }}>

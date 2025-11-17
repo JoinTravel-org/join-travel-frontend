@@ -103,17 +103,58 @@ export default function GroupExpenses({ groupId }: GroupExpensesProps) {
 
   return (
     <Container maxWidth="lg" sx={{ py: { xs: 2, sm: 4 } }}>
-      <Typography variant="h5" component="h2" sx={{ mb: 3 }}>
-        Gastos del Grupo
-      </Typography>
+      {/* Different header and styling based on context */}
+      {groupId ? (
+        // Group-specific expenses view (Admin mode)
+        <>
+          <Box
+            sx={{
+              mb: 3,
+              p: 2,
+              bgcolor: "primary.light",
+              borderRadius: 1,
+              border: "2px solid",
+              borderColor: "primary.main",
+            }}
+          >
+            <Typography variant="h5" component="h2" sx={{ color: "primary.contrastText", fontWeight: 600 }}>
+              📊 Gestión de Gastos del Grupo
+            </Typography>
+            <Typography variant="body2" sx={{ color: "primary.contrastText", mt: 0.5 }}>
+              {isAdmin 
+                ? "Como administrador, puedes crear, asignar y eliminar gastos de este grupo"
+                : "Visualización de todos los gastos de este grupo"}
+            </Typography>
+          </Box>
 
-      {/* Only show add expense form if user is admin */}
-      {groupId && isAdmin && (
-        <Box sx={{ mb: 3 }}>
-          <AddExpenseForm
-            groupId={groupId}
-            onExpenseAdded={handleExpenseAdded}
-          />
+          {/* Only show add expense form if user is admin */}
+          {isAdmin && (
+            <Box sx={{ mb: 3 }}>
+              <AddExpenseForm
+                groupId={groupId}
+                onExpenseAdded={handleExpenseAdded}
+              />
+            </Box>
+          )}
+        </>
+      ) : (
+        // Personal expenses view (User mode)
+        <Box
+          sx={{
+            mb: 3,
+            p: 2,
+            bgcolor: "success.light",
+            borderRadius: 1,
+            border: "2px solid",
+            borderColor: "success.main",
+          }}
+        >
+          <Typography variant="h5" component="h2" sx={{ color: "success.contrastText", fontWeight: 600 }}>
+            💰 Mis Gastos Personales
+          </Typography>
+          <Typography variant="body2" sx={{ color: "success.contrastText", mt: 0.5 }}>
+            Resumen de todos los gastos asignados a ti en los diferentes grupos
+          </Typography>
         </Box>
       )}
 
