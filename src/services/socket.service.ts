@@ -2,6 +2,7 @@ import { io, Socket } from "socket.io-client";
 import Logger from "../logger";
 import type { DirectMessage } from "./directMessage.service";
 import type { GroupMessage } from "../types/groupMessage";
+import type { Notification } from "../types/notification";
 
 const SOCKET_URL = import.meta.env.VITE_BACKEND_URL || "http://localhost:3005";
 const logger = Logger.getInstance();
@@ -13,6 +14,8 @@ class SocketService {
     string,
     Set<(message: GroupMessage) => void>
   > = new Map();
+  private notificationListeners: Set<(notification: Notification) => void> =
+    new Set();
 
   /**
    * Conecta al servidor de websockets
@@ -49,6 +52,20 @@ class SocketService {
       }
     });
 
+    this.socket.on("new_notification", (notification) => {
+      console.log(
+        "[Socket] ✓ New notification received via socket:",
+        notification
+      );
+      logger.info(
+        `New notification received: ${notification.id}, type: ${notification.type}`
+      );
+      console.log(
+        `[Socket] Notifying ${this.notificationListeners.size} listeners`
+      );
+      this.notificationListeners.forEach((listener) => listener(notification));
+    });
+
     this.socket.on("message_error", (error) => {
       logger.error("Socket message error", error);
     });
@@ -63,6 +80,7 @@ class SocketService {
       this.socket = null;
       this.messageListeners.clear();
       this.groupMessageListeners.clear();
+      this.notificationListeners.clear();
     }
   }
 
@@ -148,6 +166,16 @@ class SocketService {
           this.groupMessageListeners.delete(groupId);
         }
       }
+    };
+  }
+
+  /**
+   * Suscribe a nuevas notificaciones
+   */
+  onNewNotification(callback: (notification: Notification) => void) {
+    this.notificationListeners.add(callback);
+    return () => {
+      this.notificationListeners.delete(callback);
     };
   }
 
