@@ -182,15 +182,24 @@ const ProfileHeader: React.FC<ProfileHeaderProps> = ({
     }
   };
 
+  const [imageError, setImageError] = useState(false);
+
   const getAvatarUrl = () => {
-    if (user.profilePicture) {
+    if (user.profilePicture && !imageError) {
       const baseUrl = import.meta.env.VITE_BACKEND_URL || 'http://localhost:3000';
-      const avatarUrl = `${baseUrl}/uploads/avatars/${user.profilePicture}`;
-      console.log('[ProfileHeader] Avatar URL:', avatarUrl, 'profilePicture:', user.profilePicture);
-      return avatarUrl;
+      return `${baseUrl}/uploads/avatars/${user.profilePicture}`;
     }
     return undefined;
   };
+
+  const handleImageError = () => {
+    setImageError(true);
+  };
+
+  // Reset error state when user or profilePicture changes
+  React.useEffect(() => {
+    setImageError(false);
+  }, [user.id, user.profilePicture]);
 
   return (
     <Box>
@@ -217,16 +226,10 @@ const ProfileHeader: React.FC<ProfileHeaderProps> = ({
               alt={user.name || user.email}
               sx={{ width: 134, height: 134 }}
               imgProps={{
-                onError: (e) => {
-                  console.error('[ProfileHeader] Avatar image failed to load:', getAvatarUrl());
-                  console.error('[ProfileHeader] Error event:', e);
-                },
-                onLoad: () => {
-                  console.log('[ProfileHeader] Avatar image loaded successfully:', getAvatarUrl());
-                }
+                onError: handleImageError,
               }}
             >
-              {!user.profilePicture && <PersonIcon sx={{ fontSize: 67 }} />}
+              {(!user.profilePicture || imageError) && <PersonIcon sx={{ fontSize: 67 }} />}
             </Avatar>
           )}
           {editable && (

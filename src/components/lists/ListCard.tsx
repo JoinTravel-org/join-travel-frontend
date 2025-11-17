@@ -7,11 +7,12 @@ interface ListCardProps {
   list: List;
   onEdit: (list: List) => void;
   onDelete: (listId: string) => void;
-  onView: (list: List) => void;
+  onView?: (list: List) => void;
 }
 
 const ListCard: React.FC<ListCardProps> = ({ list, onEdit, onDelete, onView }) => {
   const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
+  const menuJustClosed = React.useRef(false);
 
   const handleMenuClick = (event: React.MouseEvent<HTMLElement>) => {
     setAnchorEl(event.currentTarget);
@@ -19,6 +20,7 @@ const ListCard: React.FC<ListCardProps> = ({ list, onEdit, onDelete, onView }) =
 
   const handleMenuClose = () => {
     setAnchorEl(null);
+    menuJustClosed.current = true;
   };
 
   const handleEdit = () => {
@@ -42,7 +44,13 @@ const ListCard: React.FC<ListCardProps> = ({ list, onEdit, onDelete, onView }) =
           boxShadow: 3,
         },
       }}
-      onClick={() => onView(list)}
+      onClick={() => {
+        if (menuJustClosed.current) {
+          menuJustClosed.current = false;
+          return;
+        }
+        onView?.(list);
+      }}
     >
       <CardContent>
         <Box display="flex" justifyContent="space-between" alignItems="flex-start">
@@ -138,11 +146,11 @@ const ListCard: React.FC<ListCardProps> = ({ list, onEdit, onDelete, onView }) =
           open={Boolean(anchorEl)}
           onClose={handleMenuClose}
         >
-          <MenuItem onClick={handleEdit}>
+          <MenuItem onClick={(e) => { e.stopPropagation(); handleEdit(); }}>
             <EditIcon sx={{ mr: 1 }} />
             Editar
           </MenuItem>
-          <MenuItem onClick={handleDelete} sx={{ color: 'error.main' }}>
+          <MenuItem onClick={(e) => { e.stopPropagation(); handleDelete(); }} sx={{ color: 'error.main' }}>
             <DeleteIcon sx={{ mr: 1 }} />
             Eliminar
           </MenuItem>

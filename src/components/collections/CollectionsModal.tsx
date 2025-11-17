@@ -39,7 +39,7 @@ const CollectionsModal: React.FC<CollectionsModalProps> = ({ open, onClose }) =>
         },
       }}
     >
-      <DialogTitle sx={{ textAlign: "center", pb: 1 }}>
+      <DialogTitle component="div" sx={{ textAlign: "center", pb: 1 }}>
         <Typography variant="h5" component="h2" fontWeight={600}>
           Colecciones
         </Typography>
