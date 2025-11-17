@@ -187,7 +187,7 @@ const ItineraryDetail: React.FC = () => {
             alignItems: "center",
           }}
         >
-          <Button variant="outlined" onClick={() => navigate("/itineraries")}>
+          <Button variant="outlined" onClick={() => navigate("/collections")}>
             ← Volver a Itinerarios
           </Button>
           {!loading && !error && itinerary && itinerary.userId === auth.user?.id && (

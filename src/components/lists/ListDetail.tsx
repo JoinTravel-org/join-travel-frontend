@@ -169,7 +169,7 @@ const ListDetail: React.FC = () => {
             },
           }}
         >
-          <Button variant="outlined" onClick={() => navigate("/lists")}>
+          <Button variant="outlined" onClick={() => navigate("/collections")}>
             ← Volver a Listas
           </Button>
           {!loading && !error && list && list.userId === auth.user?.id && (
