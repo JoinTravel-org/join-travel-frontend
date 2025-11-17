@@ -27,11 +27,19 @@ const UserCard: React.FC<UserCardProps> = ({ user, onClick }) => {
       onClick={onClick}
     >
       <CardContent sx={{ display: "flex", alignItems: "center", gap: 2 }}>
-        <UserAvatar user={user} size={40} />
+        <UserAvatar user={user} size={50} />
         <Box sx={{ flex: 1 }}>
-          <Typography variant="subtitle1" sx={{ fontWeight: 600 }}>
+          <Typography variant="h6" component="h3">
+            {user.name || 'Usuario sin nombre'}
+          </Typography>
+          <Typography variant="body2" color="text.secondary">
             {user.email}
           </Typography>
+          {user.age && (
+            <Typography variant="caption" color="text.secondary">
+              {user.age} años
+            </Typography>
+          )}
           {user.stats && (
             <Box sx={{ display: "flex", alignItems: "center", gap: 1, mt: 0.5 }}>
               <Chip
@@ -45,9 +53,6 @@ const UserCard: React.FC<UserCardProps> = ({ user, onClick }) => {
               </Typography>
             </Box>
           )}
-          <Typography variant="body2" color="text.secondary">
-            Miembro desde {new Date(user.createdAt).toLocaleDateString()}
-          </Typography>
         </Box>
       </CardContent>
     </Card>

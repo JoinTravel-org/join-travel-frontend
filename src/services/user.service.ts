@@ -63,16 +63,16 @@ class UserService {
   }
 
   /**
-   * Busca usuarios por email
-   * @param email - Email a buscar
+   * Busca usuarios por query (nombre o email)
+   * @param query - Query a buscar (nombre o email)
    * @returns Promise con la lista de usuarios encontrados
    */
   async searchUsers(
-    email: string
+    query: string
   ): Promise<{ success: boolean; data?: User[]; message?: string }> {
     const response = await apiService
       .getAxiosInstance()
-      .get(`/users/search`, { params: { email } });
+      .get(`/users/search`, { params: { query } });
     return response.data;
   }
 
