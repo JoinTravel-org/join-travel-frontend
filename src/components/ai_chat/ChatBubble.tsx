@@ -1,7 +1,6 @@
 import React, { useContext, useState, useEffect, useRef } from 'react';
 import { AuthContext } from '../../contexts/AuthContext';
 import { Box, Fab, Typography, TextField, Button, List, ListItem, ListItemText, Avatar, CircularProgress, IconButton, Tooltip, Dialog, DialogTitle, DialogContent, DialogActions } from '@mui/material';
-import AutoAwesomeIcon from '@mui/icons-material/AutoAwesome';
 import SendIcon from '@mui/icons-material/Send';
 import AddIcon from '@mui/icons-material/Add';
 import CloseIcon from '@mui/icons-material/Close';
@@ -43,7 +42,7 @@ const ChatBubble: React.FC = () => {
   // Welcome message
   const welcomeMessage: Message = {
     id: 'welcome',
-    text: '¡Hola! 👋✨\n Puedo ayudarte con tus necesidades de viaje 🌍✈️\n¡Pregúntame sobre lugares increíbles 🏖️, reseñas 📝 o qué destinos se adaptan mejor a ti!',
+    text: '¡Hola! Soy Viajitus 👋✨\n Puedo ayudarte con tus necesidades de viaje 🌍✈️\n¡Pregúntame sobre lugares increíbles 🏖️, reseñas 📝 o qué destinos se adaptan mejor a ti!',
     sender: 'ai',
     timestamp: Date.now(),
   };
@@ -313,10 +312,49 @@ const ChatBubble: React.FC = () => {
 
   return (
     <>
+      {/* Toast Text Above Chat Bubble */}
+      <Box
+        onClick={handleToggleChat}
+        sx={{
+          position: 'fixed',
+          bottom: 104,
+          right: 16,
+          zIndex: 1000,
+          bgcolor: 'var(--color-primary)',
+          color: 'var(--color-primary-contrast)',
+          px: 2,
+          py: 1,
+          borderRadius: 3,
+          fontSize: '0.8rem',
+          fontWeight: 'bold',
+          textAlign: 'center',
+          maxWidth: 120,
+          boxShadow: '0 4px 8px rgba(0,0,0,0.3)',
+          cursor: 'pointer',
+          transition: 'all 0.2s ease',
+          '&:hover': {
+            transform: 'translateY(-2px)',
+            boxShadow: '0 6px 12px rgba(0,0,0,0.4), 0 0 20px var(--color-primary)',
+          },
+          '&::after': {
+            content: '""',
+            position: 'absolute',
+            bottom: -8,
+            right: 20,
+            width: 0,
+            height: 0,
+            borderLeft: '8px solid transparent',
+            borderRight: '8px solid transparent',
+            borderTop: '8px solid var(--color-primary)',
+          },
+        }}
+      >
+        Te ayudo en algo?
+      </Box>
+
       {/* Chat Bubble Button */}
       <Fab
         ref={fabRef}
-        color="primary"
         aria-label="chat"
         onClick={handleToggleChat}
         sx={{
@@ -324,9 +362,32 @@ const ChatBubble: React.FC = () => {
           bottom: 16,
           right: 16,
           zIndex: 1000,
+          width: 80,
+          height: 80,
+          bgcolor: 'transparent',
+          boxShadow: 'none',
+          transition: 'all 0.2s ease',
+          '&:hover > div': {
+            border: '2px solid var(--color-primary)',
+          },
         }}
       >
-        <AutoAwesomeIcon />
+        <Box sx={{
+          position: 'relative',
+          width: '100%',
+          height: '100%',
+          borderRadius: '50%',
+          overflow: 'hidden',
+          transition: 'all 0.2s ease',
+        }}>
+          <video
+            src="/viajitus_idle.webm"
+            autoPlay
+            loop
+            muted
+            style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+          />
+        </Box>
       </Fab>
 
       {/* Chat Interface */}
@@ -354,7 +415,7 @@ const ChatBubble: React.FC = () => {
             }}
             component="div"
           >
-            <Typography variant="h6">AI Chat Assistant</Typography>
+            <Typography variant="h6">Viajitus ✨</Typography>
             <Box sx={{ display: 'flex', gap: 1 }}>
               <Tooltip title="Start New Chat">
                 <IconButton
@@ -395,8 +456,8 @@ const ChatBubble: React.FC = () => {
               <List>
                 {messages.map((message) => (
                   <ListItem key={message.id} sx={{ alignItems: 'flex-start', px: 0 }}>
-                    <Avatar sx={{ mr: 1, bgcolor: message.sender === 'ai' ? 'primary.main' : 'secondary.main' }}>
-                      {message.sender === 'ai' ? 'AI' : 'U'}
+                    <Avatar src={message.sender === 'ai' ? '/viajitus.png' : undefined} sx={{ mr: 1, bgcolor: message.sender === 'ai' ? 'transparent' : 'secondary.main' }}>
+                      {message.sender === 'ai' ? '' : 'U'}
                     </Avatar>
                     <Box sx={{ flex: 1 }}>
                       <ListItemText
@@ -432,8 +493,7 @@ const ChatBubble: React.FC = () => {
                 {/* AI Thinking Indicator */}
                 {isLoading && (
                   <ListItem sx={{ alignItems: 'flex-start', px: 0 }}>
-                    <Avatar sx={{ mr: 1, bgcolor: 'primary.main' }}>
-                      AI
+                    <Avatar src="/viajitus.png" sx={{ mr: 1 }}>
                     </Avatar>
                     <Box sx={{
                       bgcolor: 'grey.100',
@@ -495,7 +555,7 @@ const ChatBubble: React.FC = () => {
             ) : (
               <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '100%' }}>
                 <Typography variant="h6" sx={{ mb: 2 }}>
-                  Por favor inicie sesión para poder usar el AI Chat Assistant
+                  Por favor inicie sesión para poder hablar con Viajitus ✨
                 </Typography>
                 <Typography variant="body2" color="text.secondary">
                   Debes estar logeado para usar esta característica.
