@@ -657,6 +657,20 @@ class ApiService {
   }
 
   /**
+   * Busca listas públicas por título o ciudad
+   * @param query - término de búsqueda para el título (opcional)
+   * @param city - ciudad para filtrar (opcional)
+   */
+  async searchLists(query?: string, city?: string) {
+    const params: Record<string, string> = {};
+    if (query) params.q = query;
+    if (city) params.city = city;
+
+    const response = await this.api.get("/lists/search", { params });
+    return response.data;
+  }
+
+  /**
    * Obtiene una lista específica por ID
    * @param id - ID de la lista
    * @returns Promise con la lista

@@ -103,7 +103,7 @@ const Lists: React.FC = () => {
       <Box display="flex" gap={2} alignItems="center" mb={2} flexDirection={{ xs: 'column', sm: 'row' }}>
         <TextField
           label="Buscar"
-          placeholder={filterType === 'name' ? 'Buscar por nombre de lista' : 'Buscar por ubicación (ciudad o nombre del lugar)'}
+          placeholder={filterType === 'name' ? 'Buscar por nombre de lista' : 'Buscar por ubicación (lugar o nombre del lugar)'}
           value={filterQuery}
           onChange={(e) => setFilterQuery(e.target.value)}
           sx={{ width: { xs: '100%', sm: 360 } }}
