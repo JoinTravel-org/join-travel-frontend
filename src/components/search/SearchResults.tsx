@@ -62,6 +62,8 @@ const SearchResults: React.FC = () => {
   const [selectedListAuthor, setSelectedListAuthor] = useState<User | null>(null);
   // For the lower lists filter: choose whether the input filters by list name, place (lugar) or author
   const [listFilterType, setListFilterType] = useState<"name" | "location" | "author">("location");
+  // Track if the user has manually edited the lower input so we don't overwrite it
+  const [lowerUserEdited, setLowerUserEdited] = useState(false);
 
   useEffect(() => {
     const fetchApiKey = async () => {
@@ -330,6 +332,15 @@ const SearchResults: React.FC = () => {
     return () => clearTimeout(timer);
   }, [searchQuery, activeTab, locationFilter, ratingFilter, userLocation?.latitude, userLocation?.longitude]);
 
+  // When typing in the top search box, prefill the lower lists input the first time
+  // but don't overwrite if the user already edited the lower input.
+  useEffect(() => {
+    if (activeTab === 2 && !lowerUserEdited) {
+      setLocationFilter(searchQuery);
+    }
+    // only respond to searchQuery and activeTab and lowerUserEdited
+  }, [searchQuery, activeTab, lowerUserEdited]);
+
   // Trigger search when selected author changes (lists tab)
   useEffect(() => {
     if (activeTab === 2) {
@@ -369,6 +380,7 @@ const SearchResults: React.FC = () => {
     setLocationFilter(u.name || u.email || "");
     setAuthorSuggestions([]);
     // Trigger lists search immediately
+    setLowerUserEdited(true);
     performSearch(searchQuery);
   };
 
@@ -435,8 +447,21 @@ const SearchResults: React.FC = () => {
     setError(null);
   };
 
+  const handleListFilterTypeChange = (event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    const newType = (event.target as HTMLInputElement).value as "name" | "location" | "author";
+    // Reset filters/selections when switching filter type
+    setListFilterType(newType);
+    setLocationFilter("");
+    setSelectedListAuthor(null);
+    setAuthorSuggestions([]);
+    setLists([]);
+    setError(null);
+    setLowerUserEdited(false);
+  };
+
   const handleLocationFilterChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     setLocationFilter(event.target.value);
+    setLowerUserEdited(true);
   };
 
   const handleRatingFilterChange = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -511,7 +536,7 @@ const SearchResults: React.FC = () => {
                 size="small"
                 label="Filtrar por"
                 value={listFilterType}
-                onChange={(e) => setListFilterType(e.target.value as "name" | "location" | "author")}
+                onChange={handleListFilterTypeChange}
                 sx={{ width: { xs: '100%', sm: 200 } }}
               >
                 <option value="name">Nombre</option>
