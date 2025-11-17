@@ -12,6 +12,12 @@ import {
   Tabs,
   Tab,
   Button,
+  List,
+  ListItem,
+  ListItemAvatar,
+  ListItemText,
+  Avatar,
+  Chip,
 } from "@mui/material";
 import {
   Search as SearchIcon,
@@ -23,20 +29,23 @@ import { Rating } from "@fluentui/react-rating";
 import { useSearchParams, useNavigate } from "react-router-dom";
 import UserCard from "./UserCard";
 import PlaceCard from "./PlaceCard";
+import ListCard from "../lists/ListCard";
 import userService from "../../services/user.service";
 import apiService from "../../services/api.service";
 import type { User } from "../../types/user";
 import type { Place } from "../../types/place";
+import type { List as ListType } from "../../types/list";
 
 const SearchResults: React.FC = () => {
   const [searchParams, setSearchParams] = useSearchParams();
   const navigate = useNavigate();
   const [users, setUsers] = useState<User[]>([]);
   const [places, setPlaces] = useState<Place[]>([]);
+  const [lists, setLists] = useState<ListType[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState(searchParams.get("q") || "");
-  const [activeTab, setActiveTab] = useState(0); // 0 for users, 1 for places
+  const [activeTab, setActiveTab] = useState(0); // 0 for users, 1 for places, 2 for lists
   const [locationFilter, setLocationFilter] = useState("");
   const [ratingFilter, setRatingFilter] = useState<number | "">("");
   const [userLocation, setUserLocation] = useState<{ latitude: number; longitude: number } | null>(null);
@@ -47,6 +56,12 @@ const SearchResults: React.FC = () => {
   const [apiKeyLoading, setApiKeyLoading] = useState(true);
   const [apiKeyError, setApiKeyError] = useState<string | null>(null);
   const [mapsLoaded, setMapsLoaded] = useState(false);
+  // Lists / author search states
+  const [authorSuggestions, setAuthorSuggestions] = useState<User[]>([]);
+  const [authorLoading, setAuthorLoading] = useState(false);
+  const [selectedListAuthor, setSelectedListAuthor] = useState<User | null>(null);
+  // For the lower lists filter: choose whether the input filters by list name, place (lugar) or author
+  const [listFilterType, setListFilterType] = useState<"name" | "location" | "author">("location");
 
   useEffect(() => {
     const fetchApiKey = async () => {
@@ -167,6 +182,7 @@ const SearchResults: React.FC = () => {
   };
 
   const performSearch = async (query: string) => {
+    console.log("performSearch called", { activeTab, query, selectedListAuthor, locationFilter });
     // For users tab, require query with min 3 chars
     // For places tab, require at least one basic filter (query, city, or location), rating filter can be additional
     const hasBasicFilter = (query.trim().length >= 3) || locationFilter.trim() || !!userLocation;
@@ -197,24 +213,38 @@ const SearchResults: React.FC = () => {
           setError(response.message || "Error al buscar usuarios");
         }
       } else {
-        // Search places - requires at least one basic filter, rating is additional
-        try {
-          const searchQuery = query.trim().length >= 3 ? query.trim() : undefined;
-          const cityQuery = locationFilter.trim() || undefined;
-          const minRating = (ratingFilter !== "" && hasBasicFilter) ? Number(ratingFilter) : undefined;
+        if (activeTab === 1) {
+          // Search places - requires at least one basic filter, rating is additional
+          try {
+            const searchQuery = query.trim().length >= 3 ? query.trim() : undefined;
+            const cityQuery = locationFilter.trim() || undefined;
+            const minRating = (ratingFilter !== "" && hasBasicFilter) ? Number(ratingFilter) : undefined;
 
-          const response = await apiService.searchPlaces(
-            searchQuery,
-            cityQuery,
-            userLocation?.latitude,
-            userLocation?.longitude,
-            minRating
-          );
-          if (response.success && response.data) {
-            setPlaces(response.data);
-            setUsers([]);
-            setCachedPlaces(response.data); // Cache results
-          } else {
+            const response = await apiService.searchPlaces(
+              searchQuery,
+              cityQuery,
+              userLocation?.latitude,
+              userLocation?.longitude,
+              minRating
+            );
+            if (response.success && response.data) {
+              setPlaces(response.data);
+              setUsers([]);
+              setCachedPlaces(response.data); // Cache results
+            } else {
+              // Use cached results if API fails
+              if (cachedPlaces.length > 0) {
+                setPlaces(cachedPlaces);
+                setUsers([]);
+                setError("Mostrando resultados almacenados");
+              } else {
+                setPlaces([]);
+                setUsers([]);
+                setError(response.message || "Error al buscar lugares");
+              }
+            }
+          } catch (placeErr) {
+            console.error("Places search error:", placeErr);
             // Use cached results if API fails
             if (cachedPlaces.length > 0) {
               setPlaces(cachedPlaces);
@@ -223,20 +253,55 @@ const SearchResults: React.FC = () => {
             } else {
               setPlaces([]);
               setUsers([]);
-              setError(response.message || "Error al buscar lugares");
+              setError("Error al buscar lugares");
             }
           }
-        } catch (placeErr) {
-          console.error("Places search error:", placeErr);
-          // Use cached results if API fails
-          if (cachedPlaces.length > 0) {
-            setPlaces(cachedPlaces);
+        } else {
+          // activeTab === 2 -> Lists search
+          try {
+            // If an author is selected, use the author endpoint
+            if (selectedListAuthor) {
+              console.log('Searching lists by author', selectedListAuthor.id);
+              const response = await apiService.getListsByAuthor(selectedListAuthor.id);
+              console.log('getListsByAuthor response', response);
+              if (response && response.success) {
+                setLists(response.data || []);
+                setUsers([]);
+                setPlaces([]);
+              } else {
+                setLists([]);
+                setUsers([]);
+                setPlaces([]);
+                setError((response as any)?.message || "Error al buscar listas");
+              }
+            } else {
+              // Decide which param to send based on the lower filter type (name vs location)
+              const q = listFilterType === 'name'
+                ? (locationFilter.trim().length >= 1 ? locationFilter.trim() : undefined)
+                : undefined;
+              const cityQuery = listFilterType === 'location'
+                ? (locationFilter.trim().length >= 1 ? locationFilter.trim() : undefined)
+                : undefined;
+              console.log('Searching lists', { listFilterType, q, cityQuery });
+              const response = await apiService.searchLists(q, cityQuery);
+              console.log('searchLists response', response);
+              if (response && response.success) {
+                setLists(response.data || []);
+                setUsers([]);
+                setPlaces([]);
+              } else {
+                setLists([]);
+                setUsers([]);
+                setPlaces([]);
+                setError((response as any)?.message || "Error al buscar listas");
+              }
+            }
+          } catch (listErr) {
+            console.error("Lists search error:", listErr);
+            setLists([]);
             setUsers([]);
-            setError("Mostrando resultados almacenados");
-          } else {
             setPlaces([]);
-            setUsers([]);
-            setError("Error al buscar lugares");
+            setError((listErr as any)?.message || "Error al buscar listas");
           }
         }
       }
@@ -265,6 +330,65 @@ const SearchResults: React.FC = () => {
     return () => clearTimeout(timer);
   }, [searchQuery, activeTab, locationFilter, ratingFilter, userLocation?.latitude, userLocation?.longitude]);
 
+  // Trigger search when selected author changes (lists tab)
+  useEffect(() => {
+    if (activeTab === 2) {
+      performSearch(searchQuery);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selectedListAuthor]);
+
+  // Debounced author suggestions (use the lower input when in author mode)
+  useEffect(() => {
+    const acTimer = setTimeout(async () => {
+      if (listFilterType === "author" && locationFilter && locationFilter.trim().length >= 3) {
+        setAuthorLoading(true);
+        try {
+          const res = await userService.searchUsers(locationFilter.trim());
+          if (res && res.success && res.data) {
+            setAuthorSuggestions(res.data as User[]);
+          } else {
+            setAuthorSuggestions([]);
+          }
+        } catch (e) {
+          console.error("Author search error", e);
+          setAuthorSuggestions([]);
+        } finally {
+          setAuthorLoading(false);
+        }
+      } else {
+        setAuthorSuggestions([]);
+      }
+    }, 300);
+    return () => clearTimeout(acTimer);
+  }, [locationFilter, listFilterType]);
+
+  const handleSelectAuthor = (u: User) => {
+    setSelectedListAuthor(u);
+    // populate the lower input so performSearch's hasBasicFilter becomes true
+    setLocationFilter(u.name || u.email || "");
+    setAuthorSuggestions([]);
+    // Trigger lists search immediately
+    performSearch(searchQuery);
+  };
+
+  const handleClearAuthor = () => {
+    setSelectedListAuthor(null);
+    setLocationFilter("");
+    setLists([]);
+  };
+
+  const handleDeleteList = async (listId: string) => {
+    if (!window.confirm('¿Estás seguro de que quieres eliminar esta lista?')) return;
+    try {
+      await apiService.deleteList(listId);
+      setLists(prev => prev.filter(l => l.id !== listId));
+    } catch (e) {
+      console.error('Error deleting list', e);
+      setError('Error al eliminar la lista');
+    }
+  };
+
   const handleSearchSubmit = (event: React.FormEvent) => {
     event.preventDefault();
     // For places tab, require at least one basic filter (query, city, or location)
@@ -287,9 +411,13 @@ const SearchResults: React.FC = () => {
   const handleClearSearch = () => {
     setSearchQuery("");
     setUsers([]);
+    setLists([]);
+    setSelectedListAuthor(null);
+    setAuthorSuggestions([]);
     setError(null);
     setSearchParams({});
   };
+
 
   const handleUserClick = (user: User) => {
     navigate(`/user/${user.id}`);
@@ -303,6 +431,7 @@ const SearchResults: React.FC = () => {
     setActiveTab(newValue);
     setUsers([]);
     setPlaces([]);
+    setLists([]);
     setError(null);
   };
 
@@ -336,6 +465,7 @@ const SearchResults: React.FC = () => {
         <Tabs value={activeTab} onChange={handleTabChange} aria-label="search tabs">
           <Tab label="Usuarios" />
           <Tab label="Lugares" />
+          <Tab label="Listas" />
         </Tabs>
       </Paper>
 
@@ -344,31 +474,107 @@ const SearchResults: React.FC = () => {
         <Box component="form" onSubmit={handleSearchSubmit}>
           {activeTab === 1 && (
             <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
-              Buscar lugares por nombre, ciudad y calificación mínima
+              Buscar lugares por nombre, lugar y calificación mínima
             </Typography>
           )}
-          <TextField
-            fullWidth
-            label={activeTab === 0 ? "Buscar usuarios" : "Nombre del lugar"}
-            placeholder={activeTab === 0 ? "Buscar usuarios por email..." : "Buscar lugares por nombre..."}
-            value={searchQuery}
-            onChange={handleSearchChange}
-            InputProps={{
-              startAdornment: (
-                <InputAdornment position="start">
-                  <SearchIcon />
-                </InputAdornment>
-              ),
-              endAdornment: searchQuery && (
-                <InputAdornment position="end">
-                  <IconButton onClick={handleClearSearch} size="small">
-                    <ClearIcon />
-                  </IconButton>
-                </InputAdornment>
-              ),
-            }}
-            sx={{ mb: 2 }}
-          />
+          {activeTab !== 2 && (
+            <TextField
+              fullWidth
+              label={activeTab === 0 ? "Buscar usuarios" : "Nombre del lugar"}
+              placeholder={activeTab === 0 ? "Buscar usuarios por email..." : "Buscar lugares por nombre..."}
+              value={searchQuery}
+              onChange={handleSearchChange}
+              InputProps={{
+                startAdornment: (
+                  <InputAdornment position="start">
+                    <SearchIcon />
+                  </InputAdornment>
+                ),
+                endAdornment: searchQuery && (
+                  <InputAdornment position="end">
+                    <IconButton onClick={handleClearSearch} size="small">
+                      <ClearIcon />
+                    </IconButton>
+                  </InputAdornment>
+                ),
+              }}
+              sx={{ mb: 2 }}
+            />
+          )}
+
+          {/* For Lists tab we keep a single (lower) Lugar input only */}
+          {activeTab === 2 && (
+            <Box sx={{ display: 'flex', flexDirection: { xs: 'column', sm: 'row' }, gap: 2, mb: 2, alignItems: 'center' }}>
+              <TextField
+                select
+                SelectProps={{ native: true }}
+                size="small"
+                label="Filtrar por"
+                value={listFilterType}
+                onChange={(e) => setListFilterType(e.target.value as "name" | "location" | "author")}
+                sx={{ width: { xs: '100%', sm: 200 } }}
+              >
+                <option value="name">Nombre</option>
+                <option value="location">Lugar</option>
+                <option value="author">Autor</option>
+              </TextField>
+
+              <TextField
+                fullWidth
+                placeholder="Busque sus listas aqui"
+                value={locationFilter}
+                onChange={handleLocationFilterChange}
+                InputProps={{
+                  endAdornment: locationFilter ? (
+                    <InputAdornment position="end">
+                      <IconButton size="small" onClick={() => { setLocationFilter(''); setLists([]); }}>
+                        <ClearIcon />
+                      </IconButton>
+                    </InputAdornment>
+                  ) : undefined,
+                }}
+              />
+              {/* Author suggestions / selected author */}
+              {listFilterType === 'author' && (
+                <Box sx={{ width: '100%', mt: 1 }}>
+                  {selectedListAuthor ? (
+                    <Box>
+                      <Chip
+                        label={selectedListAuthor.name || selectedListAuthor.email}
+                        onDelete={handleClearAuthor}
+                      />
+                    </Box>
+                  ) : (
+                    <Box>
+                      {authorLoading ? (
+                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                          <CircularProgress size={18} />
+                          <Typography variant="body2" color="text.secondary">Buscando autores...</Typography>
+                        </Box>
+                      ) : authorSuggestions.length > 0 ? (
+                        <Paper sx={{ mt: 1 }}>
+                          <List dense>
+                            {authorSuggestions.map((u) => (
+                              <ListItem  key={u.id} onClick={() => handleSelectAuthor(u)}>
+                                <ListItemAvatar>
+                                  <Avatar src={(u as any).avatarUrl || undefined}>{u.name ? u.name.charAt(0) : (u.email || '').charAt(0)}</Avatar>
+                                </ListItemAvatar>
+                                <ListItemText primary={u.name || u.email} secondary={u.email} />
+                              </ListItem>
+                            ))}
+                          </List>
+                        </Paper>
+                      ) : locationFilter.trim().length >= 3 ? (
+                        <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
+                          No se encontraron autores
+                        </Typography>
+                      ) : null}
+                    </Box>
+                  )}
+                </Box>
+              )}
+            </Box>
+          )}
 
           {/* Filters for places */}
           {activeTab === 1 && (
@@ -381,8 +587,8 @@ const SearchResults: React.FC = () => {
               }}>
                 <TextField
                   fullWidth
-                  label="Ciudad"
-                  placeholder="Filtrar por ciudad (opcional)"
+                  label="Lugar"
+                  placeholder="Filtrar por lugar (opcional)"
                   value={locationFilter}
                   onChange={handleLocationFilterChange}
                   onKeyDown={(e) => {
@@ -457,10 +663,13 @@ const SearchResults: React.FC = () => {
 
           <Box sx={{ display: "flex", gap: 2 }}>
             <Typography variant="body2" color="text.secondary">
-              {activeTab === 0
-                ? "Busca usuarios escribiendo al menos 3 caracteres de su email"
-                : "Busca lugares por nombre (mínimo 3 caracteres) o filtra por ciudad. La calificación mínima se aplica adicionalmente."
-              }
+              {activeTab === 0 ? (
+                "Busca usuarios escribiendo al menos 3 caracteres de su email"
+              ) : activeTab === 1 ? (
+                "Busca lugares por nombre (mínimo 3 caracteres) o filtra por lugar. La calificación mínima se aplica adicionalmente."
+              ) : (
+                "Busca listas por lugar."
+              )}
             </Typography>
           </Box>
         </Box>
@@ -497,7 +706,7 @@ const SearchResults: React.FC = () => {
       {/* Results */}
       {!loading && !error && (
         <>
-          {activeTab === 0 ? (
+          {activeTab === 0 && (
             // Users results
             users.length > 0 ? (
               <>
@@ -520,7 +729,9 @@ const SearchResults: React.FC = () => {
                 </Typography>
               </Box>
             ) : null
-          ) : (
+          )}
+
+          {activeTab === 1 && (
             // Places results
             places.length > 0 ? (
               <>
@@ -533,13 +744,44 @@ const SearchResults: React.FC = () => {
                   ))}
                 </Box>
               </>
-            ) : searchQuery && searchQuery.length >= 3 && !loading ? (
+            ) : (searchQuery && searchQuery.length >= 3 || locationFilter || userLocation) && !loading ? (
               <Box sx={{ textAlign: "center", py: 4 }}>
                 <Typography variant="h6" color="text.secondary" gutterBottom>
                   No se encontraron lugares
                 </Typography>
                 <Typography variant="body2" color="text.secondary">
                   Intenta con un nombre diferente o verifica la ortografía
+                </Typography>
+              </Box>
+            ) : null
+          )}
+
+          {activeTab === 2 && (
+            // Lists results
+            lists.length > 0 ? (
+              <>
+                <Typography variant="h6" gutterBottom>
+                  {lists.length} lista{lists.length !== 1 ? "s" : ""} encontrada{lists.length !== 1 ? "s" : ""}
+                </Typography>
+                <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
+                  {lists.map((list) => (
+                    <ListCard
+                      key={list.id}
+                      list={list}
+                      onEdit={() => { /* ListCard handles edit navigation; optional callback */ }}
+                      onDelete={handleDeleteList}
+                      onView={() => navigate(`/list/${list.id}`)}
+                    />
+                  ))}
+                </Box>
+              </>
+            ) : (locationFilter && locationFilter.trim().length > 0) && !loading ? (
+              <Box sx={{ textAlign: "center", py: 4 }}>
+                <Typography variant="h6" color="text.secondary" gutterBottom>
+                  No se encontraron listas
+                </Typography>
+                <Typography variant="body2" color="text.secondary">
+                  Intenta con otro lugar
                 </Typography>
               </Box>
             ) : null

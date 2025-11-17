@@ -648,6 +648,29 @@ class ApiService {
   }
 
   /**
+   * Obtiene las listas públicas de un autor por su ID (ruta pública)
+   * @param authorId - ID del autor
+   */
+  async getListsByAuthor(authorId: string): Promise<GetUserListsResponse> {
+    const response = await this.api.get(`/lists/author/${authorId}`);
+    return response.data;
+  }
+
+  /**
+   * Busca listas públicas por título o ciudad
+   * @param query - término de búsqueda para el título (opcional)
+   * @param city - ciudad para filtrar (opcional)
+   */
+  async searchLists(query?: string, city?: string) {
+    const params: Record<string, string> = {};
+    if (query) params.q = query;
+    if (city) params.city = city;
+
+    const response = await this.api.get("/lists/search", { params });
+    return response.data;
+  }
+
+  /**
    * Obtiene una lista específica por ID
    * @param id - ID de la lista
    * @returns Promise con la lista
