@@ -32,6 +32,7 @@ import {
   Person as PersonIcon,
   Notifications as NotificationsIcon,
   Search as SearchIcon,
+  ArrowForwardIos as ArrowForwardIosIcon,
   Chat as ChatIcon,
 } from "@mui/icons-material";
 import { Link as RouterLink, useLocation, useNavigate } from "react-router-dom";
@@ -571,7 +572,7 @@ const Header: React.FC = () => {
                       onClick={handleSearchClick}
                       sx={{ color: "rgba(255, 255, 255, 0.7)" }}
                     >
-                      <SearchIcon />
+                      <ArrowForwardIosIcon />
                     </IconButton>
                   </InputAdornment>
                 ) : null,
@@ -693,10 +694,7 @@ const Header: React.FC = () => {
                 ),
                 endAdornment: searchQuery.trim() ? (
                   <InputAdornment position="end">
-                    <IconButton
-                      size="small"
-                      onClick={handleSearchClick}
-                    >
+                    <IconButton size="small" onClick={handleSearchClick}>
                       <SearchIcon />
                     </IconButton>
                   </InputAdornment>
@@ -724,7 +722,7 @@ const Header: React.FC = () => {
             </ListItemButton>
             <ListItemButton
               onClick={() => {
-                navigate('/collections');
+                navigate("/collections");
                 toggleDrawer(false)();
               }}
             >
@@ -882,10 +880,11 @@ const Header: React.FC = () => {
           <Typography>No hay notificaciones nuevas.</Typography>
         </Box>
         <DialogActions>
-          <Button onClick={() => setNoNotificationsDialogOpen(false)}>Cerrar</Button>
+          <Button onClick={() => setNoNotificationsDialogOpen(false)}>
+            Cerrar
+          </Button>
         </DialogActions>
       </Dialog>
-
     </AppBar>
   );
 };
