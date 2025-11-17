@@ -12,6 +12,7 @@ interface ListCardProps {
 
 const ListCard: React.FC<ListCardProps> = ({ list, onEdit, onDelete, onView }) => {
   const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
+  const menuJustClosed = React.useRef(false);
 
   const handleMenuClick = (event: React.MouseEvent<HTMLElement>) => {
     setAnchorEl(event.currentTarget);
@@ -19,6 +20,7 @@ const ListCard: React.FC<ListCardProps> = ({ list, onEdit, onDelete, onView }) =
 
   const handleMenuClose = () => {
     setAnchorEl(null);
+    menuJustClosed.current = true;
   };
 
   const handleEdit = () => {
@@ -42,7 +44,13 @@ const ListCard: React.FC<ListCardProps> = ({ list, onEdit, onDelete, onView }) =
           boxShadow: 3,
         },
       }}
-      onClick={() => onView?.(list)}
+      onClick={() => {
+        if (menuJustClosed.current) {
+          menuJustClosed.current = false;
+          return;
+        }
+        onView?.(list);
+      }}
     >
       <CardContent>
         <Box display="flex" justifyContent="space-between" alignItems="flex-start">
