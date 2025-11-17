@@ -32,6 +32,7 @@ import {
   Person as PersonIcon,
   Notifications as NotificationsIcon,
   Search as SearchIcon,
+  ArrowForwardIos as ArrowForwardIosIcon,
   Chat as ChatIcon,
 } from "@mui/icons-material";
 import { Link as RouterLink, useLocation, useNavigate } from "react-router-dom";
@@ -522,7 +523,7 @@ const Header: React.FC = () => {
                       onClick={handleSearchClick}
                       sx={{ color: "rgba(255, 255, 255, 0.7)" }}
                     >
-                      <SearchIcon />
+                      <ArrowForwardIosIcon />
                     </IconButton>
                   </InputAdornment>
                 ) : null,
