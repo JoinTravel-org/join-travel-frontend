@@ -20,6 +20,8 @@ import { useAnalytics } from "./hooks/useAnalytics";
 import Login from "./components/auth/Login";
 import Register from "./components/auth/Register";
 import ConfirmEmail from "./components/auth/ConfirmEmail";
+import ForgotPassword from "./components/auth/ForgotPassword";
+import ResetPassword from "./components/auth/ResetPassword";
 import AddPlace from "./components/add_place/AddPlace";
 import PlaceDetail from "./components/place/PlaceDetail";
 import CreateItinerary from "./components/itineraries/CreateItinerary";
@@ -29,6 +31,11 @@ import Chats from "./components/users_chats/Chats";
 import Profile from "./components/user_profile/Profile";
 import Notification from "./components/user_profile/Notification";
 import SearchResults from "./components/search/SearchResults";
+import Lists from "./components/lists/Lists";
+import ListDetail from "./components/lists/ListDetail";
+import ListEdit from "./components/lists/ListEdit";
+import CreateList from "./components/lists/CreateList";
+import Collections from "./components/collections/Collections";
 import UserProfile from "./components/user/UserProfile";
 import GroupPage from "./components/groups/Groups";
 
@@ -89,6 +96,8 @@ function App() {
                   }
                 />
                 <Route path="/confirm-email" element={<ConfirmEmail />} />
+                <Route path="/forgot-password" element={<ForgotPassword />} />
+                <Route path="/reset-password" element={<ResetPassword />} />
                 <Route path="/add-place" element={<AddPlace />} />
                 <Route path="/itineraries" element={<ItineraryList />} />
                 <Route path="/itinerary/:id" element={<ItineraryDetail />} />
@@ -101,6 +110,12 @@ function App() {
                 <Route path="/chats" element={<Chats />} />
                 <Route path="/profile" element={<Profile />} />
                 <Route path="/user/:userId" element={<UserProfile />} />
+                <Route path="/groups" element={<GroupPage />} />
+                <Route path="/lists" element={<Lists />} />
+                <Route path="/list/:id" element={<ListDetail />} />
+                <Route path="/list/:id/edit" element={<ListEdit />} />
+                <Route path="/create-list" element={<CreateList />} />
+                <Route path="/collections" element={<Collections />} />
                 <Route path="/search" element={<SearchResults />} />
                 <Route path="/groups" element={<GroupPage />} />
               </Routes>

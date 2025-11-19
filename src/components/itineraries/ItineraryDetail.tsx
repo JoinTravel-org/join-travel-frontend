@@ -56,11 +56,11 @@ const ItineraryDetail: React.FC = () => {
   useEffect(() => {
     if (!hasCheckedAuth.current) {
       hasCheckedAuth.current = true;
-      if (!auth.isAuthenticated) {
+      if (!auth.isLoading && !auth.isAuthenticated) {
         navigate("/login");
       }
     }
-  }, [auth.isAuthenticated, navigate]);
+  }, [auth.isAuthenticated, auth.isLoading, navigate]);
 
   // Fetch itinerary details on component mount
   useEffect(() => {
@@ -187,7 +187,7 @@ const ItineraryDetail: React.FC = () => {
             alignItems: "center",
           }}
         >
-          <Button variant="outlined" onClick={() => navigate("/itineraries")}>
+          <Button variant="outlined" onClick={() => navigate("/collections")}>
             ← Volver a Itinerarios
           </Button>
           {!loading && !error && itinerary && itinerary.userId === auth.user?.id && (

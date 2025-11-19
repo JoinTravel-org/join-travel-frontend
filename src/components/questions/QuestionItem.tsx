@@ -4,7 +4,6 @@ import {
   Typography,
   Button,
   Stack,
-  Avatar,
   IconButton,
   Collapse,
   CircularProgress,
@@ -18,8 +17,9 @@ import questionService, { type Question } from "../../services/question.service"
 import AnswerList from "./AnswerList";
 import AddAnswerForm from "./AddAnswerForm";
 import { useAuth } from "../../hooks/useAuth";
-import { formatDistanceToNow } from "date-fns";
-import { es } from "date-fns/locale";
+import UserAvatar from "../common/UserAvatar";
+// import { formatDistanceToNow } from "date-fns";
+// import { es } from "date-fns/locale";
 
 interface QuestionItemProps {
   question: Question;
@@ -64,10 +64,23 @@ const QuestionItem: React.FC<QuestionItemProps> = ({ question, onVoteUpdate }) =
     setTimeout(() => setExpanded(true), 10);
   };
 
-  const timeAgo = formatDistanceToNow(new Date(question.createdAt), {
-    addSuffix: true,
-    locale: es,
-  });
+  // Simple fallback for time formatting without date-fns
+  const timeAgo = (() => {
+    const now = new Date();
+    const created = new Date(question.createdAt);
+    const diffMs = now.getTime() - created.getTime();
+    const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+
+    if (diffDays === 0) {
+      return 'hoy';
+    } else if (diffDays === 1) {
+      return 'hace 1 día';
+    } else if (diffDays < 7) {
+      return `hace ${diffDays} días`;
+    } else {
+      return created.toLocaleDateString('es-ES');
+    }
+  })();
 
   return (
     <Box
@@ -83,9 +96,15 @@ const QuestionItem: React.FC<QuestionItemProps> = ({ question, onVoteUpdate }) =
     >
       {/* Question Header */}
       <Box sx={{ display: "flex", alignItems: "flex-start", gap: { xs: 1.5, md: 2 }, mb: 1 }}>
-        <Avatar sx={{ width: { xs: 28, md: 32 }, height: { xs: 28, md: 32 } }}>
-          {question.userEmail?.charAt(0).toUpperCase()}
-        </Avatar>
+        <UserAvatar
+          user={{
+            name: question.userName,
+            email: question.userEmail,
+            profilePicture: question.userProfilePicture,
+          }}
+          size={32}
+          sx={{ width: { xs: 28, md: 32 }, height: { xs: 28, md: 32 } }}
+        />
         <Box sx={{ flex: 1, minWidth: 0 }}>
           <Typography
             variant="body1"

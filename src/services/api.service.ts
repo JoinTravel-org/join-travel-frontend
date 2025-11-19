@@ -4,6 +4,17 @@ import type {
   CreateItineraryRequest,
   CreateItineraryResponse,
 } from "../types/itinerary";
+import type {
+  List,
+  CreateListRequest,
+  UpdateListRequest,
+  CreateListResponse,
+  UpdateListResponse,
+  DeleteListResponse,
+  GetUserListsResponse,
+  GetListResponse,
+  ModifyListPlaceResponse,
+} from "../types/list";
 
 /**
  * Configuración del cliente API con axios
@@ -205,12 +216,16 @@ class ApiService {
    * Registra un nuevo usuario
    * @param email - Email del usuario
    * @param password - Contraseña del usuario
+   * @param name - Nombre del usuario (opcional)
+   * @param age - Edad del usuario (opcional)
    * @returns Promise con la respuesta del servidor
    */
-  async register(email: string, password: string) {
+  async register(email: string, password: string, name?: string, age?: number) {
     const response = await this.api.post("/auth/register", {
       email,
       password,
+      ...(name && { name }),
+      ...(age && { age }),
     });
     return response.data;
   }
@@ -303,6 +318,27 @@ class ApiService {
    */
   async logout() {
     const response = await this.api.post("/auth/logout");
+    return response.data;
+  }
+
+  /**
+   * Solicita recuperación de contraseña
+   * @param email - Email del usuario
+   * @returns Promise con la respuesta del servidor
+   */
+  async forgotPassword(email: string) {
+    const response = await this.api.post("/auth/forgot-password", { email });
+    return response.data;
+  }
+
+  /**
+   * Restablece la contraseña usando un token
+   * @param token - Token de reseteo
+   * @param password - Nueva contraseña
+   * @returns Promise con la respuesta del servidor
+   */
+  async resetPassword(token: string, password: string) {
+    const response = await this.api.post("/auth/reset-password", { token, password });
     return response.data;
   }
 
@@ -583,6 +619,111 @@ class ApiService {
     const response = await this.api.get("/media/recent", {
       params: { page, limit },
     });
+    return response.data;
+  }
+
+  /**
+   * Crea una nueva lista
+   * @param listData - Datos de la lista
+   * @returns Promise con la respuesta del servidor
+   */
+  async createList(listData: CreateListRequest): Promise<CreateListResponse> {
+    const response = await this.api.post("/lists", listData);
+    return response.data;
+  }
+
+  /**
+   * Obtiene todas las listas del usuario autenticado
+   * @returns Promise con las listas del usuario
+   */
+  async getUserLists(): Promise<GetUserListsResponse> {
+    const response = await this.api.get("/lists");
+    return response.data;
+  }
+
+  /**
+   * Obtiene todas las listas de un usuario específico
+   * @param userId - ID del usuario
+   * @returns Promise con las listas del usuario
+   */
+  async getUserListsByUserId(userId: string): Promise<GetUserListsResponse> {
+    const response = await this.api.get(`/users/${userId}/lists`);
+    return response.data;
+  }
+
+  /**
+   * Obtiene las listas públicas de un autor por su ID (ruta pública)
+   * @param authorId - ID del autor
+   */
+  async getListsByAuthor(authorId: string): Promise<GetUserListsResponse> {
+    const response = await this.api.get(`/lists/author/${authorId}`);
+    return response.data;
+  }
+
+  /**
+   * Busca listas públicas por título o ciudad
+   * @param query - término de búsqueda para el título (opcional)
+   * @param city - ciudad para filtrar (opcional)
+   */
+  async searchLists(query?: string, city?: string) {
+    const params: Record<string, string> = {};
+    if (query) params.q = query;
+    if (city) params.city = city;
+
+    const response = await this.api.get("/lists/search", { params });
+    return response.data;
+  }
+
+  /**
+   * Obtiene una lista específica por ID
+   * @param id - ID de la lista
+   * @returns Promise con la lista
+   */
+  async getListById(id: string): Promise<GetListResponse> {
+    const response = await this.api.get(`/lists/${id}`);
+    return response.data;
+  }
+
+  /**
+   * Actualiza una lista existente
+   * @param id - ID de la lista
+   * @param listData - Datos a actualizar
+   * @returns Promise con la respuesta del servidor
+   */
+  async updateList(id: string, listData: UpdateListRequest): Promise<UpdateListResponse> {
+    const response = await this.api.put(`/lists/${id}`, listData);
+    return response.data;
+  }
+
+  /**
+   * Elimina una lista
+   * @param id - ID de la lista
+   * @returns Promise con la respuesta del servidor
+   */
+  async deleteList(id: string): Promise<DeleteListResponse> {
+    const response = await this.api.delete(`/lists/${id}`);
+    return response.data;
+  }
+
+  /**
+   * Agrega un lugar a una lista
+   * @param listId - ID de la lista
+   * @param placeId - ID del lugar
+   * @returns Promise con la respuesta del servidor
+   */
+  async addPlaceToList(listId: string, placeId: string): Promise<ModifyListPlaceResponse> {
+    const response = await this.api.post(`/lists/${listId}/places/${placeId}`);
+    return response.data;
+  }
+
+  /**
+   * Remueve un lugar de una lista
+   * @param listId - ID de la lista
+   * @param placeId - ID del lugar
+   * @returns Promise con la respuesta del servidor
+   */
+  async removePlaceFromList(listId: string, placeId: string): Promise<ModifyListPlaceResponse> {
+    const response = await this.api.delete(`/lists/${listId}/places/${placeId}`);
     return response.data;
   }
 

@@ -32,6 +32,7 @@ import {
   Person as PersonIcon,
   Notifications as NotificationsIcon,
   Search as SearchIcon,
+  ArrowForwardIos as ArrowForwardIosIcon,
   Chat as ChatIcon,
 } from "@mui/icons-material";
 import { Link as RouterLink, useLocation, useNavigate } from "react-router-dom";
@@ -40,6 +41,7 @@ import { useAuth } from "../../hooks/useAuth";
 import { useUserStats } from "../../hooks/useUserStats";
 import { useChatNotifications } from "../../hooks/useChatNotifications";
 import Notification from "../user_profile/Notification";
+import { NotificationCenter } from "../NotificationCenter";
 
 /**
  * Accessible, responsive site header:
@@ -60,7 +62,8 @@ const Header: React.FC = () => {
   const [logoutSnackbarOpen, setLogoutSnackbarOpen] = React.useState(false);
   const [isLoggingOut, setIsLoggingOut] = React.useState(false);
   const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
-  const [noNotificationsDialogOpen, setNoNotificationsDialogOpen] = React.useState(false);
+  const [noNotificationsDialogOpen, setNoNotificationsDialogOpen] =
+    React.useState(false);
   const { clearNotification } = useUserStats();
 
   // Search states
@@ -201,9 +204,7 @@ const Header: React.FC = () => {
       </Button>
       <Button
         color="inherit"
-        component={RouterLink}
-        to="/itineraries"
-        aria-current={location.pathname === "/itineraries" ? "page" : undefined}
+        onClick={() => navigate("/collections")}
         sx={{
           textDecoration: "none",
           position: "relative",
@@ -231,7 +232,7 @@ const Header: React.FC = () => {
           },
         }}
       >
-        Itinerarios
+        Colecciones
       </Button>
       {auth.isAuthenticated ? (
         <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
@@ -239,9 +240,7 @@ const Header: React.FC = () => {
             color="inherit"
             component={RouterLink}
             to="/groups"
-            aria-current={
-              location.pathname === "/groups" ? "page" : undefined
-            }
+            aria-current={location.pathname === "/groups" ? "page" : undefined}
             sx={{
               textDecoration: "none",
               position: "relative",
@@ -271,52 +270,7 @@ const Header: React.FC = () => {
           >
             Grupos
           </Button>
-          <IconButton
-            color="inherit"
-            onClick={() => {
-              if (notification === null) {
-                setNoNotificationsDialogOpen(true);
-              } else {
-                clearNotification();
-              }
-            }}
-            aria-label="Notificaciones"
-            sx={{
-              ml: 0,
-              textDecoration: "none",
-              position: "relative",
-              transition: "all 0.3s ease",
-              opacity: 1,
-              "&:hover": {
-                transform: "translateY(-3px)",
-                opacity: 1,
-              },
-              "&::before": {
-                content: '""',
-                position: "absolute",
-                zIndex: -1,
-                bottom: "-1px",
-                left: 0,
-                right: 0,
-                height: "5px",
-                backgroundColor: "#A6A6A6",
-                transform: "scaleY(0)",
-                transformOrigin: "bottom",
-                transition: "transform 0.3s ease",
-              },
-              "&:hover::before": {
-                transform: "scaleY(1)",
-              },
-            }}
-          >
-            <Badge
-              color="error"
-              variant="dot"
-              invisible={notification === null}
-            >
-              <NotificationsIcon />
-            </Badge>
-          </IconButton>
+          <NotificationCenter />
           <IconButton
             color="inherit"
             component={RouterLink}
@@ -350,11 +304,7 @@ const Header: React.FC = () => {
               },
             }}
           >
-            <Badge
-              color="error"
-              variant="dot"
-              invisible={!hasUnreadMessages}
-            >
+            <Badge color="error" variant="dot" invisible={!hasUnreadMessages}>
               <ChatIcon />
             </Badge>
           </IconButton>
@@ -573,7 +523,7 @@ const Header: React.FC = () => {
                       onClick={handleSearchClick}
                       sx={{ color: "rgba(255, 255, 255, 0.7)" }}
                     >
-                      <SearchIcon />
+                      <ArrowForwardIosIcon />
                     </IconButton>
                   </InputAdornment>
                 ) : null,
@@ -695,10 +645,7 @@ const Header: React.FC = () => {
                 ),
                 endAdornment: searchQuery.trim() ? (
                   <InputAdornment position="end">
-                    <IconButton
-                      size="small"
-                      onClick={handleSearchClick}
-                    >
+                    <IconButton size="small" onClick={handleSearchClick}>
                       <SearchIcon />
                     </IconButton>
                   </InputAdornment>
@@ -725,12 +672,12 @@ const Header: React.FC = () => {
               <ListItemText primary="Agregar Lugar" />
             </ListItemButton>
             <ListItemButton
-              component={RouterLink}
-              to="/itineraries"
-              selected={location.pathname === "/itineraries"}
-              onClick={toggleDrawer(false)}
+              onClick={() => {
+                navigate("/collections");
+                toggleDrawer(false)();
+              }}
             >
-              <ListItemText primary="Itinerarios" />
+              <ListItemText primary="Colecciones" />
             </ListItemButton>
             {auth.isAuthenticated ? (
               <>
@@ -884,7 +831,9 @@ const Header: React.FC = () => {
           <Typography>No hay notificaciones nuevas.</Typography>
         </Box>
         <DialogActions>
-          <Button onClick={() => setNoNotificationsDialogOpen(false)}>Cerrar</Button>
+          <Button onClick={() => setNoNotificationsDialogOpen(false)}>
+            Cerrar
+          </Button>
         </DialogActions>
       </Dialog>
     </AppBar>

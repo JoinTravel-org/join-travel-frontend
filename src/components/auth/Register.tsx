@@ -18,7 +18,7 @@ import {
   DialogContent,
   DialogActions,
 } from "@mui/material";
-import { Email, Lock, Visibility, VisibilityOff } from "@mui/icons-material";
+import { Email, Lock, Visibility, VisibilityOff, Person, Cake } from "@mui/icons-material";
 import authService from "../../services/auth.service";
 import {
   isValidEmail,
@@ -45,6 +45,8 @@ const Register: React.FC<RegisterProps> = ({ onSwitchToLogin }) => {
     email: "",
     password: "",
     confirmPassword: "",
+    name: "",
+    age: "",
     termsAccepted: false,
   });
 
@@ -52,6 +54,8 @@ const Register: React.FC<RegisterProps> = ({ onSwitchToLogin }) => {
     email: false,
     password: false,
     confirmPassword: false,
+    name: false,
+    age: false,
     termsAccepted: false,
   });
 
@@ -90,12 +94,16 @@ const Register: React.FC<RegisterProps> = ({ onSwitchToLogin }) => {
     touched.password && !validatePassword(formData.password).isValid;
   const confirmInvalid =
     touched.confirmPassword && formData.confirmPassword !== formData.password;
+  const nameInvalid = touched.name && formData.name.trim().length > 30;
+  const ageInvalid = touched.age && formData.age !== "" && (isNaN(Number(formData.age)) || Number(formData.age) < 13 || Number(formData.age) > 120);
   const termsInvalid = touched.termsAccepted && !formData.termsAccepted;
 
   const canSubmit =
     isValidEmail(formData.email) &&
     validatePassword(formData.password).isValid &&
     formData.confirmPassword === formData.password &&
+    !nameInvalid &&
+    !ageInvalid &&
     formData.termsAccepted &&
     !loading;
 
@@ -109,6 +117,8 @@ const Register: React.FC<RegisterProps> = ({ onSwitchToLogin }) => {
       email: true,
       password: true,
       confirmPassword: true,
+      name: true,
+      age: true,
       termsAccepted: true,
     });
 
@@ -139,6 +149,8 @@ const Register: React.FC<RegisterProps> = ({ onSwitchToLogin }) => {
       const response = await authService.register({
         email: formData.email,
         password: formData.password,
+        name: formData.name.trim() || undefined,
+        age: formData.age ? Number(formData.age) : undefined,
       });
 
       setSuccess(
@@ -151,6 +163,8 @@ const Register: React.FC<RegisterProps> = ({ onSwitchToLogin }) => {
         email: "",
         password: "",
         confirmPassword: "",
+        name: "",
+        age: "",
         termsAccepted: false,
       });
       setPasswordValidation({ isValid: false, errors: [] });
@@ -158,6 +172,8 @@ const Register: React.FC<RegisterProps> = ({ onSwitchToLogin }) => {
         email: false,
         password: false,
         confirmPassword: false,
+        name: false,
+        age: false,
         termsAccepted: false,
       });
     } catch (err) {
@@ -226,6 +242,63 @@ const Register: React.FC<RegisterProps> = ({ onSwitchToLogin }) => {
                 <Email sx={{ color: "action.active" }} aria-hidden />
               </InputAdornment>
             ),
+          }}
+        />
+
+        <TextField
+          margin="normal"
+          fullWidth
+          id="name"
+          label="Nombre (opcional)"
+          name="name"
+          autoComplete="name"
+          value={formData.name}
+          onChange={setField("name")}
+          onBlur={onBlur("name")}
+          error={nameInvalid}
+          helperText={
+            nameInvalid 
+              ? "El nombre no puede tener más de 30 caracteres." 
+              : "Puedes cambiar tu nombre más adelante en tu perfil."
+          }
+          aria-invalid={nameInvalid ? "true" : "false"}
+          InputProps={{
+            startAdornment: (
+              <InputAdornment position="start">
+                <Person sx={{ color: "action.active" }} aria-hidden />
+              </InputAdornment>
+            ),
+          }}
+        />
+
+        <TextField
+          margin="normal"
+          fullWidth
+          id="age"
+          label="Edad (opcional)"
+          name="age"
+          type="number"
+          autoComplete="age"
+          value={formData.age}
+          onChange={setField("age")}
+          onBlur={onBlur("age")}
+          error={ageInvalid}
+          helperText={
+            ageInvalid 
+              ? "La edad debe estar entre 13 y 120 años." 
+              : " "
+          }
+          aria-invalid={ageInvalid ? "true" : "false"}
+          InputProps={{
+            startAdornment: (
+              <InputAdornment position="start">
+                <Cake sx={{ color: "action.active" }} aria-hidden />
+              </InputAdornment>
+            ),
+          }}
+          inputProps={{
+            min: 13,
+            max: 120,
           }}
         />
 

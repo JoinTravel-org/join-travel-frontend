@@ -7,6 +7,8 @@ import Logger from "../logger";
 export interface RegisterData {
   email: string;
   password: string;
+  name?: string;
+  age?: number;
 }
 
 /**
@@ -82,13 +84,13 @@ export interface ApiError {
 class AuthService {
   /**
    * Registra un nuevo usuario
-   * @param data - Datos de registro (email y password)
+   * @param data - Datos de registro (email, password, name y age opcionales)
    * @returns Promise con la respuesta del registro
    */
   async register(data: RegisterData): Promise<RegisterResponse> {
     try {
       Logger.getInstance().info(`Attempting to register user with email: ${data.email}`);
-      const response = await apiService.register(data.email, data.password);
+      const response = await apiService.register(data.email, data.password, data.name, data.age);
       Logger.getInstance().info(`User registration successful for email: ${data.email}`);
       return response;
     } catch (error) {
@@ -143,6 +145,44 @@ class AuthService {
       return response;
     } catch (error) {
       Logger.getInstance().error(`User logout failed`, error);
+      throw error as ApiError;
+    }
+  }
+
+  /**
+   * Solicita recuperación de contraseña
+   * @param email - Email del usuario
+   * @returns Promise con la respuesta
+   */
+  async forgotPassword(email: string): Promise<{ success: boolean; message: string }> {
+    try {
+      Logger.getInstance().info(`Attempting password recovery for email: ${email}`);
+      const response = await apiService.forgotPassword(email);
+      Logger.getInstance().info(`Password recovery email sent for: ${email}`);
+      return response;
+    } catch (error) {
+      Logger.getInstance().error(`Password recovery failed for email: ${email}`, error);
+      throw error as ApiError;
+    }
+  }
+
+  /**
+   * Restablece la contraseña usando un token
+   * @param token - Token de reseteo
+   * @param password - Nueva contraseña
+   * @returns Promise con la respuesta
+   */
+  async resetPassword(
+    token: string,
+    password: string
+  ): Promise<{ success: boolean; message: string }> {
+    try {
+      Logger.getInstance().info(`Attempting password reset with token: ${token.substring(0, 10)}...`);
+      const response = await apiService.resetPassword(token, password);
+      Logger.getInstance().info(`Password reset successful for token: ${token.substring(0, 10)}...`);
+      return response;
+    } catch (error) {
+      Logger.getInstance().error(`Password reset failed for token: ${token.substring(0, 10)}...`, error);
       throw error as ApiError;
     }
   }

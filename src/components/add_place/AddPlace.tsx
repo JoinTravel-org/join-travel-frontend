@@ -144,11 +144,11 @@ const AddPlace: React.FC = () => {
   useEffect(() => {
     if (!hasCheckedAuth.current) {
       hasCheckedAuth.current = true;
-      if (!auth.isAuthenticated) {
+      if (!auth.isLoading && !auth.isAuthenticated) {
         navigate("/login");
       }
     }
-  }, [auth.isAuthenticated, navigate]);
+  }, [auth.isAuthenticated, auth.isLoading, navigate]);
 
   // ... resto del componente
   const [selectedPlace, setSelectedPlace] = useState<{

@@ -3,7 +3,6 @@ import {
   Box,
   Typography,
   IconButton,
-  Avatar,
   CircularProgress,
   Alert,
 } from "@mui/material";
@@ -11,8 +10,8 @@ import ThumbUpIcon from "@mui/icons-material/ThumbUp";
 import ThumbUpOutlinedIcon from "@mui/icons-material/ThumbUpOutlined";
 import questionService, { type Answer } from "../../services/question.service";
 import { useAuth } from "../../hooks/useAuth";
-import { formatDistanceToNow } from "date-fns";
-import { es } from "date-fns/locale";
+import UserAvatar from "../common/UserAvatar";
+// Custom time formatting without date-fns dependency
 
 interface AnswerItemProps {
   answer: Answer;
@@ -47,10 +46,23 @@ const AnswerItem: React.FC<AnswerItemProps> = ({ answer, onVoteUpdate }) => {
     }
   };
 
-  const timeAgo = formatDistanceToNow(new Date(answer.createdAt), {
-    addSuffix: true,
-    locale: es,
-  });
+  // Simple fallback for time formatting without date-fns
+  const timeAgo = (() => {
+    const now = new Date();
+    const created = new Date(answer.createdAt);
+    const diffMs = now.getTime() - created.getTime();
+    const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+
+    if (diffDays === 0) {
+      return 'hoy';
+    } else if (diffDays === 1) {
+      return 'hace 1 día';
+    } else if (diffDays < 7) {
+      return `hace ${diffDays} días`;
+    } else {
+      return created.toLocaleDateString('es-ES');
+    }
+  })();
 
   return (
     <Box
@@ -66,9 +78,14 @@ const AnswerItem: React.FC<AnswerItemProps> = ({ answer, onVoteUpdate }) => {
     >
       {/* Answer Header */}
       <Box sx={{ display: "flex", alignItems: "flex-start", gap: { xs: 1.5, md: 2 }, mb: 1 }}>
-        <Avatar sx={{ width: { xs: 24, md: 28 }, height: { xs: 24, md: 28 } }}>
-          {answer.userEmail?.charAt(0).toUpperCase()}
-        </Avatar>
+        <UserAvatar
+          user={{
+            email: answer.userEmail,
+            name: answer.userName,
+            profilePicture: answer.userProfilePicture,
+          }}
+          size={28}
+        />
         <Box sx={{ flex: 1, minWidth: 0 }}>
           <Typography
             variant="body2"

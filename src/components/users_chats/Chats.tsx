@@ -26,6 +26,7 @@ import groupMessageService from "../../services/groupMessage.service";
 import type { Group } from "../../types/group";
 import { DirectChatDialog } from "./DirectChatDialog";
 import { GroupChatDialog } from "../groups/GroupChatDialog";
+import UserAvatar from "../common/UserAvatar";
 
 // Extended Group type with last message
 interface GroupWithLastMessage extends Group {
@@ -232,9 +233,7 @@ const Chats: React.FC = () => {
                           color="error"
                           invisible={conversation.unreadCount === 0}
                         >
-                          <Avatar sx={{ bgcolor: "primary.main" }}>
-                            <PersonIcon />
-                          </Avatar>
+                          <UserAvatar user={conversation.otherUser} size={40} />
                         </Badge>
                       </ListItemAvatar>
                       <ListItemText
@@ -384,6 +383,8 @@ const Chats: React.FC = () => {
           onClose={handleCloseChat}
           otherUserId={selectedConversation.otherUser.id}
           otherUserEmail={selectedConversation.otherUser.email}
+          otherUserName={selectedConversation.otherUser.name}
+          otherUserProfilePicture={selectedConversation.otherUser.profilePicture}
         />
       )}
 
