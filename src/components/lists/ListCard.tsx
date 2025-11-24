@@ -2,6 +2,7 @@ import React from 'react';
 import { Card, CardContent, Typography, Box, Chip, IconButton, Menu, MenuItem } from '@mui/material';
 import { MoreVert as MoreVertIcon, Edit as EditIcon, Delete as DeleteIcon } from '@mui/icons-material';
 import type { List } from '../../types/list';
+import ImagePreview from '../common/ImagePreview';
 
 interface ListCardProps {
   list: List;
@@ -34,6 +35,9 @@ const ListCard: React.FC<ListCardProps> = ({ list, onEdit, onDelete, onView }) =
     onDelete(list.id);
   };
 
+  // Get the first place for image preview
+  const firstPlace = list.places.length > 0 ? list.places[0] : null;
+
   return (
     <Card
       sx={{
@@ -53,6 +57,15 @@ const ListCard: React.FC<ListCardProps> = ({ list, onEdit, onDelete, onView }) =
       }}
     >
       <CardContent>
+        {/* Image Preview */}
+        <Box sx={{ mb: 2 }}>
+          <ImagePreview
+            src={firstPlace?.image || null}
+            alt={firstPlace ? `Imagen de ${firstPlace.name}` : 'Sin imagen disponible'}
+            width={300}
+            height={200}
+          />
+        </Box>
         <Box display="flex" justifyContent="space-between" alignItems="flex-start">
           <Box flex={1}>
             <Typography
