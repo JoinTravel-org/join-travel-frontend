@@ -69,9 +69,25 @@ const ImagePreview: React.FC<ImagePreviewProps> = ({
         overflow: 'hidden',
         border: '1px solid',
         borderColor: 'grey.300',
+        backgroundImage: imageLoaded && !imageError ? `url(${src})` : 'none',
+        backgroundSize: 'cover',
+        backgroundPosition: 'center top',
+        backgroundRepeat: 'no-repeat',
       }}
       className={className}
+      role="img"
+      aria-label={alt}
     >
+      {/* Hidden img for loading detection */}
+      <Box
+        component="img"
+        src={src}
+        alt=""
+        onLoad={handleImageLoad}
+        onError={handleImageError}
+        sx={{ display: 'none' }}
+      />
+
       {/* Loading skeleton */}
       {!imageLoaded && (
         <Skeleton
@@ -81,21 +97,6 @@ const ImagePreview: React.FC<ImagePreviewProps> = ({
           sx={{ position: 'absolute', top: 0, left: 0 }}
         />
       )}
-
-      {/* Image */}
-      <Box
-        component="img"
-        src={src}
-        alt={alt}
-        onLoad={handleImageLoad}
-        onError={handleImageError}
-        sx={{
-          width: '100%',
-          height: '100%',
-          objectFit: 'cover',
-          display: imageLoaded ? 'block' : 'none',
-        }}
-      />
 
       {/* Error state */}
       {imageError && (
