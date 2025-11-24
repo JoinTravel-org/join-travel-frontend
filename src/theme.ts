@@ -18,6 +18,17 @@ export const createAppTheme = (mode: 'light' | 'dark'): Theme => {
   shadows[3] = 'var(--shadow-3)';
 
   return createTheme({
+    // Custom breakpoints to match US-59 requirements:
+    // mobile: <768px, tablet: 768-1024px, desktop: >1024px
+    breakpoints: {
+      values: {
+        xs: 0,      // mobile
+        sm: 768,    // tablet start
+        md: 1024,   // desktop start
+        lg: 1200,
+        xl: 1536,
+      },
+    },
     palette: {
       mode,
       primary: {

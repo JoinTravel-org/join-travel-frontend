@@ -796,6 +796,7 @@ const SearchResults: React.FC = () => {
                       onEdit={() => { /* ListCard handles edit navigation; optional callback */ }}
                       onDelete={handleDeleteList}
                       onView={() => navigate(`/list/${list.id}`)}
+                      compact={true}
                     />
                   ))}
                 </Box>

@@ -51,7 +51,8 @@ import { NotificationCenter } from "../NotificationCenter";
  */
 const Header: React.FC = () => {
   const muiTheme = useMuiTheme();
-  const isMobile = useMediaQuery(muiTheme.breakpoints.down("md"));
+  // Mobile: <768px (matches US-59 breakpoint)
+  const isMobile = useMediaQuery(muiTheme.breakpoints.down("sm"));
   const [open, setOpen] = React.useState(false);
   const location = useLocation();
   const navigate = useNavigate();
