@@ -121,7 +121,7 @@ const Collections: React.FC = () => {
           {/* Create Button - Different for each tab */}
           <Fab
             color={tabValue === 0 ? "primary" : "secondary"}
-            aria-label={tabValue === 0 ? "add list" : "add itinerary"}
+            aria-label={tabValue === 0 ? "agregar lista" : "agregar itinerario"}
             onClick={tabValue === 0 ? () => navigate('/create-list') : handleCreateItinerary}
             sx={{
               display: { xs: 'flex', md: 'none' }, // Show on mobile
@@ -136,7 +136,7 @@ const Collections: React.FC = () => {
           <Tabs
             value={tabValue}
             onChange={handleTabChange}
-            aria-label="collections tabs"
+            aria-label="pestañas de colecciones"
             variant={isMobile ? 'fullWidth' : 'standard'}
             centered={!isMobile}
             sx={{

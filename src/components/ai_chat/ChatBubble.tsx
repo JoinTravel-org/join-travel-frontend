@@ -417,7 +417,7 @@ const ChatBubble: React.FC = () => {
           >
             <Typography variant="h6">Viajitus ✨</Typography>
             <Box sx={{ display: 'flex', gap: 1 }}>
-              <Tooltip title="Start New Chat">
+              <Tooltip title="Iniciar nuevo chat">
                 <IconButton
                   onClick={handleNewChat}
                   size="medium"

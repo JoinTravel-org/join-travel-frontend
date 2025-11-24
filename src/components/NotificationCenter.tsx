@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   Drawer,
   Box,
@@ -17,13 +17,18 @@ import {
   Notifications as NotificationsIcon,
   MarkEmailRead as MarkEmailReadIcon,
   Delete as DeleteIcon,
+  WifiOff as WifiOffIcon,
 } from "@mui/icons-material";
 import { useNotifications } from "../hooks/useNotifications";
 import { formatDistanceToNow } from "date-fns";
 import { es } from "date-fns/locale";
+import { useNavigate } from "react-router-dom";
+import socketService from "../services/socket.service";
 
 export const NotificationCenter = () => {
   const [open, setOpen] = useState(false);
+  const [isConnected, setIsConnected] = useState(true);
+  const navigate = useNavigate();
   const {
     notifications,
     unreadCount,
@@ -32,6 +37,18 @@ export const NotificationCenter = () => {
     markAllAsRead,
     deleteNotification,
   } = useNotifications();
+
+  // Monitor socket connection status
+  useEffect(() => {
+    const checkConnection = () => {
+      setIsConnected(socketService.isConnected());
+    };
+
+    checkConnection();
+    const interval = setInterval(checkConnection, 5000); // Check every 5 seconds
+
+    return () => clearInterval(interval);
+  }, []);
 
   const handleOpen = () => setOpen(true);
   const handleClose = () => setOpen(false);
@@ -57,6 +74,58 @@ export const NotificationCenter = () => {
       await deleteNotification(notificationId);
     } catch (error) {
       console.error("Error deleting notification:", error);
+    }
+  };
+
+  const handleNotificationClick = async (notification: any) => {
+    try {
+      // Mark as read if not already read
+      if (!notification.read) {
+        await markAsRead(notification.id);
+      }
+
+      // Close the drawer
+      setOpen(false);
+
+      // Redirect based on notification type
+      switch (notification.type) {
+        case "NEW_MESSAGE":
+        case "NEW_GROUP_MESSAGE":
+          if (notification.data?.conversationId) {
+            navigate("/chats");
+          }
+          break;
+        case "NEW_FOLLOWER":
+          if (notification.data?.followerId) {
+            navigate(`/user/${notification.data.followerId}`);
+          }
+          break;
+        case "NEW_ITINERARY":
+          if (notification.data?.itineraryId) {
+            navigate(`/itinerary/${notification.data.itineraryId}`);
+          }
+          break;
+        case "GROUP_INVITE":
+          if (notification.data?.groupId) {
+            navigate("/groups");
+          }
+          break;
+        case "EXPENSE_ADDED":
+        case "EXPENSE_ASSIGNED":
+          if (notification.data?.groupId) {
+            navigate("/groups");
+          }
+          break;
+        case "LEVEL_UP":
+        case "NEW_BADGE":
+          navigate("/profile");
+          break;
+        default:
+          // For unknown types, just stay on current page
+          break;
+      }
+    } catch (error) {
+      console.error("Error handling notification click:", error);
     }
   };
 
@@ -111,7 +180,15 @@ export const NotificationCenter = () => {
               borderColor: "divider",
             }}
           >
-            <Typography variant="h6">Notificaciones</Typography>
+            <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+              <Typography variant="h6">Notificaciones</Typography>
+              {!isConnected && (
+                <WifiOffIcon
+                  sx={{ fontSize: 16, color: "warning.main" }}
+                  titleAccess="Conexión perdida - las notificaciones en tiempo real pueden no funcionar"
+                />
+              )}
+            </Box>
             <IconButton onClick={handleClose}>
               <CloseIcon />
             </IconButton>
@@ -188,10 +265,7 @@ export const NotificationCenter = () => {
                       }
                     >
                       <ListItemButton
-                        onClick={() =>
-                          !notification.read &&
-                          handleMarkAsRead(notification.id)
-                        }
+                        onClick={() => handleNotificationClick(notification)}
                         sx={{ p: 0, pr: 1 }}
                       >
                         <Box sx={{ display: "flex", gap: 1.5, width: "100%" }}>
