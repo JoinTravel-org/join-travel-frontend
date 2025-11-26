@@ -26,6 +26,7 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../hooks/useAuth';
 import type { Place } from '../../types/place';
 import apiService from '../../services/api.service';
+import ImagePreview from '../common/ImagePreview';
 
 interface BackendItineraryItem {
     id: string;
@@ -194,15 +195,25 @@ const ItineraryList: React.FC = () => {
                                 },
                             }}
                         >
-                            <CardContent sx={{ flexGrow: 1, p: 3 }}>
-                                <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 2 }}>
-                                    <Typography
-                                        variant="h6"
-                                        component="h2"
-                                        sx={{ fontWeight: 700, flex: 1 }}
-                                    >
-                                        {itinerary.name}
-                                    </Typography>
+                         <CardContent sx={{ flexGrow: 1, p: 3 }}>
+                             {/* Image Preview */}
+                             <Box sx={{ mb: 2 }}>
+                                 <ImagePreview
+                                     src={itinerary.items.length > 0 && itinerary.items[0].place?.image ? itinerary.items[0].place.image : null}
+                                     alt={itinerary.items.length > 0 && itinerary.items[0].place ? `Imagen de ${itinerary.items[0].place.name}` : 'Sin imagen disponible'}
+                                     width={300}
+                                     height={200}
+                                 />
+                             </Box>
+
+                             <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 2 }}>
+                                 <Typography
+                                     variant="h6"
+                                     component="h2"
+                                     sx={{ fontWeight: 700, flex: 1 }}
+                                 >
+                                     {itinerary.name}
+                                 </Typography>
                                     <Tooltip title="Ver grupos donde está compartido">
                                         <IconButton
                                             size="small"

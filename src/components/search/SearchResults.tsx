@@ -487,7 +487,7 @@ const SearchResults: React.FC = () => {
 
       {/* Tabs */}
       <Paper sx={{ mb: 4 }}>
-        <Tabs value={activeTab} onChange={handleTabChange} aria-label="search tabs">
+        <Tabs value={activeTab} onChange={handleTabChange} aria-label="pestañas de búsqueda">
           <Tab label="Usuarios" />
           <Tab label="Lugares" />
           <Tab label="Listas" />
@@ -796,6 +796,7 @@ const SearchResults: React.FC = () => {
                       onEdit={() => { /* ListCard handles edit navigation; optional callback */ }}
                       onDelete={handleDeleteList}
                       onView={() => navigate(`/list/${list.id}`)}
+                      compact={true}
                     />
                   ))}
                 </Box>

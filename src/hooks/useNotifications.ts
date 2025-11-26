@@ -140,9 +140,23 @@ export const useNotifications = () => {
       }
     });
 
+    // Check socket connection status and handle reconnection
+    const checkConnection = () => {
+      const isConnected = socketService.isConnected();
+      if (!isConnected) {
+        logger.warn("Socket disconnected, attempting to reconnect for notifications");
+        // The socket service should handle reconnection automatically
+        // We can add additional error handling here if needed
+      }
+    };
+
+    // Check connection periodically
+    const connectionCheckInterval = setInterval(checkConnection, 30000); // Check every 30 seconds
+
     return () => {
       console.log("[useNotifications] Cleaning up notification listener");
       unsubscribe();
+      clearInterval(connectionCheckInterval);
     };
   }, []);
 

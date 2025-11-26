@@ -18,7 +18,7 @@ class SocketService {
     new Set();
 
   /**
-   * Conecta al servidor de websockets
+   * Connect to the websocket server
    */
   connect(token: string) {
     if (this.socket?.connected) {
@@ -53,17 +53,26 @@ class SocketService {
     });
 
     this.socket.on("new_notification", (notification) => {
+      const receiveTime = Date.now();
       console.log(
         "[Socket] ✓ New notification received via socket:",
         notification
       );
       logger.info(
-        `New notification received: ${notification.id}, type: ${notification.type}`
+        `New notification received: ${notification.id}, type: ${notification.type}, title: ${notification.title}, read: ${notification.read}`
       );
       console.log(
-        `[Socket] Notifying ${this.notificationListeners.size} listeners`
+        `[Socket] Notifying ${this.notificationListeners.size} listeners at ${receiveTime}`
       );
-      this.notificationListeners.forEach((listener) => listener(notification));
+      this.notificationListeners.forEach((listener) => {
+        try {
+          listener(notification);
+        } catch (error) {
+          logger.error(`Error in notification listener: ${error instanceof Error ? error.message : String(error)}`);
+        }
+      });
+      const processTime = Date.now();
+      logger.debug(`Notification processing completed in ${processTime - receiveTime}ms`);
     });
 
     this.socket.on("message_error", (error) => {
@@ -72,7 +81,7 @@ class SocketService {
   }
 
   /**
-   * Desconecta del servidor de websockets
+   * Disconnect from the websocket server
    */
   disconnect() {
     if (this.socket) {
@@ -85,7 +94,7 @@ class SocketService {
   }
 
   /**
-   * Envía un mensaje directo
+   * Send a direct message
    */
   sendDirectMessage(receiverId: string, content: string) {
     if (!this.socket?.connected) {
@@ -95,7 +104,7 @@ class SocketService {
   }
 
   /**
-   * Marca mensajes como leídos
+   * Mark messages as read
    */
   markAsRead(otherUserId: string) {
     if (!this.socket?.connected) {
@@ -105,7 +114,7 @@ class SocketService {
   }
 
   /**
-   * Une a un grupo para recibir mensajes en tiempo real
+   * Join a group to receive real-time messages
    */
   joinGroup(groupId: string) {
     if (!this.socket?.connected) {
@@ -116,7 +125,7 @@ class SocketService {
   }
 
   /**
-   * Sale de un grupo
+   * Leave a group
    */
   leaveGroup(groupId: string) {
     if (!this.socket?.connected) {
@@ -127,7 +136,7 @@ class SocketService {
   }
 
   /**
-   * Envía un mensaje a un grupo
+   * Send a message to a group
    */
   sendGroupMessage(groupId: string, content: string) {
     if (!this.socket?.connected) {
@@ -137,7 +146,7 @@ class SocketService {
   }
 
   /**
-   * Suscribe a nuevos mensajes directos
+   * Subscribe to new direct messages
    */
   onNewMessage(callback: (message: DirectMessage) => void) {
     this.messageListeners.add(callback);
@@ -147,7 +156,7 @@ class SocketService {
   }
 
   /**
-   * Suscribe a nuevos mensajes de un grupo
+   * Subscribe to new group messages
    */
   onNewGroupMessage(
     groupId: string,
