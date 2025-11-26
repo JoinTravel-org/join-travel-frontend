@@ -37,7 +37,10 @@ const ChatBubble: React.FC = () => {
   const messageInputRef = useRef<HTMLInputElement>(null);
   const lastTimestampRef = useRef<number>(0);
   const pollingIntervalRef = useRef<number | null>(null);
-
+  const [isRateLimited, setIsRateLimited] = useState(false);
+  const [rateLimitMessage, setRateLimitMessage] = useState('');
+  const [rateLimitEndTime, setRateLimitEndTime] = useState<number | null>(null);
+  const rateLimitCheckIntervalRef = useRef<number | null>(null);
 
   // Welcome message
   const welcomeMessage: Message = {
@@ -46,6 +49,35 @@ const ChatBubble: React.FC = () => {
     sender: 'ai',
     timestamp: Date.now(),
   };
+
+  // Effect to check and update rate limit status
+  useEffect(() => {
+    const checkRateLimitExpiration = () => {
+      if (rateLimitEndTime && Date.now() >= rateLimitEndTime) {
+        setIsRateLimited(false);
+        setRateLimitMessage('');
+        setRateLimitEndTime(null);
+        // Clear the interval when rate limit expires
+        if (rateLimitCheckIntervalRef.current) {
+          clearInterval(rateLimitCheckIntervalRef.current);
+          rateLimitCheckIntervalRef.current = null;
+        }
+      }
+    };
+
+    // If we have a rate limit end time, start checking every second
+    if (rateLimitEndTime && !rateLimitCheckIntervalRef.current) {
+      rateLimitCheckIntervalRef.current = window.setInterval(checkRateLimitExpiration, 1000);
+    }
+
+    // Cleanup interval on unmount
+    return () => {
+      if (rateLimitCheckIntervalRef.current) {
+        clearInterval(rateLimitCheckIntervalRef.current);
+        rateLimitCheckIntervalRef.current = null;
+      }
+    };
+  }, [rateLimitEndTime]);
 
   useEffect(() => {
     if (isOpen && authContext?.user) {
@@ -221,6 +253,10 @@ const ChatBubble: React.FC = () => {
       setConversationId(null);
       setInputMessage('');
       lastTimestampRef.current = 0;
+      // Clear rate limit status
+      setIsRateLimited(false);
+      setRateLimitMessage('');
+      setRateLimitEndTime(null);
     } catch (error) {
       console.error('Failed to start new chat:', error);
       // On error, still show welcome message
@@ -232,7 +268,7 @@ const ChatBubble: React.FC = () => {
   };
 
   const handleSendMessage = async () => {
-    if (!inputMessage.trim() || !authContext?.user) return;
+    if (!inputMessage.trim() || !authContext?.user || isRateLimited) return;
 
     const timestamp = Date.now();
     setIsLoading(true);
@@ -278,12 +314,22 @@ const ChatBubble: React.FC = () => {
           });
         }
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error('Failed to send message:', error);
+
+      // Handle rate limit errors
+      if (error?.rateLimit) {
+        setIsRateLimited(true);
+        setRateLimitMessage(error.message);
+        if (error.rateLimit.blockedUntil) {
+          setRateLimitEndTime(new Date(error.rateLimit.blockedUntil).getTime());
+        }
+      }
+
       // Add error message
       const errorMessage: Message = {
         id: (timestamp + 1).toString(),
-        text: 'Perdona, hubo un error. Intenta de nuevo!',
+        text: error?.rateLimit ? error.message : 'Perdona, hubo un error. Intenta de nuevo!',
         sender: 'ai',
         timestamp: timestamp + 1000,
       };
@@ -578,17 +624,23 @@ const ChatBubble: React.FC = () => {
                   fullWidth
                   multiline
                   maxRows={3}
-                  placeholder="Escribe un mensaje..."
+                  placeholder={isRateLimited ? rateLimitMessage : "Escribe un mensaje..."}
                   value={inputMessage}
                   onChange={(e: React.ChangeEvent<HTMLInputElement>) => setInputMessage(e.target.value)}
                   onKeyPress={handleKeyPress}
                   size="small"
                   inputRef={messageInputRef}
+                  disabled={isRateLimited}
+                  sx={{
+                    '& .MuiOutlinedInput-root': {
+                      bgcolor: isRateLimited ? 'grey.100' : 'transparent',
+                    },
+                  }}
                 />
                 <Button
                   variant="contained"
                   onClick={handleSendMessage}
-                  disabled={!inputMessage.trim() || isLoading}
+                  disabled={!inputMessage.trim() || isLoading || isRateLimited}
                   endIcon={isLoading ? <CircularProgress size={20} /> : <SendIcon />}
                   sx={{ minWidth: "100px" }}
                 >
