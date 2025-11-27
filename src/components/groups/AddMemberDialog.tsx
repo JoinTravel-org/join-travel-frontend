@@ -59,7 +59,12 @@ export const AddMemberDialog: React.FC<AddMemberDialogProps> = ({
 
   const handleSearch = async () => {
     if (!searchQuery.trim()) {
-      setError("Por favor ingrese un email para buscar");
+      setError("Por favor ingrese un nombre o email para buscar");
+      return;
+    }
+
+    if (searchQuery.trim().length < 2) {
+      setError("El término de búsqueda debe tener al menos 2 caracteres");
       return;
     }
 
@@ -69,30 +74,30 @@ export const AddMemberDialog: React.FC<AddMemberDialogProps> = ({
     setHasSearched(true);
 
     try {
-      const user = await userService.getUserByEmail(searchQuery.trim());
+      const response = await userService.searchUsers(searchQuery.trim());
 
-      // Check if user is already a member
-      const isAlreadyMember = currentMembers.some(
-        (member) => member.id === user.id
+      if (!response.success || !response.data) {
+        setSearchResults([]);
+        return;
+      }
+
+      // Filter out users who are already members
+      const filteredResults = response.data.filter(
+        (user: User) => !currentMembers.some((member) => member.id === user.id)
       );
 
-      if (isAlreadyMember) {
-        setError("Este usuario ya es miembro del grupo");
-        setSearchResults([]);
-      } else {
-        setSearchResults([user]);
-      }
+      setSearchResults(filteredResults);
     } catch (err: unknown) {
       if (
         err instanceof Error &&
         (err.message?.includes("no encontrado") ||
           err.message?.includes("not found"))
       ) {
-        setError("Usuario no disponible.");
+        setError("Error al buscar usuarios.");
       } else if (err instanceof Error) {
-        setError(err.message || "Error al buscar usuario");
+        setError(err.message || "Error al buscar usuarios");
       } else {
-        setError("Error al buscar usuario");
+        setError("Error al buscar usuarios");
       }
       setSearchResults([]);
     } finally {
@@ -161,8 +166,8 @@ export const AddMemberDialog: React.FC<AddMemberDialogProps> = ({
         <Box sx={{ mt: 1 }}>
           <TextField
             fullWidth
-            label="Buscar por email"
-            placeholder="usuario@ejemplo.com"
+            label="Buscar por nombre o email"
+            placeholder="Ej: Juan Pérez o juan@email.com"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             onKeyPress={handleKeyPress}
@@ -179,19 +184,19 @@ export const AddMemberDialog: React.FC<AddMemberDialogProps> = ({
             fullWidth
             variant="contained"
             onClick={handleSearch}
-            disabled={searching || adding || !searchQuery.trim()}
+            disabled={searching || adding || !searchQuery.trim() || searchQuery.trim().length < 2}
             startIcon={
               searching ? <CircularProgress size={20} /> : <SearchIcon />
             }
           >
-            {searching ? "Buscando..." : "Buscar usuario"}
+            {searching ? "Buscando..." : "Buscar usuarios"}
           </Button>
 
           {/* Search Results */}
           {hasSearched && searchResults.length > 0 && (
             <Box sx={{ mt: 3 }}>
               <Typography variant="subtitle2" gutterBottom>
-                Resultado de búsqueda:
+                Resultados de búsqueda ({searchResults.length}):
               </Typography>
               <List>
                 {searchResults.map((user) => (
@@ -249,7 +254,7 @@ export const AddMemberDialog: React.FC<AddMemberDialogProps> = ({
             !error &&
             !searching && (
               <Alert severity="info" sx={{ mt: 2 }}>
-                No se encontraron resultados
+                No se encontraron usuarios que coincidan con la búsqueda.
               </Alert>
             )}
         </Box>
