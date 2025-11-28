@@ -374,6 +374,7 @@ const SearchResults: React.FC = () => {
     return () => clearTimeout(acTimer);
   }, [locationFilter, listFilterType]);
 
+
   const handleSelectAuthor = (u: User) => {
     setSelectedListAuthor(u);
     // populate the lower input so performSearch's hasBasicFilter becomes true
