@@ -29,9 +29,40 @@ const PlaceCard: React.FC<PlaceCardProps> = ({ place, onClick }) => {
       onClick={onClick}
     >
       <CardContent sx={{ display: "flex", alignItems: "center", gap: 2 }}>
-        <Avatar sx={{ bgcolor: "primary.main" }}>
-          <PlaceIcon />
-        </Avatar>
+        <Box
+          sx={{
+            width: 96,
+            height: 96,
+            borderRadius: 2,
+            overflow: "hidden",
+            bgcolor: "grey.200",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            flexShrink: 0,
+            p: 0.5,
+          }}
+        >
+          {place.image ? (
+            <img
+              src={place.image}
+              alt={place.name}
+              style={{
+                width: "100%",
+                height: "100%",
+                objectFit: "cover",
+              }}
+              loading="lazy"
+            />
+          ) : (
+            <PlaceIcon
+              sx={{
+                fontSize: 32,
+                color: "primary.main"
+              }}
+            />
+          )}
+        </Box>
         <Box sx={{ flex: 1 }}>
           <Typography variant="subtitle1" sx={{ fontWeight: 600 }}>
             {place.name}
