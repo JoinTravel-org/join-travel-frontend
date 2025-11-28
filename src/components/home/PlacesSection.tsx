@@ -122,12 +122,20 @@ const PlacesSection: React.FC<Props> = ({
               }}
               onClick={() => navigate(`/place/${place.id}`)}
             >
-              <CardMedia
-                component="img"
-                height="180"
-                image={place.image || "/placeholder-image.jpg"}
-                alt={place.name}
-                sx={{ borderTopLeftRadius: 12, borderTopRightRadius: 12 }}
+              <Box
+                sx={{
+                  height: 200,
+                  backgroundImage: `url(${place.image || "/placeholder-image.jpg"})`,
+                  backgroundSize: "cover",
+                  backgroundPosition: "center",
+                  backgroundColor: "#f0f0f0",
+                  borderTopLeftRadius: 12,
+                  borderTopRightRadius: 12,
+                }}
+                onError={(e: any) => {
+                  const target = e.target as HTMLDivElement;
+                  target.style.backgroundImage = "url(/placeholder-image.jpg)";
+                }}
               />
               <CardContent sx={{ p: 2.5 }}>
                 <Typography

@@ -34,11 +34,11 @@ const Home: React.FC = () => {
 
   const fetchPlaces = async (pageNum: number) => {
     try {
-      const response = await api.getPlaces(pageNum, 4);
+      const response = await api.getPlaces(pageNum, 8);
       const newPlaces = response.places || [];
       const totalCount = response.totalCount || 0;
       setPlaces(newPlaces);
-      setTotalPages(Math.ceil(totalCount / 4));
+      setTotalPages(Math.ceil(totalCount / 8));
     } catch (error) {
       console.error("Error fetching places:", error);
     } finally {
