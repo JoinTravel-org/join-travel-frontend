@@ -2,7 +2,6 @@ import React from 'react';
 import { Card, CardContent, Typography, Box, Chip, IconButton, Menu, MenuItem, Avatar } from '@mui/material';
 import { MoreVert as MoreVertIcon, Edit as EditIcon, Delete as DeleteIcon, List as ListIcon } from '@mui/icons-material';
 import type { List } from '../../types/list';
-import ImagePreview from '../common/ImagePreview';
 
 interface ListCardProps {
   list: List;
@@ -41,12 +40,15 @@ const ListCard: React.FC<ListCardProps> = ({ list, onEdit, onDelete, onView, com
 
   return (
     <Card
+      elevation={0}
       sx={{
         cursor: 'pointer',
-        transition: 'all 0.2s ease-in-out',
+        borderRadius: 3,
+        boxShadow: "0 4px 12px rgba(0,0,0,0.08)",
+        transition: "transform 0.3s ease, box-shadow 0.3s ease",
         '&:hover': {
-          transform: 'translateY(-2px)',
-          boxShadow: 3,
+          transform: "translateY(-5px)",
+          boxShadow: "0 8px 16px rgba(0,0,0,0.15)",
         },
       }}
       onClick={() => {
@@ -61,12 +63,20 @@ const ListCard: React.FC<ListCardProps> = ({ list, onEdit, onDelete, onView, com
         {compact ? (
           <React.Fragment>
             {/* Compact mode: horizontal layout */}
-            <Box sx={{ flexShrink: 0, width: 200 }}>
-              <ImagePreview
-                src={firstPlace?.image || null}
-                alt={firstPlace ? `Imagen de ${firstPlace.name}` : 'Sin imagen disponible'}
-                width={200}
-                height={150}
+            <Box sx={{ flexShrink: 0, width: 300 }}>
+              <Box
+                sx={{
+                  height: 200,
+                  backgroundImage: `url(${firstPlace?.image || "/placeholder-image.jpg"})`,
+                  backgroundSize: "cover",
+                  backgroundPosition: "center",
+                  backgroundColor: "#f0f0f0",
+                  borderRadius: 1,
+                }}
+                onError={(e: any) => {
+                  const target = e.target as HTMLDivElement;
+                  target.style.backgroundImage = "url(/placeholder-image.jpg)";
+                }}
               />
             </Box>
             <Box sx={{ flex: 1 }}>
@@ -74,8 +84,9 @@ const ListCard: React.FC<ListCardProps> = ({ list, onEdit, onDelete, onView, com
                 variant="h6"
                 component="h2"
                 sx={{
-                  fontWeight: 600,
-                  fontSize: '1rem',
+                  fontWeight: 700,
+                  color: "#002B5B",
+                  fontSize: "1.1rem",
                   lineHeight: 1.2,
                   mb: 0.5,
                   wordBreak: 'break-word'
@@ -108,11 +119,19 @@ const ListCard: React.FC<ListCardProps> = ({ list, onEdit, onDelete, onView, com
           <React.Fragment>
             {/* Full mode: vertical layout */}
             <Box sx={{ mb: 2 }}>
-              <ImagePreview
-                src={firstPlace?.image || null}
-                alt={firstPlace ? `Imagen de ${firstPlace.name}` : 'Sin imagen disponible'}
-                width={450}
-                height={280}
+              <Box
+                sx={{
+                  height: 200,
+                  backgroundImage: `url(${firstPlace?.image || "/placeholder-image.jpg"})`,
+                  backgroundSize: "cover",
+                  backgroundPosition: "center",
+                  backgroundColor: "#f0f0f0",
+                  borderRadius: 1,
+                }}
+                onError={(e: any) => {
+                  const target = e.target as HTMLDivElement;
+                  target.style.backgroundImage = "url(/placeholder-image.jpg)";
+                }}
               />
             </Box>
         <Box display="flex" justifyContent="space-between" alignItems="flex-start">
@@ -122,8 +141,9 @@ const ListCard: React.FC<ListCardProps> = ({ list, onEdit, onDelete, onView, com
               component="h2"
               gutterBottom
               sx={{
-                fontWeight: 600,
-                fontSize: { xs: '1rem', sm: '1.1rem' },
+                fontWeight: 700,
+                color: "#002B5B",
+                fontSize: "1.1rem",
                 lineHeight: 1.2,
                 mb: 1,
                 wordBreak: 'break-word'

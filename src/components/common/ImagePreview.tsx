@@ -71,7 +71,7 @@ const ImagePreview: React.FC<ImagePreviewProps> = ({
         borderColor: 'grey.300',
         backgroundImage: imageLoaded && !imageError ? `url(${src})` : 'none',
         backgroundSize: 'cover',
-        backgroundPosition: 'center top',
+        backgroundPosition: 'center',
         backgroundRepeat: 'no-repeat',
       }}
       className={className}
