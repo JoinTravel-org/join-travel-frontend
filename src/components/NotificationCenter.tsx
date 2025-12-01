@@ -31,11 +31,13 @@ import socketService from "../services/socket.service";
 interface NotificationCenterProps {
   open?: boolean;
   onOpenChange?: (open: boolean) => void;
+  showIconButton?: boolean;
 }
 
 export const NotificationCenter: React.FC<NotificationCenterProps> = ({
   open: externalOpen,
   onOpenChange,
+  showIconButton = true,
 }) => {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down(800));
@@ -56,6 +58,29 @@ export const NotificationCenter: React.FC<NotificationCenterProps> = ({
     markAllAsRead,
     deleteNotification,
   } = useNotifications();
+
+  const getNotificationIcon = (type: string) => {
+    switch (type) {
+      case "NEW_MESSAGE":
+      case "NEW_GROUP_MESSAGE":
+        return "💬";
+      case "NEW_FOLLOWER":
+        return "👤";
+      case "NEW_ITINERARY":
+        return "🗺️";
+      case "GROUP_INVITE":
+        return "👥";
+      case "EXPENSE_ADDED":
+      case "EXPENSE_ASSIGNED":
+        return "💰";
+      case "LEVEL_UP":
+        return "⬆️";
+      case "NEW_BADGE":
+        return "🏆";
+      default:
+        return "🔔";
+    }
+  };
 
   // Memoize notification elements to prevent unnecessary re-renders
   const notificationElements = useMemo(() => {
@@ -228,34 +253,11 @@ export const NotificationCenter: React.FC<NotificationCenterProps> = ({
     }
   };
 
-  const getNotificationIcon = (type: string) => {
-    switch (type) {
-      case "NEW_MESSAGE":
-      case "NEW_GROUP_MESSAGE":
-        return "💬";
-      case "NEW_FOLLOWER":
-        return "👤";
-      case "NEW_ITINERARY":
-        return "🗺️";
-      case "GROUP_INVITE":
-        return "👥";
-      case "EXPENSE_ADDED":
-      case "EXPENSE_ASSIGNED":
-        return "💰";
-      case "LEVEL_UP":
-        return "⬆️";
-      case "NEW_BADGE":
-        return "🏆";
-      default:
-        return "🔔";
-    }
-  };
-
   console.log('Rendering NotificationCenter drawer, open:', open);
 
   return (
     <>
-      {!isMobile && (
+      {!isMobile && showIconButton && (
         <IconButton color="inherit" onClick={handleOpen}>
           <Badge badgeContent={unreadCount} color="error">
             <NotificationsIcon />

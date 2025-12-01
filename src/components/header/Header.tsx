@@ -551,10 +551,41 @@ const Header: React.FC = () => {
           </Box>
         )}
         {!isMobile && (
-          <NotificationCenter
-            open={notificationsDrawerOpen}
-            onOpenChange={setNotificationsDrawerOpen}
-          />
+          <IconButton
+            color="inherit"
+            onClick={() => setNotificationsDrawerOpen(true)}
+            aria-label="Notificaciones"
+            sx={{
+              textDecoration: "none",
+              position: "relative",
+              transition: "all 0.3s ease",
+              opacity: 1,
+              "&:hover": {
+                transform: "translateY(-3px)",
+                opacity: 1,
+              },
+              "&::before": {
+                content: '""',
+                position: "absolute",
+                zIndex: -1,
+                bottom: "-1px",
+                left: 0,
+                right: 0,
+                height: "5px",
+                backgroundColor: "#A6A6A6",
+                transform: "scaleY(0)",
+                transformOrigin: "bottom",
+                transition: "transform 0.3s ease",
+              },
+              "&:hover::before": {
+                transform: "scaleY(1)",
+              },
+            }}
+          >
+            <Badge badgeContent={unreadCount} color="error">
+              <NotificationsIcon />
+            </Badge>
+          </IconButton>
         )}
 
 
@@ -845,12 +876,11 @@ const Header: React.FC = () => {
         <CircularProgress color="inherit" />
       </Backdrop>
 
-      {isMobile && (
-        <NotificationCenter
-          open={notificationsDrawerOpen}
-          onOpenChange={setNotificationsDrawerOpen}
-        />
-      )}
+      <NotificationCenter
+        open={notificationsDrawerOpen}
+        onOpenChange={setNotificationsDrawerOpen}
+        showIconButton={false}
+      />
 
       {/* Global Level Up Notification */}
       <Notification

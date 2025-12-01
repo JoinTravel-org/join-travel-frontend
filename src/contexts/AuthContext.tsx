@@ -43,12 +43,25 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         return;
       }
 
+      const parsedUser = JSON.parse(storedUser);
+      if (!parsedUser.id || parsedUser.id === 'undefined') {
+        // Invalid user data, clear auth state
+        localStorage.removeItem("accessToken");
+        localStorage.removeItem("refreshToken");
+        localStorage.removeItem("user");
+        return;
+      }
+
       try {
         // First, try to validate the access token with a simple API call
-        await apiService.getUserStats(JSON.parse(atob(storedAccessToken.split('.')[1])).userId);
+        const decodedToken = JSON.parse(atob(storedAccessToken.split('.')[1]));
+        if (!decodedToken.id || decodedToken.id === 'undefined') {
+          throw new Error('Invalid token: missing user ID');
+        }
+        await apiService.getUserStats(decodedToken.id);
         // If successful, tokens are valid, restore session
         setAccessToken(storedAccessToken);
-        setUser(JSON.parse(storedUser));
+        setUser(parsedUser);
         socketService.connect(storedAccessToken);
       } catch (accessTokenError) {
         // Access token is invalid, try refresh token
@@ -64,7 +77,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
           // Restore session with new tokens
           setAccessToken(newAccessToken);
-          setUser(JSON.parse(storedUser));
+          setUser(parsedUser);
           socketService.connect(newAccessToken);
         } catch (refreshError) {
           // Both tokens are invalid, clear all auth state
