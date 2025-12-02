@@ -16,7 +16,7 @@ export const useUserStats = () => {
   const [previousStats, setPreviousStats] = useState<UserStats | null>(null);
 
   const fetchUserStats = async () => {
-    if (!user?.id) return;
+    if (!user?.id || user.id === 'undefined') return;
 
     setLoading(true);
     setError(null);
@@ -47,7 +47,7 @@ export const useUserStats = () => {
   };
 
   const updatePoints = async (action: string) => {
-    if (!user?.id) return;
+    if (!user?.id || user.id === 'undefined') return;
 
     try {
       const response = await userService.updateUserPoints(user.id, action);

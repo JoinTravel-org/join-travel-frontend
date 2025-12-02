@@ -40,6 +40,7 @@ import { useTheme as useMuiTheme } from "@mui/material/styles";
 import { useAuth } from "../../hooks/useAuth";
 import { useUserStats } from "../../hooks/useUserStats";
 import { useChatNotifications } from "../../hooks/useChatNotifications";
+import { useNotifications } from "../../hooks/useNotifications";
 import Notification from "../user_profile/Notification";
 import { NotificationCenter } from "../NotificationCenter";
 
@@ -51,28 +52,34 @@ import { NotificationCenter } from "../NotificationCenter";
  */
 const Header: React.FC = () => {
   const muiTheme = useMuiTheme();
-  // Mobile: <768px (matches US-59 breakpoint)
-  const isMobile = useMediaQuery(muiTheme.breakpoints.down("sm"));
+  // Mobile: <800px (as mentioned by user)
+  const isMobile = useMediaQuery(muiTheme.breakpoints.down(800));
   const [open, setOpen] = React.useState(false);
   const location = useLocation();
   const navigate = useNavigate();
   const auth = useAuth();
   const { stats, loading, notification } = useUserStats();
   const { hasUnreadMessages } = useChatNotifications();
+  const { unreadCount } = useNotifications();
 
   const [logoutSnackbarOpen, setLogoutSnackbarOpen] = React.useState(false);
   const [isLoggingOut, setIsLoggingOut] = React.useState(false);
   const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
   const [noNotificationsDialogOpen, setNoNotificationsDialogOpen] =
     React.useState(false);
+  const [notificationsDrawerOpen, setNotificationsDrawerOpen] = React.useState(false);
   const { clearNotification } = useUserStats();
+
+  console.log('Header render - isMobile:', isMobile, 'menu open:', open, 'notifications open:', notificationsDrawerOpen);
 
   // Search states
   const [searchQuery, setSearchQuery] = React.useState("");
 
+
   const navId = "primary-navigation";
 
   const toggleDrawer = (nextOpen: boolean) => () => {
+    console.log('toggleDrawer called with:', nextOpen);
     setOpen(nextOpen);
   };
 
@@ -271,7 +278,6 @@ const Header: React.FC = () => {
           >
             Grupos
           </Button>
-          <NotificationCenter />
           <IconButton
             color="inherit"
             component={RouterLink}
@@ -544,6 +550,44 @@ const Header: React.FC = () => {
             {NavItems}
           </Box>
         )}
+        {!isMobile && (
+          <IconButton
+            color="inherit"
+            onClick={() => setNotificationsDrawerOpen(true)}
+            aria-label="Notificaciones"
+            sx={{
+              textDecoration: "none",
+              position: "relative",
+              transition: "all 0.3s ease",
+              opacity: 1,
+              "&:hover": {
+                transform: "translateY(-3px)",
+                opacity: 1,
+              },
+              "&::before": {
+                content: '""',
+                position: "absolute",
+                zIndex: -1,
+                bottom: "-1px",
+                left: 0,
+                right: 0,
+                height: "5px",
+                backgroundColor: "#A6A6A6",
+                transform: "scaleY(0)",
+                transformOrigin: "bottom",
+                transition: "transform 0.3s ease",
+              },
+              "&:hover::before": {
+                transform: "scaleY(1)",
+              },
+            }}
+          >
+            <Badge badgeContent={unreadCount} color="error">
+              <NotificationsIcon />
+            </Badge>
+          </IconButton>
+        )}
+
 
         {/* Mobile toggle */}
         {isMobile && (
@@ -556,7 +600,12 @@ const Header: React.FC = () => {
             }
             aria-controls={navId}
             aria-expanded={open ? "true" : "false"}
-            onClick={toggleDrawer(true)}
+            onClick={() => {
+              console.log('Hamburger menu clicked');
+              // Close notifications when opening menu to avoid conflicts
+              setNotificationsDrawerOpen(false);
+              toggleDrawer(true)();
+            }}
             sx={{
               "&:hover": { backgroundColor: "rgba(255,255,255,0.08)" },
             }}
@@ -579,6 +628,7 @@ const Header: React.FC = () => {
             width: "min(85vw, 320px)",
             backgroundColor: "var(--color-surface)",
             color: "var(--color-text)",
+            zIndex: 1200, // Ensure proper z-index for menu drawer
           },
         }}
       >
@@ -699,6 +749,18 @@ const Header: React.FC = () => {
                   <ListItemText primary="Mensajes Directos" />
                 </ListItemButton>
                 <ListItemButton
+                  onClick={() => {
+                    console.log('Opening notifications drawer from mobile menu');
+                    toggleDrawer(false)();
+                    // Direct open without delay for mobile
+                    setNotificationsDrawerOpen(true);
+                  }}
+                  sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}
+                >
+                  <ListItemText primary="Notificaciones" />
+                  <Badge badgeContent={unreadCount} color="error" sx={{ fontSize: '1rem' }} />
+                </ListItemButton>
+                <ListItemButton
                   component={RouterLink}
                   to="/profile"
                   onClick={() => {
@@ -813,6 +875,12 @@ const Header: React.FC = () => {
       >
         <CircularProgress color="inherit" />
       </Backdrop>
+
+      <NotificationCenter
+        open={notificationsDrawerOpen}
+        onOpenChange={setNotificationsDrawerOpen}
+        showIconButton={false}
+      />
 
       {/* Global Level Up Notification */}
       <Notification
