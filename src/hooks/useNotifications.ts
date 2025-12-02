@@ -1,12 +1,15 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useContext } from "react";
 import notificationService from "../services/notification.service";
 import socketService from "../services/socket.service";
 import type { Notification } from "../types/notification";
 import Logger from "../logger";
+import { AuthContext } from "../contexts/AuthContext";
 
 const logger = Logger.getInstance();
 
 export const useNotifications = () => {
+  const authContext = useContext(AuthContext);
+  const isAuthenticated = authContext?.isAuthenticated || false;
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [unreadCount, setUnreadCount] = useState<number>(0);
   const [loading, setLoading] = useState<boolean>(true);
@@ -16,6 +19,10 @@ export const useNotifications = () => {
    * Obtiene las notificaciones del usuario
    */
   const fetchNotifications = useCallback(async (limit?: number) => {
+    if (!isAuthenticated) {
+      setLoading(false);
+      return;
+    }
     try {
       setLoading(true);
       setError(null);
@@ -32,12 +39,13 @@ export const useNotifications = () => {
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [isAuthenticated]);
 
   /**
    * Obtiene el conteo de notificaciones no leídas
    */
   const fetchUnreadCount = useCallback(async () => {
+    if (!isAuthenticated) return;
     try {
       const response = await notificationService.getUnreadCount();
       if (response.success) {
@@ -46,7 +54,7 @@ export const useNotifications = () => {
     } catch (err) {
       logger.error("Error fetching unread count", err);
     }
-  }, []);
+  }, [isAuthenticated]);
 
   /**
    * Marca una notificación como leída
@@ -113,6 +121,8 @@ export const useNotifications = () => {
    * Maneja nuevas notificaciones en tiempo real
    */
   useEffect(() => {
+    if (!isAuthenticated) return;
+
     console.log("[useNotifications] Setting up notification listener");
     const unsubscribe = socketService.onNewNotification((notification) => {
       console.log(
@@ -158,7 +168,7 @@ export const useNotifications = () => {
       unsubscribe();
       clearInterval(connectionCheckInterval);
     };
-  }, []);
+  }, [isAuthenticated]);
 
   /**
    * Carga las notificaciones al montar el componente

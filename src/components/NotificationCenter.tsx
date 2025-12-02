@@ -1,6 +1,7 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import {
   Drawer,
+  Dialog,
   Box,
   Typography,
   IconButton,
@@ -11,6 +12,8 @@ import {
   Divider,
   Button,
   CircularProgress,
+  useMediaQuery,
+  useTheme,
 } from "@mui/material";
 import {
   Close as CloseIcon,
@@ -25,10 +28,28 @@ import { es } from "date-fns/locale";
 import { useNavigate } from "react-router-dom";
 import socketService from "../services/socket.service";
 
-export const NotificationCenter = () => {
-  const [open, setOpen] = useState(false);
+interface NotificationCenterProps {
+  open?: boolean;
+  onOpenChange?: (open: boolean) => void;
+  showIconButton?: boolean;
+}
+
+export const NotificationCenter: React.FC<NotificationCenterProps> = ({
+  open: externalOpen,
+  onOpenChange,
+  showIconButton = true,
+}) => {
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down(800));
+  const [internalOpen, setInternalOpen] = useState(false);
   const [isConnected, setIsConnected] = useState(true);
   const navigate = useNavigate();
+
+  const open = externalOpen !== undefined ? externalOpen : internalOpen;
+  const setOpen = onOpenChange || setInternalOpen;
+
+  console.log('NotificationCenter render:', { externalOpen, open, onOpenChange: !!onOpenChange, isMobile });
+  console.log('NotificationCenter - about to render JSX, open:', open);
   const {
     notifications,
     unreadCount,
@@ -37,6 +58,104 @@ export const NotificationCenter = () => {
     markAllAsRead,
     deleteNotification,
   } = useNotifications();
+
+  const getNotificationIcon = (type: string) => {
+    switch (type) {
+      case "NEW_MESSAGE":
+      case "NEW_GROUP_MESSAGE":
+        return "💬";
+      case "NEW_FOLLOWER":
+        return "👤";
+      case "NEW_ITINERARY":
+        return "🗺️";
+      case "GROUP_INVITE":
+        return "👥";
+      case "EXPENSE_ADDED":
+      case "EXPENSE_ASSIGNED":
+        return "💰";
+      case "LEVEL_UP":
+        return "⬆️";
+      case "NEW_BADGE":
+        return "🏆";
+      default:
+        return "🔔";
+    }
+  };
+
+  // Memoize notification elements to prevent unnecessary re-renders
+  const notificationElements = useMemo(() => {
+    return notifications.map((notification, index) => (
+      <Box key={notification.id}>
+        <ListItem
+          sx={{
+            bgcolor: notification.read
+              ? "transparent"
+              : "action.hover",
+            px: 2,
+            py: 1.5,
+          }}
+          secondaryAction={
+            <IconButton
+              edge="end"
+              onClick={() => handleDelete(notification.id)}
+              size="small"
+            >
+              <DeleteIcon fontSize="small" />
+            </IconButton>
+          }
+        >
+          <ListItemButton
+            onClick={() => handleNotificationClick(notification)}
+            sx={{ p: 0, pr: 1, width: "100%" }}
+          >
+            <Box sx={{ display: "flex", gap: 1.5, width: "100%", alignItems: "flex-start" }}>
+              <Box sx={{ fontSize: 24, flexShrink: 0, mt: 0.5 }}>
+                {getNotificationIcon(notification.type)}
+              </Box>
+              <Box sx={{ flex: 1, minWidth: 0 }}>
+                <Typography
+                  variant="subtitle2"
+                  sx={{
+                    fontWeight: notification.read ? 400 : 600,
+                    mb: 0.5,
+                  }}
+                >
+                  {notification.title}
+                </Typography>
+                <Typography
+                  variant="body2"
+                  color="text.secondary"
+                  sx={{
+                    overflow: "hidden",
+                    textOverflow: "ellipsis",
+                    display: "-webkit-box",
+                    WebkitLineClamp: 2,
+                    WebkitBoxOrient: "vertical",
+                    mb: 0.5,
+                  }}
+                >
+                  {notification.message}
+                </Typography>
+                <Typography
+                  variant="caption"
+                  color="text.disabled"
+                >
+                  {formatDistanceToNow(
+                    new Date(notification.createdAt),
+                    {
+                      addSuffix: true,
+                      locale: es,
+                    }
+                  )}
+                </Typography>
+              </Box>
+            </Box>
+          </ListItemButton>
+        </ListItem>
+        {index < notifications.length - 1 && <Divider />}
+      </Box>
+    ));
+  }, [notifications]);
 
   // Monitor socket connection status
   useEffect(() => {
@@ -49,6 +168,11 @@ export const NotificationCenter = () => {
 
     return () => clearInterval(interval);
   }, []);
+
+  // Debug open state changes
+  useEffect(() => {
+    console.log('NotificationCenter open state changed:', open);
+  }, [open]);
 
   const handleOpen = () => setOpen(true);
   const handleClose = () => setOpen(false);
@@ -129,197 +253,226 @@ export const NotificationCenter = () => {
     }
   };
 
-  const getNotificationIcon = (type: string) => {
-    switch (type) {
-      case "NEW_MESSAGE":
-      case "NEW_GROUP_MESSAGE":
-        return "💬";
-      case "NEW_FOLLOWER":
-        return "👤";
-      case "NEW_ITINERARY":
-        return "🗺️";
-      case "GROUP_INVITE":
-        return "👥";
-      case "EXPENSE_ADDED":
-      case "EXPENSE_ASSIGNED":
-        return "💰";
-      case "LEVEL_UP":
-        return "⬆️";
-      case "NEW_BADGE":
-        return "🏆";
-      default:
-        return "🔔";
-    }
-  };
+  console.log('Rendering NotificationCenter drawer, open:', open);
 
   return (
     <>
-      <IconButton color="inherit" onClick={handleOpen}>
-        <Badge badgeContent={unreadCount} color="error">
-          <NotificationsIcon />
-        </Badge>
-      </IconButton>
+      {!isMobile && showIconButton && (
+        <IconButton color="inherit" onClick={handleOpen}>
+          <Badge badgeContent={unreadCount} color="error">
+            <NotificationsIcon />
+          </Badge>
+        </IconButton>
+      )}
 
-      <Drawer anchor="right" open={open} onClose={handleClose}>
-        <Box
-          sx={{
-            width: 400,
-            height: "100%",
-            display: "flex",
-            flexDirection: "column",
+      {isMobile ? (
+        <Dialog
+          open={open}
+          onClose={handleClose}
+          fullScreen={true}
+          PaperProps={{
+            sx: {
+              zIndex: 1300,
+              backgroundColor: 'background.paper',
+            }
           }}
         >
-          {/* Header */}
           <Box
             sx={{
-              p: 2,
+              width: "100%",
+              height: "100%",
               display: "flex",
-              alignItems: "center",
-              justifyContent: "space-between",
-              borderBottom: 1,
-              borderColor: "divider",
+              flexDirection: "column",
+              backgroundColor: 'background.paper',
             }}
           >
-            <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-              <Typography variant="h6">Notificaciones</Typography>
-              {!isConnected && (
-                <WifiOffIcon
-                  sx={{ fontSize: 16, color: "warning.main" }}
-                  titleAccess="Conexión perdida - las notificaciones en tiempo real pueden no funcionar"
-                />
+            {/* Header */}
+            <Box
+              sx={{
+                p: 2,
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "space-between",
+                borderBottom: 1,
+                borderColor: "divider",
+              }}
+            >
+              <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+                <Typography variant="h6">Notificaciones</Typography>
+                {!isConnected && (
+                  <WifiOffIcon
+                    sx={{ fontSize: 16, color: "warning.main" }}
+                    titleAccess="Conexión perdida - las notificaciones en tiempo real pueden no funcionar"
+                  />
+                )}
+              </Box>
+              <IconButton onClick={handleClose}>
+                <CloseIcon />
+              </IconButton>
+            </Box>
+
+            {/* Actions */}
+            {unreadCount > 0 && (
+              <Box sx={{ p: 2, borderBottom: 1, borderColor: "divider" }}>
+                <Button
+                  startIcon={<MarkEmailReadIcon />}
+                  onClick={handleMarkAllAsRead}
+                  size="small"
+                >
+                  Marcar todas como leídas
+                </Button>
+              </Box>
+            )}
+
+            {/* Notifications List */}
+            <Box sx={{ flex: 1, overflow: "auto" }}>
+              {loading ? (
+                <Box
+                  sx={{
+                    display: "flex",
+                    justifyContent: "center",
+                    alignItems: "center",
+                    height: "100%",
+                  }}
+                >
+                  <CircularProgress />
+                </Box>
+              ) : notifications.length === 0 ? (
+                <Box
+                  sx={{
+                    display: "flex",
+                    flexDirection: "column",
+                    justifyContent: "center",
+                    alignItems: "center",
+                    height: "100%",
+                    p: 3,
+                  }}
+                >
+                  <NotificationsIcon
+                    sx={{ fontSize: 60, color: "text.disabled", mb: 2 }}
+                  />
+                  <Typography
+                    variant="body2"
+                    color="text.secondary"
+                    align="center"
+                  >
+                    No tienes notificaciones
+                  </Typography>
+                </Box>
+              ) : (
+                <List sx={{ p: 0 }}>
+                  {notificationElements}
+                </List>
               )}
             </Box>
-            <IconButton onClick={handleClose}>
-              <CloseIcon />
-            </IconButton>
           </Box>
-
-          {/* Actions */}
-          {unreadCount > 0 && (
-            <Box sx={{ p: 2, borderBottom: 1, borderColor: "divider" }}>
-              <Button
-                startIcon={<MarkEmailReadIcon />}
-                onClick={handleMarkAllAsRead}
-                size="small"
-              >
-                Marcar todas como leídas
-              </Button>
+        </Dialog>
+      ) : (
+        <Drawer
+          anchor="right"
+          open={open}
+          onClose={handleClose}
+          PaperProps={{
+            sx: {
+              width: 400,
+              zIndex: 1300,
+              backgroundColor: 'background.paper',
+            }
+          }}
+          ModalProps={{
+            keepMounted: true,
+          }}
+        >
+          <Box
+            sx={{
+              width: "100%",
+              height: "100%",
+              display: "flex",
+              flexDirection: "column",
+            }}
+          >
+            {/* Header */}
+            <Box
+              sx={{
+                p: 2,
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "space-between",
+                borderBottom: 1,
+                borderColor: "divider",
+              }}
+            >
+              <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+                <Typography variant="h6">Notificaciones</Typography>
+                {!isConnected && (
+                  <WifiOffIcon
+                    sx={{ fontSize: 16, color: "warning.main" }}
+                    titleAccess="Conexión perdida - las notificaciones en tiempo real pueden no funcionar"
+                  />
+                )}
+              </Box>
+              <IconButton onClick={handleClose}>
+                <CloseIcon />
+              </IconButton>
             </Box>
-          )}
 
-          {/* Notifications List */}
-          <Box sx={{ flex: 1, overflow: "auto" }}>
-            {loading ? (
-              <Box
-                sx={{
-                  display: "flex",
-                  justifyContent: "center",
-                  alignItems: "center",
-                  height: "100%",
-                }}
-              >
-                <CircularProgress />
-              </Box>
-            ) : notifications.length === 0 ? (
-              <Box
-                sx={{
-                  display: "flex",
-                  flexDirection: "column",
-                  justifyContent: "center",
-                  alignItems: "center",
-                  height: "100%",
-                  p: 3,
-                }}
-              >
-                <NotificationsIcon
-                  sx={{ fontSize: 60, color: "text.disabled", mb: 2 }}
-                />
-                <Typography
-                  variant="body2"
-                  color="text.secondary"
-                  align="center"
+            {/* Actions */}
+            {unreadCount > 0 && (
+              <Box sx={{ p: 2, borderBottom: 1, borderColor: "divider" }}>
+                <Button
+                  startIcon={<MarkEmailReadIcon />}
+                  onClick={handleMarkAllAsRead}
+                  size="small"
                 >
-                  No tienes notificaciones
-                </Typography>
+                  Marcar todas como leídas
+                </Button>
               </Box>
-            ) : (
-              <List sx={{ p: 0 }}>
-                {notifications.map((notification, index) => (
-                  <Box key={notification.id}>
-                    <ListItem
-                      sx={{
-                        bgcolor: notification.read
-                          ? "transparent"
-                          : "action.hover",
-                        px: 2,
-                        py: 1.5,
-                      }}
-                      secondaryAction={
-                        <IconButton
-                          edge="end"
-                          onClick={() => handleDelete(notification.id)}
-                          size="small"
-                        >
-                          <DeleteIcon fontSize="small" />
-                        </IconButton>
-                      }
-                    >
-                      <ListItemButton
-                        onClick={() => handleNotificationClick(notification)}
-                        sx={{ p: 0, pr: 1 }}
-                      >
-                        <Box sx={{ display: "flex", gap: 1.5, width: "100%" }}>
-                          <Box sx={{ fontSize: 24, flexShrink: 0 }}>
-                            {getNotificationIcon(notification.type)}
-                          </Box>
-                          <Box sx={{ flex: 1, minWidth: 0 }}>
-                            <Typography
-                              variant="subtitle2"
-                              sx={{
-                                fontWeight: notification.read ? 400 : 600,
-                                mb: 0.5,
-                              }}
-                            >
-                              {notification.title}
-                            </Typography>
-                            <Typography
-                              variant="body2"
-                              color="text.secondary"
-                              sx={{
-                                overflow: "hidden",
-                                textOverflow: "ellipsis",
-                                display: "-webkit-box",
-                                WebkitLineClamp: 2,
-                                WebkitBoxOrient: "vertical",
-                              }}
-                            >
-                              {notification.message}
-                            </Typography>
-                            <Typography
-                              variant="caption"
-                              color="text.disabled"
-                              sx={{ mt: 0.5 }}
-                            >
-                              {formatDistanceToNow(
-                                new Date(notification.createdAt),
-                                {
-                                  addSuffix: true,
-                                  locale: es,
-                                }
-                              )}
-                            </Typography>
-                          </Box>
-                        </Box>
-                      </ListItemButton>
-                    </ListItem>
-                    {index < notifications.length - 1 && <Divider />}
-                  </Box>
-                ))}
-              </List>
             )}
+
+            {/* Notifications List */}
+            <Box sx={{ flex: 1, overflow: "auto" }}>
+              {loading ? (
+                <Box
+                  sx={{
+                    display: "flex",
+                    justifyContent: "center",
+                    alignItems: "center",
+                    height: "100%",
+                  }}
+                >
+                  <CircularProgress />
+                </Box>
+              ) : notifications.length === 0 ? (
+                <Box
+                  sx={{
+                    display: "flex",
+                    flexDirection: "column",
+                    justifyContent: "center",
+                    alignItems: "center",
+                    height: "100%",
+                    p: 3,
+                  }}
+                >
+                  <NotificationsIcon
+                    sx={{ fontSize: 60, color: "text.disabled", mb: 2 }}
+                  />
+                  <Typography
+                    variant="body2"
+                    color="text.secondary"
+                    align="center"
+                  >
+                    No tienes notificaciones
+                  </Typography>
+                </Box>
+              ) : (
+                <List sx={{ p: 0 }}>
+                  {notificationElements}
+                </List>
+              )}
+            </Box>
           </Box>
-        </Box>
-      </Drawer>
+        </Drawer>
+      )}
     </>
   );
 };
