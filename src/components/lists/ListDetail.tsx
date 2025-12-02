@@ -278,15 +278,13 @@ const ListDetail: React.FC = () => {
                         display: "flex",
                         cursor: "pointer",
                         flexDirection: "column",
-                        border: "2px solid #000",
-                        borderRadius: 2,
+                        borderRadius: 3,
                         backgroundColor: "#fff",
-                        boxShadow: "6px 6px 4px 0px rgba(0,0,0,0.7)",
-                        transition: "all 0.3s ease",
+                        boxShadow: "0 4px 12px rgba(0,0,0,0.08)",
+                        transition: "transform 0.3s ease, box-shadow 0.3s ease",
                         "&:hover": {
-                          transform: "translate(-2px, -2px)",
-                          boxShadow: "8px 8px 6px 0px rgba(0,0,0,0.7)",
-                          borderColor: "#333",
+                          transform: "translateY(-5px)",
+                          boxShadow: "0 8px 16px rgba(0,0,0,0.15)",
                         },
                       }}
                     >
