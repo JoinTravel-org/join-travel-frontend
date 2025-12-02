@@ -176,7 +176,7 @@ const Lists: React.FC = () => {
         <Box
           sx={{
             display: 'grid',
-            gridTemplateColumns: "repeat(auto-fill, minmax(300px, 1fr))",
+            gridTemplateColumns: { xs: "1fr", sm: "repeat(auto-fill, minmax(300px, 1fr))" },
             gap: 3,
           }}
         >

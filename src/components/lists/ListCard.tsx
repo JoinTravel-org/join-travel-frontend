@@ -59,27 +59,28 @@ const ListCard: React.FC<ListCardProps> = ({ list, onEdit, onDelete, onView, com
         onView?.(list);
       }}
     >
-      <CardContent sx={compact ? { display: 'flex', alignItems: 'center', gap: 2 } : {}}>
+      <CardContent sx={compact ? { p: { xs: 1.5, sm: 2 } } : { p: { xs: 1.5, sm: 2 } }}>
         {compact ? (
           <React.Fragment>
-            {/* Compact mode: horizontal layout */}
-            <Box sx={{ flexShrink: 0, width: 300 }}>
-              <Box
-                sx={{
-                  height: 200,
-                  backgroundImage: `url(${firstPlace?.image || "/placeholder-image.jpg"})`,
-                  backgroundSize: "cover",
-                  backgroundPosition: "center",
-                  backgroundColor: "#f0f0f0",
-                  borderRadius: 1,
-                }}
-                onError={(e: any) => {
-                  const target = e.target as HTMLDivElement;
-                  target.style.backgroundImage = "url(/placeholder-image.jpg)";
-                }}
-              />
-            </Box>
-            <Box sx={{ flex: 1 }}>
+            {/* Compact mode: responsive layout - vertical on mobile, horizontal on larger screens */}
+            <Box sx={{ display: 'flex', flexDirection: { xs: 'column', sm: 'row' }, gap: 2 }}>
+              <Box sx={{ flexShrink: 0, width: { xs: '100%', sm: 300 } }}>
+                <Box
+                  sx={{
+                    height: { xs: 150, sm: 200 },
+                    backgroundImage: `url(${firstPlace?.image || "/placeholder-image.jpg"})`,
+                    backgroundSize: "cover",
+                    backgroundPosition: "center",
+                    backgroundColor: "#f0f0f0",
+                    borderRadius: 1,
+                  }}
+                  onError={(e: any) => {
+                    const target = e.target as HTMLDivElement;
+                    target.style.backgroundImage = "url(/placeholder-image.jpg)";
+                  }}
+                />
+              </Box>
+              <Box sx={{ flex: 1 }}>
               <Typography
                 variant="h6"
                 component="h2"
@@ -105,7 +106,8 @@ const ListCard: React.FC<ListCardProps> = ({ list, onEdit, onDelete, onView, com
                 })}
               </Typography>
             </Box>
-            <IconButton
+          </Box>
+          <IconButton
               aria-label="more"
               onClick={(e) => {
                 e.stopPropagation();
@@ -121,7 +123,7 @@ const ListCard: React.FC<ListCardProps> = ({ list, onEdit, onDelete, onView, com
             <Box sx={{ mb: 2 }}>
               <Box
                 sx={{
-                  height: 200,
+                  height: { xs: 150, sm: 200 },
                   backgroundImage: `url(${firstPlace?.image || "/placeholder-image.jpg"})`,
                   backgroundSize: "cover",
                   backgroundPosition: "center",
